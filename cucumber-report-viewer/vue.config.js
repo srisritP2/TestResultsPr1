@@ -1,4 +1,5 @@
 module.exports = {
+  publicPath: '/TestResultsPr1/',
   lintOnSave: false,
   devServer: {
     port: 8080,
