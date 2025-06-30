@@ -1,0 +1,28 @@
+{
+  "name": "cucumber-report-viewer",
+  "version": "1.0.0",
+  "description": "A responsive web application for visualizing Cucumber JSON test reports.",
+  "main": "src/main.js",
+  "scripts": {
+    "serve": "vue-cli-service serve",
+    "build": "vue-cli-service build",
+    "lint": "vue-cli-service lint"
+  },
+  "dependencies": {
+    "sass": "^1.89.2",
+    "sass-loader": "^13.3.3",
+    "vue": "^3.0.0",
+    "vue-router": "^4.0.0",
+    "vuetify": "^3.6.7",
+    "vuex": "^4.0.0"
+  },
+  "devDependencies": {
+    "@vue/cli-plugin-babel": "^4.5.0",
+    "@vue/cli-service": "^4.5.0",
+    "eslint": "^7.0.0",
+    "eslint-plugin-vue": "^7.0.0",
+    "vue-cli-plugin-vuetify": "~2.5.8"
+  },
+  "author": "",
+  "license": "MIT"
+}
