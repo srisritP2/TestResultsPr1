@@ -1,104 +1,107 @@
 <template>
-  <div class="report-viewer">
-    <div v-if="error" class="error-message">
-      <strong>Error:</strong> {{ error }}
-    </div>
-    <div v-else-if="!report || !Array.isArray(report.features) || report.features.length === 0">
-      <p>No report data available or invalid report format. Please upload a valid Cucumber JSON file.</p>
-    </div>
-    <div v-else>
+  <v-container class="py-6" fluid>
+    <v-alert v-if="error" type="error" class="mb-4">{{ error }}</v-alert>
+    <v-alert v-else-if="!report || !Array.isArray(report.features) || report.features.length === 0" type="info" class="mb-4">
+      No report data available or invalid report format. Please upload a valid Cucumber JSON file.
+    </v-alert>
+    <template v-else>
       <!-- Summary Card -->
-      <div class="summary-card">
-        <div class="summary-title">Test Summary</div>
-        <div class="summary-row">
-          <span class="summary-item passed">
-            <svg class="summary-icon" viewBox="0 0 16 16">
-              <circle cx="8" cy="8" r="8" fill="#e8f5e9" />
-              <path d="M4 8l3 3 5-5" stroke="#388e3c" stroke-width="2" fill="none" />
-            </svg>
-            Passed: {{ summary.passed }}
-          </span>
-          <span class="summary-item failed">
-            <svg class="summary-icon" viewBox="0 0 16 16">
-              <circle cx="8" cy="8" r="8" fill="#ffebee" />
-              <path d="M5 5l6 6M11 5l-6 6" stroke="#e53935" stroke-width="2" fill="none" />
-            </svg>
-            Failed: {{ summary.failed }}
-          </span>
-          <span class="summary-item skipped">
-            <svg class="summary-icon" viewBox="0 0 16 16">
-              <circle cx="8" cy="8" r="8" fill="#fffde7" />
-              <path d="M4 8h8" stroke="#ffb300" stroke-width="2" fill="none" />
-            </svg>
-            Skipped: {{ summary.skipped }}
-          </span>
-          <span class="summary-item total">
-            <svg class="summary-icon" viewBox="0 0 16 16">
-              <circle cx="8" cy="8" r="8" fill="#e0e7ef" />
-              <text x="8" y="12" text-anchor="middle" font-size="8" fill="#222">Σ</text>
-            </svg>
-            Total: {{ summary.total }}
-          </span>
-          <span class="summary-item duration">
-            <svg class="summary-icon" viewBox="0 0 16 16">
-              <circle cx="8" cy="8" r="8" fill="#e3f2fd" />
-              <path d="M8 4v4l3 2" stroke="#1976d2" stroke-width="2" fill="none" />
-            </svg>
-            Duration: {{ summary.duration }}
-          </span>
-        </div>
-      </div>
-      <!-- Existing report header and features list -->
-      <div class="report-header">
-        <div class="header-title">
-          <svg viewBox="0.06 0.56 32.5 37.13" aria-hidden="true" class="cucumber-logo"><g fill="none" fill-rule="evenodd"><path d="M-4-1h40v40H-4z"></path><path fill="#00a818" d="M16.438.563C7.386.563.063 7.886.063 16.938c0 7.968 5.712 14.589 13.25 16.062v4.688c9.8-1.478 18.477-9.257 19.124-19.47.39-6.146-2.674-12.421-7.843-15.468a13.62 13.62 0 0 0-1.875-.938l-.313-.125c-.287-.106-.577-.225-.875-.312a16.246 16.246 0 0 0-5.093-.813v.001z"></path><path fill="#fff" d="M19.813 6.625a1.787 1.787 0 0 0-1.563.625c-.3.4-.488.787-.688 1.188-.6 1.4-.4 2.9.5 4 1.4-.3 2.588-1.194 3.188-2.594.2-.4.313-.913.313-1.313.062-1.062-.817-1.81-1.75-1.906zm-7.282.094c-.913.087-1.781.812-1.781 1.812 0 .4.113.913.313 1.313.6 1.4 1.88 2.293 3.28 2.594.8-1.1 1.007-2.6.407-4-.2-.4-.387-.794-.688-1.094a1.757 1.757 0 0 0-1.53-.625h-.001zM7.625 11.53c-1.577.081-2.281 2.063-.969 3.094.4.3.788.519 1.188.719 1.4.6 3.019.394 4.218-.406-.3-1.3-1.318-2.494-2.718-3.094-.5-.2-.906-.313-1.406-.313-.113-.012-.208-.005-.313 0zm15.406 6.063a4.574 4.574 0 0 0-2.593.75c.3 1.3 1.318 2.493 2.718 3.093.5.2.907.313 1.407.313 1.8.1 2.68-2.125 1.28-3.125-.4-.3-.787-.488-1.187-.688a4.32 4.32 0 0 0-1.625-.343zm-13.656.093c-.55.011-1.1.12-1.625.344-.5.2-.888.419-1.188.719-1.3 1.1-.425 3.194 1.375 3.094.5 0 1.007-.113 1.407-.313 1.4-.6 2.394-1.793 2.594-3.093a4.475 4.475 0 0 0-2.563-.75v-.001zm5.063 3.063c-1.4.3-2.588 1.194-3.188 2.594-.2.4-.313.881-.313 1.281-.1 1.7 2.22 2.613 3.22 1.313.3-.4.487-.788.687-1.188.6-1.3.394-2.8-.406-4zm3.718.094c-.8 1.1-1.006 2.6-.406 4 .2.4.387.793.688 1.093 1.1 1.2 3.412.313 3.312-1.187 0-.4-.113-.913-.313-1.313-.6-1.4-1.88-2.293-3.28-2.593h-.001z"></path></g></svg>
-          <span class="title">Cucumber Report Viewer</span>
-        </div>
-        <div class="env-summary">
+      <v-card class="mb-6" elevation="2">
+        <v-card-title class="text-h6 font-weight-bold">Test Summary</v-card-title>
+        <v-card-text>
+          <v-row align="center" justify="space-between">
+            <v-col cols="auto">
+              <v-chip color="success" class="ma-1" label>
+                <v-icon left>mdi-check-circle</v-icon>
+                Passed: {{ summary.passed }}
+              </v-chip>
+            </v-col>
+            <v-col cols="auto">
+              <v-chip color="error" class="ma-1" label>
+                <v-icon left>mdi-close-circle</v-icon>
+                Failed: {{ summary.failed }}
+              </v-chip>
+            </v-col>
+            <v-col cols="auto">
+              <v-chip color="warning" class="ma-1" label>
+                <v-icon left>mdi-alert-circle</v-icon>
+                Skipped: {{ summary.skipped }}
+              </v-chip>
+            </v-col>
+            <v-col cols="auto">
+              <v-chip color="info" class="ma-1" label>
+                <v-icon left>mdi-format-list-numbered</v-icon>
+                Total: {{ summary.total }}
+              </v-chip>
+            </v-col>
+            <v-col cols="auto">
+              <v-chip color="primary" class="ma-1" label>
+                <v-icon left>mdi-timer</v-icon>
+                Duration: {{ summary.duration }}
+              </v-chip>
+            </v-col>
+          </v-row>
+        </v-card-text>
+      </v-card>
+      <!-- Report Header -->
+      <v-card class="mb-4" elevation="1">
+        <v-card-title class="d-flex align-center">
+          <v-avatar size="32" class="mr-2">
+            <img src="https://cucumber.io/img/cucumber-logo.svg" alt="Cucumber Logo" />
+          </v-avatar>
+          <span class="font-weight-bold">Cucumber Report Viewer</span>
+        </v-card-title>
+        <v-card-subtitle>
           <span><strong>{{ report.framework || 'cucumber-jvm' }}</strong><span v-if="report.frameworkVersion">@{{ report.frameworkVersion }}</span></span>
-          <span>with</span>
+          <span class="mx-1">with</span>
           <span><strong>{{ report.runtime || 'Java HotSpot(TM) 64-Bit Server VM' }}</strong><span v-if="report.runtimeVersion">@{{ report.runtimeVersion }}</span></span>
-          <span>on</span>
+          <span class="mx-1">on</span>
           <span><strong>{{ report.os || 'Windows 11' }}</strong></span>
-        </div>
-      </div>
+        </v-card-subtitle>
+      </v-card>
+      <!-- Features List (to be further modularized) -->
       <div class="features-list">
-        <div v-for="(feature, fIdx) in normalizedFeatures" :key="feature.id || feature.name || fIdx" class="feature">
-          <details>
-            <summary @click.prevent="toggleDetails($event)">
-              <span class="feature-title scenario-header">{{ feature.name || feature.file || 'Unnamed Feature' }}</span>
-              <span class="feature-status" :class="featureStatus(feature)">{{ featureStatus(feature) }}</span>
-              <svg class="chevron" viewBox="0 0 20 20"><path d="M6 8l4 4 4-4" stroke="#64748b" stroke-width="2" fill="none"/></svg>
-            </summary>
-            <div class="scenarios-list">
-              <div v-for="(scenario, sIdx) in feature.scenarios" :key="scenario.id || scenario.name || sIdx" class="scenario">
-                <details>
-                  <summary @click.prevent="toggleDetails($event)">
-                    <span class="scenario-title scenario-header">{{ scenario.keyword || 'Scenario:' }} {{ scenario.name || 'Unnamed Scenario' }}</span>
-                    <span v-if="scenario.tags && scenario.tags.length" class="scenario-tags">
-                      <span v-for="tag in scenario.tags" :key="tag" class="tag">{{ tag }}</span>
-                    </span>
-                    <span class="scenario-status" :class="scenarioStatus(scenario)">{{ scenarioStatus(scenario) }}</span>
-                    <span v-if="scenario.duration" class="scenario-duration">⏱ {{ formatDuration(scenario.duration) }}</span>
-                    <svg class="chevron" viewBox="0 0 20 20"><path d="M6 8l4 4 4-4" stroke="#64748b" stroke-width="2" fill="none"/></svg>
-                  </summary>
-                  <ol class="steps-list">
-                    <li v-for="(step, stIdx) in scenario.steps" :key="step.id || stIdx" class="step">
-                      <span class="step-status" :class="stepStatus(step)"></span>
-                      <span class="step-keyword" :class="stepKeywordClass(step.keyword)">{{ step.keyword }}</span>
-                      <span v-if="(step.text || step.name) && (step.text || step.name).includes('&quot;')" class="step-text step-quoted"><span class="quoted-text">{{ step.text || step.name }}</span></span>
-                      <span v-else class="step-text">{{ step.text || step.name }}</span>
-                      <span v-if="stepStatus(step) === 'failed' && step.result && step.result.error_message" class="step-error">{{ step.result.error_message }}</span>
-                    </li>
-                  </ol>
-                </details>
-              </div>
-            </div>
-          </details>
+        <div v-for="feature in normalizedFeatures" :key="feature.id || feature.name" class="feature">
+          <v-expansion-panels multiple>
+            <v-expansion-panel>
+              <v-expansion-panel-title>
+                <span class="feature-title">{{ feature.name }}</span>
+                <span class="feature-status" :class="featureStatus(feature)">{{ featureStatus(feature) }}</span>
+              </v-expansion-panel-title>
+              <v-expansion-panel-text>
+                <div class="scenarios-list">
+                  <div v-for="scenario in feature.scenarios" :key="scenario.id || scenario.name" class="scenario">
+                    <v-expansion-panels>
+                      <v-expansion-panel>
+                        <v-expansion-panel-title>
+                          <span class="scenario-title">{{ scenario.name }}</span>
+                          <span class="scenario-status" :class="scenarioStatus(scenario)">{{ scenarioStatus(scenario) }}</span>
+                          <span v-if="scenario.tags && scenario.tags.length" class="scenario-tags">
+                            <v-chip v-for="tag in scenario.tags" :key="tag" class="tag" size="x-small">{{ tag }}</v-chip>
+                          </span>
+                          <span class="scenario-duration">{{ formatDuration(scenario.duration) }}</span>
+                        </v-expansion-panel-title>
+                        <v-expansion-panel-text>
+                          <ul class="steps-list">
+                            <li v-for="(step, idx) in scenario.steps" :key="step.keyword + step.name + idx" class="step">
+                              <span class="step-status" :class="stepStatus(step)"></span>
+                              <span :class="stepKeywordClass(step.keyword)">{{ step.keyword }}</span>
+                              <span class="step-text">{{ step.name }}</span>
+                              <span v-if="step.result && step.result.error_message" class="step-error">{{ step.result.error_message }}</span>
+                            </li>
+                          </ul>
+                        </v-expansion-panel-text>
+                      </v-expansion-panel>
+                    </v-expansion-panels>
+                  </div>
+                </div>
+              </v-expansion-panel-text>
+            </v-expansion-panel>
+          </v-expansion-panels>
         </div>
       </div>
-    </div>
-  </div>
+    </template>
+</v-container>
 </template>
 
 <script>
