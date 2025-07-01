@@ -3,5 +3,8 @@
     "@vue/cli-service": "^5.0.8",
     "vue-loader": "^17.0.1",
     "webpack": "^5.0.0"
+  },
+  "dependencies": {
+    "@mdi/font": "^7.4.47"
   }
 }
