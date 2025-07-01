@@ -1,4 +1,5 @@
 
+
 function parseCucumberJson(jsonData) {
     // Accept either an array or an object with a features array
     let features = [];
@@ -16,29 +17,50 @@ function parseCucumberJson(jsonData) {
         passed: 0,
         failed: 0,
         duration: 0,
+        meta: {
+            framework: jsonData.framework || '',
+            frameworkVersion: jsonData.frameworkVersion || '',
+            runtime: jsonData.runtime || '',
+            runtimeVersion: jsonData.runtimeVersion || '',
+            os: jsonData.os || '',
+        }
     };
 
     features.forEach(feature => {
         const featureData = {
+            id: feature.id,
             name: feature.name,
+            description: feature.description || '',
+            tags: Array.isArray(feature.tags) ? feature.tags.map(t => t.name || t) : [],
             scenarios: [],
         };
 
-        if (!Array.isArray(feature.elements)) return; // skip if no scenarios
-        feature.elements.forEach(scenario => {
+        // Support both 'elements' and 'children' for scenarios/backgrounds
+        const scenarioList = Array.isArray(feature.elements) ? feature.elements : (Array.isArray(feature.children) ? feature.children : []);
+        scenarioList.forEach(scenario => {
+            if (scenario.type === 'background') return; // skip backgrounds for now, or handle separately
             const scenarioData = {
+                id: scenario.id,
                 name: scenario.name,
+                description: scenario.description || '',
+                type: scenario.type,
+                tags: Array.isArray(scenario.tags) ? scenario.tags.map(t => t.name || t) : [],
                 status: scenario.status,
                 steps: [],
+                keyword: scenario.keyword,
+                line: scenario.line,
             };
 
             if (Array.isArray(scenario.steps)) {
                 scenario.steps.forEach(step => {
                     scenarioData.steps.push({
+                        keyword: step.keyword,
                         name: step.name,
                         status: step.result && step.result.status,
                         duration: step.result && step.result.duration,
                         errorMessage: step.result && step.result.error_message || null,
+                        embeddings: step.embeddings || [],
+                        line: step.line,
                     });
                 });
             }
@@ -48,7 +70,7 @@ function parseCucumberJson(jsonData) {
 
             if (scenario.status === 'passed') {
                 parsedResults.passed++;
-            } else {
+            } else if (scenario.status === 'failed') {
                 parsedResults.failed++;
             }
 

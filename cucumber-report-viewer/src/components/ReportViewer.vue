@@ -43,51 +43,95 @@
           </v-row>
         </v-card-text>
       </v-card>
-      <!-- Report Header -->
+      <!-- Report Header & Meta Info (Cucumber style) -->
       <v-card class="mb-4" elevation="1">
         <v-card-title class="d-flex align-center">
-          <v-avatar size="32" class="mr-2">
-            <img src="https://cucumber.io/img/cucumber-logo.svg" alt="Cucumber Logo" />
+          <v-avatar size="32" class="mr-2" color="#00a818">
+            <v-icon size="28" color="white">mdi-leaf</v-icon>
           </v-avatar>
-          <span class="font-weight-bold">Cucumber Report Viewer</span>
+          <span class="font-weight-bold text-h6">Cucumber Report Viewer</span>
         </v-card-title>
-        <v-card-subtitle>
-          <span><strong>{{ report.framework || 'cucumber-jvm' }}</strong><span v-if="report.frameworkVersion">@{{ report.frameworkVersion }}</span></span>
+        <v-card-text class="d-flex align-center flex-wrap" style="gap: 1rem;">
+          <v-chip color="#00a818" text-color="white" class="ma-0 pa-2" size="small">
+            <v-icon left size="18">mdi-leaf</v-icon>
+            <span>{{ report.meta?.framework || 'cucumber-jvm' }}</span>
+            <span v-if="report.meta?.frameworkVersion">@{{ report.meta.frameworkVersion }}</span>
+          </v-chip>
           <span class="mx-1">with</span>
-          <span><strong>{{ report.runtime || 'Java HotSpot(TM) 64-Bit Server VM' }}</strong><span v-if="report.runtimeVersion">@{{ report.runtimeVersion }}</span></span>
+          <v-chip color="#0074BD" text-color="white" class="ma-0 pa-2" size="small">
+            <v-icon left size="18">mdi-language-java</v-icon>
+            <span>{{ report.meta?.runtime || 'Java HotSpot(TM) 64-Bit Server VM' }}</span>
+            <span v-if="report.meta?.runtimeVersion">@{{ report.meta.runtimeVersion }}</span>
+          </v-chip>
           <span class="mx-1">on</span>
-          <span><strong>{{ report.os || 'Windows 11' }}</strong></span>
-        </v-card-subtitle>
+          <v-chip color="#00ADEF" text-color="white" class="ma-0 pa-2" size="small">
+            <v-icon left size="18">mdi-microsoft-windows</v-icon>
+            <span>{{ report.meta?.os || 'Windows 11' }}</span>
+          </v-chip>
+          <v-tooltip top>
+            <template #activator="{ on, attrs }">
+              <v-btn icon v-bind="attrs" v-on="on" @click="copyMetaInfo" :aria-label="'Copy environment info'">
+                <v-icon>mdi-content-copy</v-icon>
+              </v-btn>
+            </template>
+            <span>Copy environment info</span>
+          </v-tooltip>
+        </v-card-text>
       </v-card>
       <!-- Features List (to be further modularized) -->
       <div class="features-list">
-        <div v-for="feature in normalizedFeatures" :key="feature.id || feature.name" class="feature">
+        <div v-for="feature in report.features" :key="feature.id || feature.name" class="feature">
           <v-expansion-panels multiple>
             <v-expansion-panel>
               <v-expansion-panel-title>
                 <span class="feature-title">{{ feature.name }}</span>
+                <span v-if="feature.tags && feature.tags.length" class="ml-2">
+                  <v-chip v-for="tag in feature.tags" :key="tag" class="tag" size="x-small">{{ tag }}</v-chip>
+                </span>
                 <span class="feature-status" :class="featureStatus(feature)">{{ featureStatus(feature) }}</span>
               </v-expansion-panel-title>
               <v-expansion-panel-text>
+                <div class="mb-2" v-if="feature.description">
+                  <v-alert type="info" dense>{{ feature.description }}</v-alert>
+                </div>
                 <div class="scenarios-list">
                   <div v-for="scenario in feature.scenarios" :key="scenario.id || scenario.name" class="scenario">
                     <v-expansion-panels>
                       <v-expansion-panel>
                         <v-expansion-panel-title>
                           <span class="scenario-title">{{ scenario.name }}</span>
-                          <span class="scenario-status" :class="scenarioStatus(scenario)">{{ scenarioStatus(scenario) }}</span>
-                          <span v-if="scenario.tags && scenario.tags.length" class="scenario-tags">
+                          <span v-if="scenario.tags && scenario.tags.length" class="scenario-tags ml-2">
                             <v-chip v-for="tag in scenario.tags" :key="tag" class="tag" size="x-small">{{ tag }}</v-chip>
                           </span>
+                          <span class="scenario-status" :class="scenarioStatus(scenario)">{{ scenarioStatus(scenario) }}</span>
                           <span class="scenario-duration">{{ formatDuration(scenario.duration) }}</span>
                         </v-expansion-panel-title>
                         <v-expansion-panel-text>
+                          <div v-if="scenario.description" class="mb-2">
+                            <v-alert type="info" dense>{{ scenario.description }}</v-alert>
+                          </div>
                           <ul class="steps-list">
                             <li v-for="(step, idx) in scenario.steps" :key="step.keyword + step.name + idx" class="step">
                               <span class="step-status" :class="stepStatus(step)"></span>
                               <span :class="stepKeywordClass(step.keyword)">{{ step.keyword }}</span>
                               <span class="step-text">{{ step.name }}</span>
-                              <span v-if="step.result && step.result.error_message" class="step-error">{{ step.result.error_message }}</span>
+                              <span v-if="step.errorMessage" class="step-error">
+                                <v-alert type="error" dense text>
+                                  <pre style="white-space:pre-wrap;word-break:break-word;">{{ step.errorMessage }}</pre>
+                                </v-alert>
+                              </span>
+                              <span v-if="step.duration" class="ml-2 grey--text text--darken-1" style="font-size:0.9em;">({{ formatDuration(step.duration) }})</span>
+                              <span v-if="step.embeddings && step.embeddings.length" class="ml-2">
+                                <v-tooltip v-for="(embed, eidx) in step.embeddings" :key="eidx" top>
+                                  <template #activator="{ on, attrs }">
+                                    <v-icon v-bind="attrs" v-on="on" color="primary" small>mdi-paperclip</v-icon>
+                                  </template>
+                                  <span v-if="embed.mime_type && embed.mime_type.startsWith('image/')">
+                                    <img :src="'data:' + embed.mime_type + ';base64,' + embed.data" style="max-width:200px;max-height:120px;" />
+                                  </span>
+                                  <span v-else>{{ embed.data }}</span>
+                                </v-tooltip>
+                              </span>
                             </li>
                           </ul>
                         </v-expansion-panel-text>
