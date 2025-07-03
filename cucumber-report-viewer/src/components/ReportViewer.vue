@@ -76,9 +76,9 @@
               <v-icon v-else-if="featureStatus(feature) === 'failed'" color="error" size="18">mdi-close-circle</v-icon>
               <v-icon v-else color="grey" size="18">mdi-help-circle</v-icon>
               <span class="feature-file">{{ feature.uri || feature.name }}</span>
-              <span class="feature-title" style="font-weight:700;">{{ feature.name }}</span>
+              <!-- <span class="feature-title" style="font-weight:700;">{{ feature.name }}</span> -->
               <span v-if="feature.tags && feature.tags.length" class="feature-tags">
-                <span v-for="tag in feature.tags" :key="tag" class="feature-tag">@{{ tag }}</span>
+                <span v-for="tag in feature.tags" :key="tag" class="feature-tag">{{ tag }}</span>
               </span>
             </v-expansion-panel-title>
             <v-expansion-panel-text>
@@ -90,10 +90,10 @@
                       <v-icon v-if="scenarioStatus(scenario) === 'passed'" color="success" size="18">mdi-check-circle</v-icon>
                       <v-icon v-else-if="scenarioStatus(scenario) === 'failed'" color="error" size="18">mdi-close-circle</v-icon>
                       <v-icon v-else color="grey" size="18">mdi-help-circle</v-icon>
-                      <span class="scenario-title">Scenario: {{ scenario.name }}</span>
-                      <span v-if="scenario.tags && scenario.tags.length" class="scenario-tags">
-                        <span v-for="tag in scenario.tags" :key="tag" class="scenario-tag">@{{ tag }}</span>
+                        <span v-if="scenario.tags && scenario.tags.length" class="scenario-tags">
+                        <span v-for="tag in scenario.tags" :key="tag" class="scenario-tag">{{ tag }}</span>
                       </span>
+                      <span class="scenario-title">Scenario: {{ scenario.name }}</span>
                       <span class="scenario-duration">{{ formatDuration(scenario.duration) }}</span>
                     </v-expansion-panel-title>
                     <v-expansion-panel-text>
