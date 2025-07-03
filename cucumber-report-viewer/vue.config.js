@@ -1,8 +1,7 @@
 // vue.config.js for GitHub Pages deployment
-// Set publicPath to match the repository name for correct asset loading
+const path = require('path');
+
 module.exports = {
-  publicPath: '/TestResultsPr1/'
-};module.exports = {
   publicPath: '/TestResultsPr1/',
   lintOnSave: false,
   devServer: {
@@ -12,7 +11,7 @@ module.exports = {
   configureWebpack: {
     resolve: {
       alias: {
-        '@': require('path').resolve(__dirname, 'src'),
+        '@': path.resolve(__dirname, 'src'),
       },
     },
   },
