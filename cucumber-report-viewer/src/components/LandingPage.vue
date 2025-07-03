@@ -8,14 +8,14 @@
               <path d="M12 2C6.48 2 2 6.48 2 12c0 4.97 3.87 9.06 8.78 9.86.34.05.47-.15.47-.34 0-.17-.01-.73-.01-1.41-3.57.77-4.32-1.72-4.32-1.72-.31-.8-.76-1.01-.76-1.01-.62-.42.05-.41.05-.41.68.05 1.04.7 1.04.7.61 1.04 1.6.74 1.99.57.06-.44.24-.74.43-.91-2.85-.32-5.85-1.43-5.85-6.36 0-1.4.5-2.54 1.32-3.44-.13-.33-.57-1.66.13-3.46 0 0 1.08-.35 3.54 1.31A12.3 12.3 0 0 1 12 6.84c1.09.01 2.19.15 3.22.44 2.46-1.66 3.54-1.31 3.54-1.31.7 1.8.26 3.13.13 3.46.82.9 1.32 2.04 1.32 3.44 0 4.94-3 6.04-5.86 6.36.25.22.47.65.47 1.31 0 .95-.01 1.72-.01 1.95 0 .19.13.39.48.33C18.13 21.06 22 16.97 22 12c0-5.52-4.48-10-10-10z" fill="#fff"/>
             </svg>
           </span>
-          <span class="brand-title">Cucumber Reports</span>
+          <span class="brand-title">Automation Test Results || Cucumber Reports</span>
         </div>
         <a href="https://cucumber.io" target="_blank" class="navbar-link">cucumber.io</a>
       </div>
     </nav>
     <main class="main-content">
       <div class="upload-card">
-        <h1 class="main-title">Publish and share your test results, straight from Cucumber.</h1>
+        <h1 class="main-title">Publish and share your test results, straight from this Site.</h1>
         <p class="subtitle">Upload your <span class="accent">Cucumber JSON</span> test report to visualize the results.</p>
         <div class="upload-area">
           <ReportUploader @report-uploaded="handleFileUpload" />
@@ -47,7 +47,7 @@
       </div>
     </main>
     <footer class="footer">
-      Copyright © 2025 The Cucumber Open Source Project
+      Copyright © 2025 SriSri T
       <br />
       <a href="#" class="footer-link">Terms & Privacy</a>
     </footer>
