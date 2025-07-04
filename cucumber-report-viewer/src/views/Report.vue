@@ -11,7 +11,10 @@
       </div>
     </header>
     <main class="main-content">
-      <div v-if="reportData" class="dashboard-grid">
+      <div v-if="expired" class="card empty-card" style="color:#b71c1c;background:#ffebee;border:1px solid #ffcdd2;">
+        <p>This report link has expired (older than 24 hours).</p>
+      </div>
+      <div v-else-if="reportData" class="dashboard-grid">
         <ReportViewer 
           :report="reportData" 
           :selectedFeatureIndex="selectedFeatureIndex"
@@ -43,7 +46,21 @@ export default {
     const onSelectFeature = idx => {
       selectedFeatureIndex.value = idx;
     };
-    return { reportData, selectedFeatureIndex, onSelectFeature };
+
+    // Soft expiry logic: check for t= timestamp in URL hash
+    let expired = false;
+    if (typeof window !== 'undefined') {
+      const hash = window.location.hash;
+      const queryString = hash.includes('?') ? hash.split('?')[1] : '';
+      const params = new URLSearchParams(queryString);
+      const t = parseInt(params.get('t'), 10);
+      if (t && !isNaN(t)) {
+        const now = Date.now();
+        expired = now - t > 24 * 60 * 60 * 1000;
+      }
+    }
+
+    return { reportData, selectedFeatureIndex, onSelectFeature, expired };
   },
 };
 </script>
