@@ -6,6 +6,9 @@
         <span class="scenario-status" :class="scenario.status">{{ scenario.status }}</span>
         <span class="scenario-duration">{{ scenario.duration || 0 }} ms</span>
       </div>
+      <div v-if="scenario.tags && scenario.tags.length" class="scenario-tags">
+        <span v-for="tag in scenario.tags" :key="tag" class="scenario-tag">{{ cleanTagText(tag) }}</span>
+      </div>
       <ul class="steps-list">
         <li v-for="step in scenario.steps" :key="step.keyword + step.name" :class="step.status">
           <span class="step-icon">
@@ -36,6 +39,25 @@ export default {
       type: Object,
       required: true
     }
+  },
+  methods: {
+    cleanTagText(tag) {
+      // Handle different tag formats from Cucumber JSON
+      let tagText = '';
+      
+      if (typeof tag === 'string') {
+        tagText = tag;
+      } else if (tag && typeof tag === 'object') {
+        // Handle tag objects - common properties in Cucumber JSON
+        tagText = tag.name || tag.value || tag.tag || tag.text || '';
+      } else {
+        // Handle other non-string values
+        tagText = tag ? String(tag) : '';
+      }
+      
+      // Remove curly braces from tag text
+      return tagText.replace(/[{}]/g, '');
+    }
   }
 }
 </script>
@@ -43,6 +65,7 @@ export default {
 <style scoped>
 .test-details {
   padding: 1rem 0 0 0;
+  text-align: left;
 }
 .scenario-header {
   display: flex;
@@ -74,6 +97,23 @@ export default {
   color: #888;
   font-size: 0.95rem;
 }
+.scenario-tags {
+  display: flex;
+  gap: 0.3em;
+  flex-wrap: wrap;
+  margin-bottom: 0.5rem;
+  text-align: left;
+}
+.scenario-tag {
+  font-size: 0.97em;
+  color: #b26a00;
+  font-family: 'JetBrains Mono', 'Consolas', monospace;
+  font-weight: 600;
+  background: #fffbe7;
+  border-radius: 4px;
+  padding: 0 0.4em;
+  letter-spacing: 0.01em;
+}
 .steps-list {
   list-style: none;
   padding: 0;
@@ -101,6 +141,7 @@ export default {
 }
 .step-name {
   flex: 1;
+  text-align: left;
 }
 .step-status.passed {
   color: #388e3c;
@@ -119,5 +160,6 @@ export default {
   color: #e53935;
   font-size: 0.95em;
   margin-left: 2.5rem;
+  text-align: left;
 }
 </style>

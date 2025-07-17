@@ -27,4 +27,11 @@ Thumbs.db
 # Misc
 coverage/
 
+# Unit Tests - Exclude from GitHub
+src/tests/
+*.test.js
+*.spec.js
+jest.config.js
+babel.config.js
+
 # GitHub Pages

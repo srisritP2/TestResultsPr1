@@ -4,9 +4,30 @@
       <div class="header-section">
         <div class="header-item">
           <div class="header-subitem">
-            <img src="https://reports.cucumber.io/images/cucumber-logo.svg" alt="Cucumber Reports" class="cucumber-logo" />
-            <svg viewBox="0 0 128 128" aria-hidden="true" class="header-tech-logo"><path fill="#0074BD" d="M47.617 98.12s-4.767 2.774 3.397 3.71c9.892 1.13 14.947.968 25.845-1.092 0 0 2.871 1.795 6.873 3.351-24.439 10.47-55.308-.607-36.115-5.969zm-2.988-13.665s-5.348 3.959 2.823 4.805c10.567 1.091 18.91 1.18 33.354-1.6 0 0 1.993 2.025 5.132 3.131-29.542 8.64-62.446.68-41.309-6.336z"></path><path fill="#EA2D2E" d="M69.802 61.271c6.025 6.935-1.58 13.17-1.58 13.17s15.289-7.891 8.269-17.777c-6.559-9.215-11.587-13.792 15.635-29.58 0 .001-42.731 10.67-22.324 34.187z"></path><path fill="#0074BD" d="M102.123 108.229s3.529 2.91-3.888 5.159c-14.102 4.272-58.706 5.56-71.094.171-4.451-1.938 3.899-4.625 6.526-5.192 2.739-.593 4.303-.485 4.303-.485-4.953-3.487-32.013 6.85-13.743 9.815 49.821 8.076 90.817-3.637 77.896-9.468zM49.912 70.294s-22.686 5.389-8.033 7.348c6.188.828 18.518.638 30.011-.326 9.39-.789 18.813-2.474 18.813-2.474s-3.308 1.419-5.704 3.053c-23.042 6.061-67.544 3.238-54.731-2.958 10.832-5.239 19.644-4.643 19.644-4.643zm40.697 22.747c23.421-12.167 12.591-23.86 5.032-22.285-1.848.385-2.677.72-2.677.72s.688-1.079 2-1.543c14.953-5.255 26.451 15.503-4.823 23.725 0-.002.359-.327.468-.617z"></path><path fill="#EA2D2E" d="M76.491 1.587S89.459 14.563 64.188 34.51c-20.266 16.006-4.621 25.13-.007 35.559-11.831-10.673-20.509-20.07-14.688-28.815C58.041 28.42 81.722 22.195 76.491 1.587z"></path><path fill="#0074BD" d="M52.214 126.021c22.476 1.437 57-.8 57.817-11.436 0 0-1.571 4.032-18.577 7.231-19.186 3.612-42.854 3.191-56.887.874 0 .001 2.875 2.381 17.647 3.331z"></path></svg>
-            <svg viewBox="0 0 128 128" aria-hidden="true" class="header-tech-logo"><path fill="#00ADEF" d="M126 1.637l-67 9.834v49.831l67-.534zM1.647 66.709l.003 42.404 50.791 6.983-.04-49.057zM58.467 67.389l.094 49.465 67.376 9.509.016-58.863zM1.61 19.297l.047 42.383 50.791-.289-.023-49.016z"></path></svg>
+            <img src="https://reports.cucumber.io/images/cucumber-logo.svg" alt="Cucumber Reports"
+              class="cucumber-logo" />
+            <svg viewBox="0 0 128 128" aria-hidden="true" class="header-tech-logo">
+              <path fill="#0074BD"
+                d="M47.617 98.12s-4.767 2.774 3.397 3.71c9.892 1.13 14.947.968 25.845-1.092 0 0 2.871 1.795 6.873 3.351-24.439 10.47-55.308-.607-36.115-5.969zm-2.988-13.665s-5.348 3.959 2.823 4.805c10.567 1.091 18.91 1.18 33.354-1.6 0 0 1.993 2.025 5.132 3.131-29.542 8.64-62.446.68-41.309-6.336z">
+              </path>
+              <path fill="#EA2D2E"
+                d="M69.802 61.271c6.025 6.935-1.58 13.17-1.58 13.17s15.289-7.891 8.269-17.777c-6.559-9.215-11.587-13.792 15.635-29.58 0 .001-42.731 10.67-22.324 34.187z">
+              </path>
+              <path fill="#0074BD"
+                d="M102.123 108.229s3.529 2.91-3.888 5.159c-14.102 4.272-58.706 5.56-71.094.171-4.451-1.938 3.899-4.625 6.526-5.192 2.739-.593 4.303-.485 4.303-.485-4.953-3.487-32.013 6.85-13.743 9.815 49.821 8.076 90.817-3.637 77.896-9.468zM49.912 70.294s-22.686 5.389-8.033 7.348c6.188.828 18.518.638 30.011-.326 9.39-.789 18.813-2.474 18.813-2.474s-3.308 1.419-5.704 3.053c-23.042 6.061-67.544 3.238-54.731-2.958 10.832-5.239 19.644-4.643 19.644-4.643zm40.697 22.747c23.421-12.167 12.591-23.86 5.032-22.285-1.848.385-2.677.72-2.677.72s.688-1.079 2-1.543c14.953-5.255 26.451 15.503-4.823 23.725 0-.002.359-.327.468-.617z">
+              </path>
+              <path fill="#EA2D2E"
+                d="M76.491 1.587S89.459 14.563 64.188 34.51c-20.266 16.006-4.621 25.13-.007 35.559-11.831-10.673-20.509-20.07-14.688-28.815C58.041 28.42 81.722 22.195 76.491 1.587z">
+              </path>
+              <path fill="#0074BD"
+                d="M52.214 126.021c22.476 1.437 57-.8 57.817-11.436 0 0-1.571 4.032-18.577 7.231-19.186 3.612-42.854 3.191-56.887.874 0 .001 2.875 2.381 17.647 3.331z">
+              </path>
+            </svg>
+            <svg viewBox="0 0 128 128" aria-hidden="true" class="header-tech-logo">
+              <path fill="#00ADEF"
+                d="M126 1.637l-67 9.834v49.831l67-.534zM1.647 66.709l.003 42.404 50.791 6.983-.04-49.057zM58.467 67.389l.094 49.465 67.376 9.509.016-58.863zM1.61 19.297l.047 42.383 50.791-.289-.023-49.016z">
+              </path>
+            </svg>
           </div>
           <span class="cucumber-header-title">Cucumber Reports</span>
         </div>
@@ -23,21 +44,39 @@
         </div>
         <div class="header-item">
           <div class="header-subitem health-summary">
-            <svg viewBox="0 0 100 100" aria-hidden="true" class="health-chart"><g transform="rotate(-90 50 50)"><path :stroke-dasharray="(summary.passed / summary.total * 52).toFixed(0) + ' ' + (52 - (summary.passed / summary.total * 52)).toFixed(0)" stroke-dashoffset="50" stroke-width="50" d="M75 50a1 1 90 10-50 0a1 1 90 10 50 0" fill="none" stroke="#00a818"/><path :stroke-dasharray="(summary.failed / summary.total * 52).toFixed(0) + ' ' + (52 - (summary.failed / summary.total * 52)).toFixed(0)" stroke-dashoffset="52" stroke-width="50" d="M75 50a1 1 90 10-50 0a1 1 90 10 50 0" fill="none" stroke="#e53935"/></g></svg>
+            <svg viewBox="0 0 100 100" aria-hidden="true" class="health-chart">
+              <g transform="rotate(-90 50 50)">
+                <path
+                  :stroke-dasharray="(summary.passed / summary.total * 52).toFixed(0) + ' ' + (52 - (summary.passed / summary.total * 52)).toFixed(0)"
+                  stroke-dashoffset="50" stroke-width="50" d="M75 50a1 1 90 10-50 0a1 1 90 10 50 0" fill="none"
+                  stroke="#00a818" />
+                <path
+                  :stroke-dasharray="(summary.failed / summary.total * 52).toFixed(0) + ' ' + (52 - (summary.failed / summary.total * 52)).toFixed(0)"
+                  stroke-dashoffset="52" stroke-width="50" d="M75 50a1 1 90 10-50 0a1 1 90 10 50 0" fill="none"
+                  stroke="#e53935" />
+              </g>
+            </svg>
             <span>{{ ((summary.passed / summary.total) * 100).toFixed(1) }}% passed</span>
           </div>
         </div>
         <div class="header-item">
           <div class="header-subitem time-summary">
             <v-icon color="primary" size="18" class="mr-1">mdi-stopwatch</v-icon>
-            <span><time :title="report?.dateString || ''" :datetime="report?.dateISO || ''">{{ report?.dateAgo || '1 day ago' }}</time><em class="conjunction"> in </em><span>{{ summary.duration }}</span></span>
+            <span>
+              <time :title="report?.dateString || ''" :datetime="report?.dateISO || ''">
+                {{ report?.dateAgo || '1 day ago' }}
+              </time>
+              <em class="conjunction"> in </em>
+              <span>{{ summary.duration }}</span>
+            </span>
           </div>
         </div>
       </div>
     </div>
     <div class="cucumber-report-content">
       <div v-if="error" class="cucumber-alert error">{{ error }}</div>
-      <div v-else-if="!report || !Array.isArray(report.features) || report.features.length === 0" class="cucumber-alert info">
+      <div v-else-if="!report || !Array.isArray(report.features) || report.features.length === 0"
+        class="cucumber-alert info">
         No report data available or invalid report format. Please upload a valid Cucumber JSON file.
       </div>
       <template v-else>
@@ -70,38 +109,50 @@
 
         <!-- Features list with expandable scenarios -->
         <v-expansion-panels multiple class="cucumber-features-list">
-          <v-expansion-panel v-for="(feature, idx) in report.features" :key="feature.id || feature.name" :value="idx === selectedFeatureIndex">
-            <v-expansion-panel-title @click="$emit('select-feature', idx)" class="cucumber-feature-row" :class="[featureStatus(feature), { selected: idx === selectedFeatureIndex }]">
+          <v-expansion-panel v-for="(feature, idx) in report.features" :key="feature.id || feature.name">
+            <v-expansion-panel-title class="cucumber-feature-row" :class="[featureStatus(feature)]">
               <v-icon v-if="featureStatus(feature) === 'passed'" color="success" size="18">mdi-check-circle</v-icon>
               <v-icon v-else-if="featureStatus(feature) === 'failed'" color="error" size="18">mdi-close-circle</v-icon>
               <v-icon v-else color="grey" size="18">mdi-help-circle</v-icon>
               <span class="feature-file">{{ feature.uri || feature.name }}</span>
               <!-- <span class="feature-title" style="font-weight:700;">{{ feature.name }}</span> -->
               <span v-if="feature.tags && feature.tags.length" class="feature-tags">
-                <span v-for="tag in feature.tags" :key="tag" class="feature-tag">{{ tag }}</span>
+                <span v-for="tag in feature.tags" :key="tag" class="feature-tag">{{ cleanTagText(tag) }}</span>
               </span>
             </v-expansion-panel-title>
             <v-expansion-panel-text>
               <div v-if="feature.description" class="feature-description">{{ feature.description }}</div>
-              <div v-for="scenario in feature.elements" :key="scenario.id || scenario.name" class="cucumber-scenario-block">
+              <div v-for="scenario in feature.elements" :key="scenario.id || scenario.name"
+                class="cucumber-scenario-block">
                 <v-expansion-panels>
                   <v-expansion-panel>
                     <v-expansion-panel-title class="scenario-header-row">
-                      <v-icon v-if="scenarioStatus(scenario) === 'passed'" color="success" size="18">mdi-check-circle</v-icon>
-                      <v-icon v-else-if="scenarioStatus(scenario) === 'failed'" color="error" size="18">mdi-close-circle</v-icon>
-                      <v-icon v-else color="grey" size="18">mdi-help-circle</v-icon>
-                        <span v-if="scenario.tags && scenario.tags.length" class="scenario-tags">
-                        <span v-for="tag in scenario.tags" :key="tag" class="scenario-tag">{{ tag }}</span>
-                      </span>
-                      <span class="scenario-title">Scenario: {{ scenario.name }}</span>
-                      <span class="scenario-duration">{{ formatDuration(scenario.duration) }}</span>
+                      <div class="scenario-header-content">
+                        <div class="scenario-title-row">
+                          <span class="scenario-title">Scenario: {{ scenario.name }}</span>
+                          <v-icon v-if="scenarioStatus(scenario) === 'passed'" color="success"
+                            size="18">mdi-check-circle</v-icon>
+                          <v-icon v-else-if="scenarioStatus(scenario) === 'failed'" color="error"
+                            size="18">mdi-close-circle</v-icon>
+                          <v-icon v-else color="grey" size="18">mdi-help-circle</v-icon>
+                          <span class="scenario-duration">{{ formatDuration(scenario.duration) }}</span>
+                        </div>
+                        <div v-if="scenario.tags && scenario.tags.length" class="scenario-tags">
+                          <span v-for="tag in scenario.tags" :key="tag" class="scenario-tag">{{ cleanTagText(tag)
+                          }}</span>
+                        </div>
+                      </div>
                     </v-expansion-panel-title>
                     <v-expansion-panel-text>
                       <ul class="cucumber-steps-list">
-                        <li v-for="(step, idx) in scenario.steps" :key="step.keyword + step.name + idx" class="cucumber-step-row">
-                          <v-icon v-if="stepStatus(step) === 'passed'" color="success" size="16">mdi-check-circle</v-icon>
-                          <v-icon v-else-if="stepStatus(step) === 'failed'" color="error" size="16">mdi-close-circle</v-icon>
-                          <v-icon v-else-if="stepStatus(step) === 'skipped'" color="warning" size="16">mdi-alert-circle</v-icon>
+                        <li v-for="(step, idx) in scenario.steps" :key="step.keyword + step.name + idx"
+                          class="cucumber-step-row">
+                          <v-icon v-if="stepStatus(step) === 'passed'" color="success"
+                            size="16">mdi-check-circle</v-icon>
+                          <v-icon v-else-if="stepStatus(step) === 'failed'" color="error"
+                            size="16">mdi-close-circle</v-icon>
+                          <v-icon v-else-if="stepStatus(step) === 'skipped'" color="warning"
+                            size="16">mdi-alert-circle</v-icon>
                           <v-icon v-else color="grey" size="16">mdi-help-circle</v-icon>
                           <span class="step-keyword">{{ step.keyword }}</span>
                           <span class="step-text">{{ step.name }}</span>
@@ -110,7 +161,8 @@
                             <pre class="step-error-message">
                               {{ shouldTruncate(step.errorMessage) && !step._showFullError ? truncateError(step.errorMessage) : step.errorMessage }}
                             </pre>
-                            <a v-if="shouldTruncate(step.errorMessage)" @click.prevent="toggleErrorExpand(step)" class="show-more-link">
+                            <a v-if="shouldTruncate(step.errorMessage)" @click.prevent="toggleErrorExpand(step)"
+                              class="show-more-link">
                               {{ step._showFullError ? 'Show less' : 'Show more' }}
                             </a>
                           </div>
@@ -151,6 +203,23 @@ export default {
     },
   },
   methods: {
+    cleanTagText(tag) {
+      // Handle different tag formats from Cucumber JSON
+      let tagText = '';
+
+      if (typeof tag === 'string') {
+        tagText = tag;
+      } else if (tag && typeof tag === 'object') {
+        // Handle tag objects - common properties in Cucumber JSON
+        tagText = tag.name || tag.value || tag.tag || tag.text || '';
+      } else {
+        // Handle other non-string values
+        tagText = tag ? String(tag) : '';
+      }
+
+      // Remove curly braces from tag text
+      return tagText.replace(/[{}]/g, '');
+    },
     scenarioStatus(scenario) {
       // Try to determine scenario status from common Cucumber JSON structures
       if (scenario.status) return scenario.status;
@@ -266,22 +335,26 @@ export default {
   padding: 1.2rem 2rem 0.7rem 2rem;
   margin-bottom: 1.5rem;
 }
+
 .header-section {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 2.5rem;
 }
+
 .header-item {
   display: flex;
   align-items: center;
   gap: 1.2rem;
 }
+
 .header-subitem {
   display: flex;
   align-items: center;
   gap: 0.7rem;
 }
+
 .header-tech-logo {
   width: 28px;
   height: 28px;
@@ -291,6 +364,7 @@ export default {
   border-radius: 50%;
   border: 1px solid #e5e7eb;
 }
+
 .execution-summary code {
   background: #f3f6fa;
   border-radius: 4px;
@@ -299,11 +373,13 @@ export default {
   font-family: 'JetBrains Mono', 'Consolas', monospace;
   color: #1976d2;
 }
+
 .execution-summary em.conjunction {
   color: #888;
   font-style: normal;
   margin: 0 0.2em;
 }
+
 .health-summary {
   display: flex;
   align-items: center;
@@ -311,11 +387,13 @@ export default {
   font-weight: 500;
   color: #00a818;
 }
+
 .health-chart {
   width: 32px;
   height: 32px;
   margin-right: 0.2em;
 }
+
 .time-summary {
   display: flex;
   align-items: center;
@@ -323,13 +401,16 @@ export default {
   color: #1976d2;
   font-weight: 500;
 }
+
 .time-summary time {
   color: #222;
   font-weight: 500;
 }
+
 .mb-5 {
   margin-bottom: 2.5rem !important;
 }
+
 /* Cucumber Reports Classic Style */
 .cucumber-report-root {
   min-height: 100vh;
@@ -337,6 +418,7 @@ export default {
   font-family: 'Segoe UI', 'Roboto', 'Arial', sans-serif;
   color: #23272f;
 }
+
 .cucumber-header {
   display: flex;
   align-items: center;
@@ -346,6 +428,7 @@ export default {
   background: #fff;
   margin-bottom: 1.5rem;
 }
+
 .cucumber-logo {
   width: 32px;
   height: 32px;
@@ -354,6 +437,7 @@ export default {
   border-radius: 50%;
   border: 1px solid #e5e7eb;
 }
+
 .cucumber-header-title {
   font-size: 1.3rem;
   font-weight: 700;
@@ -361,11 +445,13 @@ export default {
   letter-spacing: 0.01em;
   margin-left: 0.5em;
 }
+
 .cucumber-report-content {
   max-width: 900px;
   margin: 0 auto;
   padding: 0 1.5rem 2rem 1.5rem;
 }
+
 .cucumber-summary-bar {
   display: flex;
   align-items: center;
@@ -377,26 +463,31 @@ export default {
   margin-bottom: 1.2rem;
   font-size: 1.05rem;
 }
+
 .summary-env {
   display: flex;
   align-items: center;
   gap: 0.5em;
   color: #444;
 }
+
 .env-label {
   font-weight: 500;
   color: #222;
 }
+
 .env-value {
   font-family: 'JetBrains Mono', 'Consolas', monospace;
   color: #1976d2;
   font-size: 1.01em;
 }
+
 .summary-stats {
   display: flex;
   gap: 1.2em;
   align-items: center;
 }
+
 .stat {
   display: flex;
   align-items: center;
@@ -404,26 +495,42 @@ export default {
   font-weight: 500;
   font-size: 1.01em;
 }
-.stat.passed { color: #388e3c; }
-.stat.failed { color: #e53935; }
-.stat.skipped { color: #b26a00; }
-.stat.duration { color: #1976d2; }
+
+.stat.passed {
+  color: #388e3c;
+}
+
+.stat.failed {
+  color: #e53935;
+}
+
+.stat.skipped {
+  color: #b26a00;
+}
+
+.stat.duration {
+  color: #1976d2;
+}
+
 .cucumber-alert {
   border-radius: 6px;
   padding: 1em 1.2em;
   margin-bottom: 1.2em;
   font-size: 1.05em;
 }
+
 .cucumber-alert.error {
   background: #ffebee;
   color: #b71c1c;
   border: 1px solid #ffcdd2;
 }
+
 .cucumber-alert.info {
   background: #e3f2fd;
   color: #1976d2;
   border: 1px solid #90caf9;
 }
+
 .cucumber-features-list {
   background: #f8f9fa;
   border: 1px solid #e5e7eb;
@@ -431,6 +538,7 @@ export default {
   margin-bottom: 1.2rem;
   padding: 0.5rem 0.7rem;
 }
+
 .cucumber-feature-row {
   display: flex;
   align-items: center;
@@ -441,16 +549,25 @@ export default {
   font-size: 1.01em;
   transition: background 0.15s;
 }
+
 .cucumber-feature-row.selected {
   background: #e3f2fd;
 }
-.cucumber-feature-row.passed { background: #e8f5e9; }
-.cucumber-feature-row.failed { background: #ffebee; }
+
+.cucumber-feature-row.passed {
+  background: #e8f5e9;
+}
+
+.cucumber-feature-row.failed {
+  background: #ffebee;
+}
+
 .feature-file {
   font-family: 'JetBrains Mono', 'Consolas', monospace;
   color: #1976d2;
   font-size: 0.98em;
 }
+
 .cucumber-feature-details {
   background: #fff;
   border: 1px solid #e5e7eb;
@@ -458,21 +575,28 @@ export default {
   padding: 1.2rem 1.5rem 1.2rem 1.5rem;
   margin-bottom: 1.2rem;
 }
+
 .feature-title-block {
   display: flex;
   align-items: center;
   gap: 1em;
   margin-bottom: 0.3em;
 }
+
 .feature-title {
   font-size: 1.13rem;
   font-weight: 700;
   color: #222;
 }
+
 .feature-tags {
   display: flex;
   gap: 0.3em;
+  text-align: left;
+  flex-wrap: wrap;
+  ;
 }
+
 .feature-tag {
   font-size: 0.97em;
   color: #b26a00;
@@ -483,19 +607,23 @@ export default {
   padding: 0 0.4em;
   letter-spacing: 0.01em;
 }
+
 .feature-description {
   color: #444;
   font-size: 1.01em;
   margin-bottom: 0.7em;
+  text-align: left;
 }
+
 .cucumber-scenario-block {
   border-top: 1px solid #e5e7eb;
   padding: 1.1em 0 0.7em 0;
   background: #fff;
   border-radius: 8px;
   margin-bottom: 1.2em;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
 }
+
 .scenario-header-row {
   display: flex;
   align-items: flex-start;
@@ -506,18 +634,37 @@ export default {
   margin-bottom: 0.2em;
   word-break: break-word;
 }
+
+.scenario-header-content {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  text-align: left;
+}
+
+.scenario-title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  margin-bottom: 0.3em;
+}
+
 .scenario-title {
   font-weight: 700;
   color: #222;
-  flex: 1 1 100%;
-  min-width: 220px;
+  flex: 1;
   word-break: break-word;
+  text-align: left;
 }
+
 .scenario-tags {
   display: flex;
   gap: 0.3em;
+  text-align: left;
   flex-wrap: wrap;
+  margin-left: 0;
 }
+
 .scenario-tag {
   font-size: 0.97em;
   color: #b26a00;
@@ -528,17 +675,20 @@ export default {
   padding: 0 0.4em;
   letter-spacing: 0.01em;
 }
+
 .scenario-duration {
   margin-left: auto;
   color: #64748b;
   font-size: 0.97em;
   white-space: nowrap;
 }
+
 .cucumber-steps-list {
   list-style: none;
   margin: 0.5em 0 0 0;
   padding: 0;
 }
+
 .cucumber-step-row {
   display: flex;
   align-items: flex-start;
@@ -548,21 +698,26 @@ export default {
   flex-wrap: wrap;
   word-break: break-word;
 }
+
 .step-keyword {
   font-weight: 600;
   color: #1976d2;
   min-width: 48px;
 }
+
 .step-text {
   color: #23272f;
   flex: 1 1 200px;
   word-break: break-word;
+  text-align: left;
 }
+
 .step-duration {
   color: #888;
   font-size: 0.95em;
   margin-left: 0.5em;
 }
+
 .step-error-block {
   background: #ffebee;
   border: 1px solid #ffcdd2;
@@ -574,6 +729,7 @@ export default {
   overflow-x: auto;
   word-break: break-word;
 }
+
 .step-error-message {
   color: #b71c1c;
   font-size: 0.97em;
@@ -581,7 +737,9 @@ export default {
   white-space: pre-wrap;
   margin: 0;
   word-break: break-word;
+  text-align: left;
 }
+
 .cucumber-summary-bar {
   display: flex;
   gap: 1.5em;
@@ -589,17 +747,66 @@ export default {
   margin-bottom: 1.2em;
   align-items: center;
 }
-.summary-passed { color: #388e3c; font-weight: bold; }
-.summary-failed { color: #e53935; font-weight: bold; }
-.summary-skipped { color: #888; }
-.summary-total { color: #1976d2; }
-.summary-duration { color: #444; }
-.cucumber-scenario-block { margin-bottom: 1em; }
-.cucumber-steps-list { list-style: none; padding: 0; margin: 0; }
-.cucumber-step-row { display: flex; gap: 1em; align-items: center; margin-bottom: 0.3em; }
-.step-keyword { color: #888; font-weight: bold; }
-.step-name { color: #222; }
-.step-status { margin-left: auto; }
-.scenario-status-label { margin-left: 1em; font-size: 0.95em; }
-.cucumber-alert.info { color: #1976d2; background: #e3f2fd; padding: 0.5em 1em; border-radius: 6px; margin-top: 1em; }
+
+.summary-passed {
+  color: #388e3c;
+  font-weight: bold;
+}
+
+.summary-failed {
+  color: #e53935;
+  font-weight: bold;
+}
+
+.summary-skipped {
+  color: #888;
+}
+
+.summary-total {
+  color: #1976d2;
+}
+
+.summary-duration {
+  color: #444;
+}
+
+.cucumber-scenario-block {
+  margin-bottom: 1em;
+}
+
+.cucumber-steps-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.cucumber-step-row {
+  display: flex;
+  gap: 1em;
+  align-items: center;
+  margin-bottom: 0.3em;
+}
+
+
+
+.step-name {
+  color: #222;
+}
+
+.step-status {
+  margin-left: auto;
+}
+
+.scenario-status-label {
+  margin-left: 1em;
+  font-size: 0.95em;
+}
+
+.cucumber-alert.info {
+  color: #1976d2;
+  background: #e3f2fd;
+  padding: 0.5em 1em;
+  border-radius: 6px;
+  margin-top: 1em;
+}
 </style>
