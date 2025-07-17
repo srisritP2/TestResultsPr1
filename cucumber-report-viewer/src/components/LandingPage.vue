@@ -19,12 +19,9 @@
         <p class="subtitle">Upload your <span class="accent">Cucumber JSON</span> test report to visualize the results.</p>
         <div class="upload-area">
           <ReportUploader @report-uploaded="handleFileUpload" />
-          <div class="upload-hint">
-            <svg class="upload-icon" viewBox="0 0 24 24"><path fill="#00a818" d="M12 16V4m0 0l-4 4m4-4l4 4"/><path fill="#64748b" d="M20 16.5A2.5 2.5 0 0 1 17.5 19h-11A2.5 2.5 0 0 1 4 16.5V16a8 8 0 0 1 16 0v.5z" opacity=".3"/></svg>
-            <span>Drag & drop your file here, or click to browse</span>
-          </div>
         </div>
       </div>
+      <ReportsCollection />
       <div class="howto-section">
         <h2>Start publishing <span class="highlight">in seconds</span></h2>
         <div class="howto-cards">
@@ -56,15 +53,36 @@
 
 <script>
 import ReportUploader from './ReportUploader.vue';
+import ReportsCollection from './ReportsCollection.vue';
+import { useRouter } from 'vue-router';
+import { useStore } from 'vuex';
 
 export default {
   components: {
-    ReportUploader
+    ReportUploader,
+    ReportsCollection
   },
-  methods: {
-    handleFileUpload(fileData) {
-      this.$emit('file-uploaded', fileData);
-    }
+  setup() {
+    const router = useRouter();
+    const store = useStore();
+    const handleFileUpload = (reportData) => {
+      // Use the id from the upload event if available
+      const id = reportData && reportData._uploadedId;
+      if (reportData) {
+        store.commit('setReportData', reportData);
+      }
+      if (id) {
+        router.push({ name: 'Report', params: { id }, query: { t: Date.now() } });
+      } else {
+        // fallback: use latest from index
+        let index = JSON.parse(localStorage.getItem('uploaded-reports-index') || '[]');
+        const latest = index && index.length ? index[0] : null;
+        if (latest && latest.id) {
+          router.push({ name: 'Report', params: { id: latest.id }, query: { t: Date.now() } });
+        }
+      }
+    };
+    return { handleFileUpload };
   }
 }
 </script>

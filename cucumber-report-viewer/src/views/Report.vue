@@ -15,6 +15,9 @@
         <p>This report link has expired (older than 24 hours).</p>
       </div>
       <div v-else-if="reportData" class="dashboard-grid">
+        <div v-if="sessionOnly" class="cucumber-alert warning" style="margin-bottom:1em;">
+          This uploaded report is only available for this session. It will be lost if you refresh or close the page.
+        </div>
         <ReportViewer 
           :report="reportData" 
           :selectedFeatureIndex="selectedFeatureIndex"
@@ -32,7 +35,8 @@
 
 import ReportViewer from '@/components/ReportViewer.vue';
 import { useStore } from 'vuex';
-import { computed, ref } from 'vue';
+import { computed, ref, onMounted, reactive } from 'vue';
+import { useRoute } from 'vue-router';
 
 export default {
   components: {
@@ -40,12 +44,52 @@ export default {
   },
   setup() {
     const store = useStore();
-    const reportData = computed(() => store.state.reportData);
+    const route = useRoute();
+    const reportId = route && route.params && route.params.id ? route.params.id : null;
+    const state = reactive({ staticReport: null });
+    const reportData = computed(() => {
+      // Try to load from localStorage if route param id matches a static report
+      if (reportId && localStorage.getItem('uploaded-report-' + reportId)) {
+        try {
+          const data = JSON.parse(localStorage.getItem('uploaded-report-' + reportId));
+          if (Array.isArray(data)) return { features: data };
+          if (data && Array.isArray(data.features)) return data;
+        } catch {}
+      }
+      // If the report was uploaded this session, use Vuex store
+      if (store.state.reportData && store.state.reportData._uploadedId === reportId) {
+        if (Array.isArray(store.state.reportData)) return { features: store.state.reportData };
+        if (store.state.reportData && Array.isArray(store.state.reportData.features)) return store.state.reportData;
+      }
+      // If fetched static report, use it
+      if (state.staticReport) {
+        if (Array.isArray(state.staticReport)) return { features: state.staticReport };
+        if (state.staticReport && Array.isArray(state.staticReport.features)) return state.staticReport;
+      }
+      return null;
+    });
     // Track selected feature index, default to 0
     const selectedFeatureIndex = ref(0);
     const onSelectFeature = idx => {
       selectedFeatureIndex.value = idx;
     };
+
+    // Fetch static report JSON if needed
+    onMounted(() => {
+      if (!reportId) return;
+      if (store.state.reportData && store.state.reportData._uploadedId === reportId) return;
+      if (localStorage.getItem('uploaded-report-' + reportId)) return;
+      // Try to fetch from public/TestResultsJsons/<id>.json
+      fetch(process.env.BASE_URL + 'TestResultsJsons/' + reportId + '.json', { cache: 'reload' })
+        .then(r => r.ok ? r.json() : null)
+        .then(json => {
+          // Always normalize to {features: array}
+          if (Array.isArray(json)) state.staticReport = { features: json };
+          else if (json && Array.isArray(json.features)) state.staticReport = json;
+          else state.staticReport = null;
+        })
+        .catch(() => { state.staticReport = null; });
+    });
 
     // Soft expiry logic: check for t= timestamp in URL hash
     let expired = false;
@@ -60,7 +104,12 @@ export default {
       }
     }
 
-    return { reportData, selectedFeatureIndex, onSelectFeature, expired };
+    // Show a warning if the report is only available for this session
+    const sessionOnly = computed(() => {
+      return store.state.reportData && store.state.reportData._uploadedId === reportId;
+    });
+
+    return { reportData, selectedFeatureIndex, onSelectFeature, expired, sessionOnly };
   },
 };
 </script>

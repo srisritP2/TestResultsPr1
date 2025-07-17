@@ -4,7 +4,7 @@
       <div class="header-section">
         <div class="header-item">
           <div class="header-subitem">
-            <img src="https://raw.githubusercontent.com/cucumber/cucumber/main/images/cucumber-logo.svg" alt="Cucumber Reports" class="cucumber-logo" />
+            <img src="https://reports.cucumber.io/images/cucumber-logo.svg" alt="Cucumber Reports" class="cucumber-logo" />
             <svg viewBox="0 0 128 128" aria-hidden="true" class="header-tech-logo"><path fill="#0074BD" d="M47.617 98.12s-4.767 2.774 3.397 3.71c9.892 1.13 14.947.968 25.845-1.092 0 0 2.871 1.795 6.873 3.351-24.439 10.47-55.308-.607-36.115-5.969zm-2.988-13.665s-5.348 3.959 2.823 4.805c10.567 1.091 18.91 1.18 33.354-1.6 0 0 1.993 2.025 5.132 3.131-29.542 8.64-62.446.68-41.309-6.336z"></path><path fill="#EA2D2E" d="M69.802 61.271c6.025 6.935-1.58 13.17-1.58 13.17s15.289-7.891 8.269-17.777c-6.559-9.215-11.587-13.792 15.635-29.58 0 .001-42.731 10.67-22.324 34.187z"></path><path fill="#0074BD" d="M102.123 108.229s3.529 2.91-3.888 5.159c-14.102 4.272-58.706 5.56-71.094.171-4.451-1.938 3.899-4.625 6.526-5.192 2.739-.593 4.303-.485 4.303-.485-4.953-3.487-32.013 6.85-13.743 9.815 49.821 8.076 90.817-3.637 77.896-9.468zM49.912 70.294s-22.686 5.389-8.033 7.348c6.188.828 18.518.638 30.011-.326 9.39-.789 18.813-2.474 18.813-2.474s-3.308 1.419-5.704 3.053c-23.042 6.061-67.544 3.238-54.731-2.958 10.832-5.239 19.644-4.643 19.644-4.643zm40.697 22.747c23.421-12.167 12.591-23.86 5.032-22.285-1.848.385-2.677.72-2.677.72s.688-1.079 2-1.543c14.953-5.255 26.451 15.503-4.823 23.725 0-.002.359-.327.468-.617z"></path><path fill="#EA2D2E" d="M76.491 1.587S89.459 14.563 64.188 34.51c-20.266 16.006-4.621 25.13-.007 35.559-11.831-10.673-20.509-20.07-14.688-28.815C58.041 28.42 81.722 22.195 76.491 1.587z"></path><path fill="#0074BD" d="M52.214 126.021c22.476 1.437 57-.8 57.817-11.436 0 0-1.571 4.032-18.577 7.231-19.186 3.612-42.854 3.191-56.887.874 0 .001 2.875 2.381 17.647 3.331z"></path></svg>
             <svg viewBox="0 0 128 128" aria-hidden="true" class="header-tech-logo"><path fill="#00ADEF" d="M126 1.637l-67 9.834v49.831l67-.534zM1.647 66.709l.003 42.404 50.791 6.983-.04-49.057zM58.467 67.389l.094 49.465 67.376 9.509.016-58.863zM1.61 19.297l.047 42.383 50.791-.289-.023-49.016z"></path></svg>
           </div>
@@ -35,22 +35,12 @@
         </div>
       </div>
     </div>
-  </div>
     <div class="cucumber-report-content">
-      <div class="share-report-bar">
-        <v-btn color="primary" variant="outlined" @click="copyShareLink" class="share-report-btn" :title="shareLink">
-          <v-icon left size="18">mdi-share-variant</v-icon>
-          <span v-if="!copySuccess">Share Report</span>
-          <span v-else>Link copied!</span>
-        </v-btn>
-        <span v-if="copySuccess" class="copy-success-msg">Link copied!</span>
-      </div>
-
       <div v-if="error" class="cucumber-alert error">{{ error }}</div>
       <div v-else-if="!report || !Array.isArray(report.features) || report.features.length === 0" class="cucumber-alert info">
         No report data available or invalid report format. Please upload a valid Cucumber JSON file.
       </div>
-      <div v-else>
+      <template v-else>
         <!-- Top summary bar -->
         <div class="cucumber-summary-bar">
           <div class="summary-env">
@@ -93,14 +83,14 @@
             </v-expansion-panel-title>
             <v-expansion-panel-text>
               <div v-if="feature.description" class="feature-description">{{ feature.description }}</div>
-              <div v-for="scenario in feature.scenarios" :key="scenario.id || scenario.name" class="cucumber-scenario-block">
+              <div v-for="scenario in feature.elements" :key="scenario.id || scenario.name" class="cucumber-scenario-block">
                 <v-expansion-panels>
                   <v-expansion-panel>
                     <v-expansion-panel-title class="scenario-header-row">
                       <v-icon v-if="scenarioStatus(scenario) === 'passed'" color="success" size="18">mdi-check-circle</v-icon>
                       <v-icon v-else-if="scenarioStatus(scenario) === 'failed'" color="error" size="18">mdi-close-circle</v-icon>
                       <v-icon v-else color="grey" size="18">mdi-help-circle</v-icon>
-                      <span v-if="scenario.tags && scenario.tags.length" class="scenario-tags scenario-tags-left">
+                        <span v-if="scenario.tags && scenario.tags.length" class="scenario-tags">
                         <span v-for="tag in scenario.tags" :key="tag" class="scenario-tag">{{ tag }}</span>
                       </span>
                       <span class="scenario-title">Scenario: {{ scenario.name }}</span>
@@ -133,8 +123,9 @@
             </v-expansion-panel-text>
           </v-expansion-panel>
         </v-expansion-panels>
-      </div>
+      </template>
     </div>
+  </div>
 </template>
 
 <script>
@@ -153,97 +144,13 @@ export default {
       type: Object,
       required: false
     },
+    // section prop removed, no longer needed
     selectedFeatureIndex: {
       type: Number,
       default: 0,
     },
   },
-  data() {
-    return {
-      error: '',
-      copySuccess: false
-    }
-  },
-  computed: {
-    shareLink() {
-      // Generate the shareable link for tooltip/title
-      let id = '';
-      if (this.$route && this.$route.params && this.$route.params.id) {
-        id = this.$route.params.id;
-      } else if (this.$route && this.$route.query && this.$route.query.id) {
-        id = this.$route.query.id;
-      } else {
-        const hash = window.location.hash;
-        const match = hash.match(/id=([^&]+)/);
-        if (match) id = match[1];
-      }
-      const t = Date.now();
-      let base = window.location.origin + window.location.pathname + '#/report';
-      if (id) base += `/${id}`;
-      return `${base}?t=${t}`;
-    },
-    normalizedFeatures() {
-      if (!this.report || !Array.isArray(this.report.features)) return [];
-      return this.report.features.map(f => {
-        let scenarios = getScenarioList(f).map(e => ({
-          ...e,
-          steps: Array.isArray(e.steps) ? e.steps : [],
-          tags: Array.isArray(e.tags) ? e.tags.map(t => t.name || t) : [],
-          status: e.status || (e.steps && e.steps.some(s => (s.result && s.result.status === 'failed') || s.status === 'failed') ? 'failed' : 'passed') || 'unknown',
-          duration: e.duration || (e.steps && e.steps.reduce((acc, s) => acc + (s.result && typeof s.result.duration === 'number' ? s.result.duration : 0), 0))
-        }));
-        return { ...f, scenarios };
-      });
-    },
-    summary() {
-      // Calculate passed, failed, skipped, total from all scenarios
-      const allScenarios = this.normalizedFeatures.flatMap(f => f.scenarios || []);
-      let passed = 0, failed = 0, skipped = 0, total = 0, duration = 0;
-      allScenarios.forEach(s => {
-        const status = this.scenarioStatus(s);
-        if (status === 'passed') passed++;
-        else if (status === 'failed') failed++;
-        else skipped++;
-        total++;
-        // Prefer step durations if available, else scenario duration
-        if (Array.isArray(s.steps) && s.steps.length > 0 && s.steps.some(st => typeof st.duration === 'number')) {
-          duration += s.steps.reduce((acc, st) => acc + (typeof st.duration === 'number' ? (st.duration > 1000000 ? st.duration / 1e9 : st.duration) : 0), 0);
-        } else if (typeof s.duration === 'number') {
-          duration += (s.duration > 1000000 ? s.duration / 1e9 : s.duration);
-        }
-      });
-      return {
-        passed,
-        failed,
-        skipped,
-        total,
-        rawDuration: duration,
-        duration: this.formatDuration(duration, true)
-      };
-    },
-  },
   methods: {
-    copyShareLink() {
-      if (!this.shareLink) return;
-      if (navigator.clipboard) {
-        navigator.clipboard.writeText(this.shareLink).then(() => {
-          this.copySuccess = true;
-          setTimeout(() => { this.copySuccess = false; }, 1800);
-        });
-      } else {
-        // Fallback for older browsers
-        const textarea = document.createElement('textarea');
-        textarea.value = this.shareLink;
-        document.body.appendChild(textarea);
-        textarea.select();
-        try {
-          document.execCommand('copy');
-          this.copySuccess = true;
-          setTimeout(() => { this.copySuccess = false; }, 1800);
-        } catch (e) {}
-        document.body.removeChild(textarea);
-      }
-    },
     scenarioStatus(scenario) {
       // Try to determine scenario status from common Cucumber JSON structures
       if (scenario.status) return scenario.status;
@@ -311,10 +218,41 @@ export default {
       return (val / total * 100).toFixed(1) + '%';
     },
     featureStatus(feature) {
-      if (!feature || !feature.scenarios) return '';
-      if (feature.scenarios.some(s => this.scenarioStatus(s) === 'failed')) return 'failed';
-      if (feature.scenarios.every(s => this.scenarioStatus(s) === 'passed')) return 'passed';
+      if (!feature || !feature.elements) return '';
+      if (feature.elements.some(s => this.scenarioStatus(s) === 'failed')) return 'failed';
+      if (feature.elements.every(s => this.scenarioStatus(s) === 'passed')) return 'passed';
       return '';
+    },
+  },
+  data() {
+    return {
+      error: ''
+    }
+  },
+  computed: {
+    summary() {
+      let passed = 0, failed = 0, skipped = 0, total = 0, duration = 0;
+      if (!this.report || !Array.isArray(this.report.features)) return { passed, failed, skipped, total, duration: 0 };
+      this.report.features.forEach(feature => {
+        const scenarios = Array.isArray(feature.elements) ? feature.elements : [];
+        scenarios.forEach(scenario => {
+          const status = this.scenarioStatus(scenario);
+          if (status === 'passed') passed++;
+          else if (status === 'failed') failed++;
+          else skipped++;
+          total++;
+          if (Array.isArray(scenario.steps)) {
+            duration += scenario.steps.reduce((acc, st) => acc + (typeof st.result?.duration === 'number' ? st.result.duration : 0), 0);
+          }
+        });
+      });
+      return {
+        passed,
+        failed,
+        skipped,
+        total,
+        duration: this.formatDuration(duration, true)
+      };
     },
   }
 }
@@ -644,28 +582,24 @@ export default {
   margin: 0;
   word-break: break-word;
 }
- </style>
-
-.scenario-tags-left {
-  justify-content: flex-start !important;
-  text-align: left !important;
+.cucumber-summary-bar {
   display: flex;
-}
-
-/* Share Report Button Styles */
-.share-report-bar {
-  display: flex;
-  align-items: center;
-  gap: 1em;
+  gap: 1.5em;
+  font-size: 1.08em;
   margin-bottom: 1.2em;
+  align-items: center;
 }
-.share-report-btn {
-  font-weight: 600;
-  letter-spacing: 0.01em;
-}
-.copy-success-msg {
-  color: #388e3c;
-  font-size: 1.01em;
-  font-weight: 500;
-  margin-left: 0.5em;
-}
+.summary-passed { color: #388e3c; font-weight: bold; }
+.summary-failed { color: #e53935; font-weight: bold; }
+.summary-skipped { color: #888; }
+.summary-total { color: #1976d2; }
+.summary-duration { color: #444; }
+.cucumber-scenario-block { margin-bottom: 1em; }
+.cucumber-steps-list { list-style: none; padding: 0; margin: 0; }
+.cucumber-step-row { display: flex; gap: 1em; align-items: center; margin-bottom: 0.3em; }
+.step-keyword { color: #888; font-weight: bold; }
+.step-name { color: #222; }
+.step-status { margin-left: auto; }
+.scenario-status-label { margin-left: 1em; font-size: 0.95em; }
+.cucumber-alert.info { color: #1976d2; background: #e3f2fd; padding: 0.5em 1em; border-radius: 6px; margin-top: 1em; }
+</style>

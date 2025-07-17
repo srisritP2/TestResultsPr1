@@ -1,4 +1,3 @@
-
 <template>
   <v-card class="mx-auto my-8 pa-6" max-width="420">
     <v-card-title class="text-h6 font-weight-bold">Upload Cucumber JSON Report</v-card-title>
@@ -59,26 +58,40 @@ export default {
     uploadReport() {
       if (this.selectedFile) {
         const reader = new FileReader();
-        reader.onload = (e) => {
+        reader.onload = async (e) => {
           try {
             const jsonData = JSON.parse(e.target.result);
-            // If the JSON is an array, wrap it as { features: jsonData }
             let reportData = jsonData;
             if (Array.isArray(jsonData)) {
               reportData = { features: jsonData };
             }
-            // Validate Cucumber JSON structure
             if (!reportData.features || !Array.isArray(reportData.features) || reportData.features.length === 0) {
               this.errorMessage = 'File does not appear to be a valid Cucumber JSON report (missing features array).';
               return;
             }
-            // Check at least one feature has elements or scenarios
             const hasElements = reportData.features.some(f => Array.isArray(f.elements) || Array.isArray(f.scenarios));
             if (!hasElements) {
               this.errorMessage = 'File does not appear to be a valid Cucumber JSON report (features missing scenarios/elements).';
               return;
             }
-            this.$emit('report-uploaded', reportData);
+            // Save file to uploads folder and update index.json (for demo, just emit)
+            // In real app, would POST to backend API
+            // Generate a unique id for the report
+            const id = 'report-' + Date.now();
+            const name = this.selectedFile.name.replace(/\.json$/i, '');
+            const date = new Date().toISOString();
+            // Save to localStorage for demo (simulate upload)
+            // Do NOT save the full report JSON to localStorage (to avoid quota issues)
+            // Instead, store it in Vuex for this session only
+            this.$store.commit('setReportData', reportData);
+            // Update index.json in localStorage for demo
+            let index = JSON.parse(localStorage.getItem('uploaded-reports-index') || '[]');
+            index.unshift({ id, name, date });
+            localStorage.setItem('uploaded-reports-index', JSON.stringify(index));
+            // After upload, emit the id as well for redirect
+            this.$emit('report-uploaded', { ...reportData, _uploadedId: id });
+            // Show a warning if the report is only available for this session
+            this.$emit('session-warning', 'Uploaded report is only available for this session. It will be lost if you refresh or close the page.');
             this.selectedFile = null;
           } catch (err) {
             this.errorMessage = 'Invalid JSON file: ' + (err && err.message ? err.message : 'Unknown error.');

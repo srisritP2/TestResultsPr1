@@ -9,9 +9,14 @@ const routes = [
     component: Home
   },
   {
-    path: '/report',
+    path: '/report/:id',
     name: 'Report',
-    component: Report
+    component: Report,
+    props: true
+  },
+  {
+    path: '/report',
+    redirect: '/'
   }
 ];
 
