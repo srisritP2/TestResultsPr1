@@ -4,8 +4,10 @@
       <div class="header-section">
         <div class="header-item">
           <div class="header-subitem">
-            <img src="https://reports.cucumber.io/images/cucumber-logo.svg" alt="Cucumber Reports"
-              class="cucumber-logo" />
+            <svg viewBox="0 0 32 32" aria-hidden="true" class="cucumber-logo">
+              <path fill="#23d160" d="M16 2C8.268 2 2 8.268 2 16s6.268 14 14 14 14-6.268 14-14S23.732 2 16 2zm0 25c-6.065 0-11-4.935-11-11S9.935 5 16 5s11 4.935 11 11-4.935 11-11 11z"/>
+              <path fill="#23d160" d="M12 10h8v2h-8zm0 4h8v2h-8zm0 4h6v2h-6z"/>
+            </svg>
             <svg viewBox="0 0 128 128" aria-hidden="true" class="header-tech-logo">
               <path fill="#0074BD"
                 d="M47.617 98.12s-4.767 2.774 3.397 3.71c9.892 1.13 14.947.968 25.845-1.092 0 0 2.871 1.795 6.873 3.351-24.439 10.47-55.308-.607-36.115-5.969zm-2.988-13.665s-5.348 3.959 2.823 4.805c10.567 1.091 18.91 1.18 33.354-1.6 0 0 1.993 2.025 5.132 3.131-29.542 8.64-62.446.68-41.309-6.336z">
@@ -44,27 +46,24 @@
         </div>
         <div class="header-item">
           <div class="header-subitem health-summary">
-            <svg viewBox="0 0 100 100" aria-hidden="true" class="health-chart">
-              <g transform="rotate(-90 50 50)">
-                <path
-                  :stroke-dasharray="(summary.passed / summary.total * 52).toFixed(0) + ' ' + (52 - (summary.passed / summary.total * 52)).toFixed(0)"
-                  stroke-dashoffset="50" stroke-width="50" d="M75 50a1 1 90 10-50 0a1 1 90 10 50 0" fill="none"
-                  stroke="#00a818" />
-                <path
-                  :stroke-dasharray="(summary.failed / summary.total * 52).toFixed(0) + ' ' + (52 - (summary.failed / summary.total * 52)).toFixed(0)"
-                  stroke-dashoffset="52" stroke-width="50" d="M75 50a1 1 90 10-50 0a1 1 90 10 50 0" fill="none"
-                  stroke="#e53935" />
-              </g>
+            <svg viewBox="0 0 42 42" aria-hidden="true" class="health-chart">
+              <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#e5e7eb" stroke-width="3"></circle>
+              <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#00a818" stroke-width="3"
+                :stroke-dasharray="passedPercentage + ' ' + (100 - passedPercentage)"
+                stroke-dashoffset="25" transform="rotate(-90 21 21)"></circle>
+              <circle v-if="summary.failed > 0" cx="21" cy="21" r="15.915" fill="transparent" stroke="#e53935" stroke-width="3"
+                :stroke-dasharray="failedPercentage + ' ' + (100 - failedPercentage)"
+                :stroke-dashoffset="25 - passedPercentage" transform="rotate(-90 21 21)"></circle>
             </svg>
-            <span>{{ ((summary.passed / summary.total) * 100).toFixed(1) }}% passed</span>
+            <span>{{ passedPercentage }}% passed</span>
           </div>
         </div>
         <div class="header-item">
           <div class="header-subitem time-summary">
             <v-icon color="primary" size="18" class="mr-1">mdi-stopwatch</v-icon>
             <span>
-              <time :title="report?.dateString || ''" :datetime="report?.dateISO || ''">
-                {{ report?.dateAgo || '1 day ago' }}
+              <time :title="formattedDate" :datetime="reportTimestamp ? reportTimestamp.toISOString() : ''">
+                {{ timeAgo }}
               </time>
               <em class="conjunction"> in </em>
               <span>{{ summary.duration }}</span>
@@ -80,6 +79,74 @@
         No report data available or invalid report format. Please upload a valid Cucumber JSON file.
       </div>
       <template v-else>
+        <!-- Search Bar -->
+        <div class="cucumber-search-bar">
+          <v-text-field v-model="searchQuery" placeholder="Search features, scenarios, and steps..."
+            prepend-inner-icon="mdi-magnify" clearable variant="outlined" density="compact" class="search-input"
+            @input="onSearchInput"></v-text-field>
+          <div v-if="searchQuery && searchResults.total > 0" class="search-results-summary">
+            Found {{ searchResults.total }} results ({{ searchResults.features }} features, {{ searchResults.scenarios
+            }} scenarios, {{ searchResults.steps }} steps)
+          </div>
+          <div v-else-if="searchQuery && searchResults.total === 0" class="search-no-results">
+            No results found for "{{ searchQuery }}"
+          </div>
+        </div>
+
+        <!-- Advanced Filters -->
+        <div class="cucumber-filters-bar">
+          <div class="filters-row">
+            <!-- Status Filter -->
+            <div class="filter-group">
+              <label class="filter-label">Status:</label>
+              <v-select v-model="filters.status" :items="statusFilterOptions" item-title="text" item-value="value"
+                multiple chips closable-chips variant="outlined" density="compact" class="filter-select"
+                placeholder="All statuses" @update:modelValue="applyFilters"></v-select>
+            </div>
+
+            <!-- Tags Filter -->
+            <div class="filter-group">
+              <label class="filter-label">Tags:</label>
+              <v-select v-model="filters.tags" :items="availableTags" multiple chips closable-chips variant="outlined"
+                density="compact" class="filter-select" placeholder="All tags"
+                @update:modelValue="applyFilters"></v-select>
+            </div>
+
+            <!-- Duration Filter -->
+            <div class="filter-group">
+              <label class="filter-label">Duration:</label>
+              <v-select v-model="filters.duration" :items="durationFilterOptions" item-title="text" item-value="value"
+                variant="outlined" density="compact" class="filter-select" placeholder="All durations"
+                @update:modelValue="applyFilters"></v-select>
+            </div>
+
+            <!-- Feature Filter -->
+            <div class="filter-group">
+              <label class="filter-label">Features:</label>
+              <v-select v-model="filters.features" :items="availableFeatures" item-title="text" item-value="value"
+                multiple chips closable-chips variant="outlined" density="compact" class="filter-select"
+                placeholder="All features" @update:modelValue="applyFilters"></v-select>
+            </div>
+
+            <!-- Clear Filters Button -->
+            <div class="filter-group">
+              <v-btn @click="clearAllFilters" variant="outlined" color="secondary" size="small"
+                class="clear-filters-btn">
+                <v-icon size="16" class="mr-1">mdi-filter-remove</v-icon>
+                Clear Filters
+              </v-btn>
+            </div>
+          </div>
+
+          <!-- Active Filters Summary -->
+          <div v-if="hasActiveFilters" class="active-filters-summary">
+            <span class="filters-summary-text">
+              Active filters: {{ getActiveFiltersText() }}
+              <span class="filtered-results-count">({{ filteredFeaturesCount }} features shown)</span>
+            </span>
+          </div>
+        </div>
+
         <!-- Top summary bar -->
         <div class="cucumber-summary-bar">
           <div class="summary-env">
@@ -109,10 +176,12 @@
 
         <!-- Features list with expandable scenarios -->
         <v-expansion-panels multiple class="cucumber-features-list">
-          <v-expansion-panel v-for="(feature, idx) in report.features" :key="feature.id || feature.name">
+          <v-expansion-panel v-for="(feature, idx) in filteredFeatures" :key="feature.id || feature.name">
             <v-expansion-panel-title class="cucumber-feature-row" :class="[featureStatus(feature)]">
               <v-icon v-if="featureStatus(feature) === 'passed'" color="success" size="18">mdi-check-circle</v-icon>
               <v-icon v-else-if="featureStatus(feature) === 'failed'" color="error" size="18">mdi-close-circle</v-icon>
+              <v-icon v-else-if="featureStatus(feature) === 'skipped'" color="warning"
+                size="18">mdi-alert-circle</v-icon>
               <v-icon v-else color="grey" size="18">mdi-help-circle</v-icon>
               <span class="feature-file">{{ feature.uri || feature.name }}</span>
               <!-- <span class="feature-title" style="font-weight:700;">{{ feature.name }}</span> -->
@@ -122,18 +191,21 @@
             </v-expansion-panel-title>
             <v-expansion-panel-text>
               <div v-if="feature.description" class="feature-description">{{ feature.description }}</div>
-              <div v-for="scenario in feature.elements" :key="scenario.id || scenario.name"
-                class="cucumber-scenario-block">
+              <div v-for="scenario in feature.elements.filter(el => el.type !== 'background')"
+                :key="scenario.id || scenario.name" class="cucumber-scenario-block">
                 <v-expansion-panels>
                   <v-expansion-panel>
                     <v-expansion-panel-title class="scenario-header-row">
                       <div class="scenario-header-content">
                         <div class="scenario-title-row">
-                          <span class="scenario-title">Scenario: {{ scenario.name }}</span>
+                          <span class="scenario-title">{{ scenario.keyword || 'Scenario' }}: {{ scenario.name ||
+                            scenario.id || (scenario.type ? scenario.type : 'Unnamed Scenario') }}</span>
                           <v-icon v-if="scenarioStatus(scenario) === 'passed'" color="success"
                             size="18">mdi-check-circle</v-icon>
                           <v-icon v-else-if="scenarioStatus(scenario) === 'failed'" color="error"
                             size="18">mdi-close-circle</v-icon>
+                          <v-icon v-else-if="scenarioStatus(scenario) === 'skipped'" color="warning"
+                            size="18">mdi-alert-circle</v-icon>
                           <v-icon v-else color="grey" size="18">mdi-help-circle</v-icon>
                           <span class="scenario-duration">{{ formatDuration(scenario.duration) }}</span>
                         </div>
@@ -203,23 +275,6 @@ export default {
     },
   },
   methods: {
-    cleanTagText(tag) {
-      // Handle different tag formats from Cucumber JSON
-      let tagText = '';
-
-      if (typeof tag === 'string') {
-        tagText = tag;
-      } else if (tag && typeof tag === 'object') {
-        // Handle tag objects - common properties in Cucumber JSON
-        tagText = tag.name || tag.value || tag.tag || tag.text || '';
-      } else {
-        // Handle other non-string values
-        tagText = tag ? String(tag) : '';
-      }
-
-      // Remove curly braces from tag text
-      return tagText.replace(/[{}]/g, '');
-    },
     scenarioStatus(scenario) {
       // Try to determine scenario status from common Cucumber JSON structures
       if (scenario.status) return scenario.status;
@@ -288,14 +343,211 @@ export default {
     },
     featureStatus(feature) {
       if (!feature || !feature.elements) return '';
-      if (feature.elements.some(s => this.scenarioStatus(s) === 'failed')) return 'failed';
-      if (feature.elements.every(s => this.scenarioStatus(s) === 'passed')) return 'passed';
+
+      // Filter out background elements to only consider actual scenarios
+      const scenarios = feature.elements.filter(el => el.type !== 'background');
+      if (scenarios.length === 0) return '';
+
+      // Check if any scenario failed
+      if (scenarios.some(s => this.scenarioStatus(s) === 'failed')) return 'failed';
+
+      // Check if all scenarios passed
+      if (scenarios.every(s => this.scenarioStatus(s) === 'passed')) return 'passed';
+
+      // Check if all scenarios are skipped
+      if (scenarios.every(s => this.scenarioStatus(s) === 'skipped')) return 'skipped';
+
+      // Mixed status or unknown
       return '';
     },
+    onSearchInput() {
+      // Clear existing timer
+      if (this.searchDebounceTimer) {
+        clearTimeout(this.searchDebounceTimer);
+      }
+
+      // Debounce search for performance
+      this.searchDebounceTimer = setTimeout(() => {
+        this.performSearch();
+      }, 300);
+    },
+    performSearch() {
+      if (!this.searchQuery || this.searchQuery.trim() === '') {
+        this.searchResults = { total: 0, features: 0, scenarios: 0, steps: 0 };
+        return;
+      }
+
+      const query = this.searchQuery.toLowerCase().trim();
+      let totalResults = 0;
+      let featureMatches = 0;
+      let scenarioMatches = 0;
+      let stepMatches = 0;
+
+      if (!this.report || !this.report.features) {
+        this.searchResults = { total: 0, features: 0, scenarios: 0, steps: 0 };
+        return;
+      }
+
+      // Search through features, scenarios, and steps
+      this.report.features.forEach(feature => {
+        // Search in feature name and description
+        const featureText = `${feature.name || ''} ${feature.description || ''} ${feature.uri || ''}`.toLowerCase();
+        if (featureText.includes(query)) {
+          featureMatches++;
+          totalResults++;
+        }
+
+        // Search in feature tags
+        if (feature.tags) {
+          feature.tags.forEach(tag => {
+            const tagText = this.cleanTagText(tag).toLowerCase();
+            if (tagText.includes(query)) {
+              featureMatches++;
+              totalResults++;
+            }
+          });
+        }
+
+        // Search in scenarios
+        if (feature.elements) {
+          feature.elements.forEach(scenario => {
+            // Search in scenario name
+            const scenarioText = `${scenario.name || ''}`.toLowerCase();
+            if (scenarioText.includes(query)) {
+              scenarioMatches++;
+              totalResults++;
+            }
+
+            // Search in scenario tags
+            if (scenario.tags) {
+              scenario.tags.forEach(tag => {
+                const tagText = this.cleanTagText(tag).toLowerCase();
+                if (tagText.includes(query)) {
+                  scenarioMatches++;
+                  totalResults++;
+                }
+              });
+            }
+
+            // Search in steps
+            if (scenario.steps) {
+              scenario.steps.forEach(step => {
+                const stepText = `${step.keyword || ''} ${step.name || ''}`.toLowerCase();
+                if (stepText.includes(query)) {
+                  stepMatches++;
+                  totalResults++;
+                }
+
+                // Search in error messages
+                if (step.errorMessage && step.errorMessage.toLowerCase().includes(query)) {
+                  stepMatches++;
+                  totalResults++;
+                }
+              });
+            }
+          });
+        }
+      });
+
+      this.searchResults = {
+        total: totalResults,
+        features: featureMatches,
+        scenarios: scenarioMatches,
+        steps: stepMatches
+      };
+    },
+    cleanTagText(tag) {
+      // Handle different tag formats from Cucumber JSON
+      let tagText = '';
+
+      if (typeof tag === 'string') {
+        tagText = tag;
+      } else if (tag && typeof tag === 'object') {
+        // Handle tag objects - common properties in Cucumber JSON
+        tagText = tag.name || tag.value || tag.tag || tag.text || '';
+      } else {
+        // Handle other non-string values
+        tagText = tag ? String(tag) : '';
+      }
+
+      // Remove curly braces from tag text
+      return tagText.replace(/[{}]/g, '');
+    },
+    applyFilters() {
+      // Filters are applied through computed properties
+      // This method is called when filter values change
+    },
+    clearAllFilters() {
+      this.filters = {
+        status: [],
+        tags: [],
+        duration: null,
+        features: []
+      };
+    },
+    getActiveFiltersText() {
+      const activeFilters = [];
+
+      if (this.filters.status.length > 0) {
+        activeFilters.push(`Status: ${this.filters.status.join(', ')}`);
+      }
+
+      if (this.filters.tags.length > 0) {
+        activeFilters.push(`Tags: ${this.filters.tags.join(', ')}`);
+      }
+
+      if (this.filters.duration) {
+        const durationOption = this.durationFilterOptions.find(opt => opt.value === this.filters.duration);
+        activeFilters.push(`Duration: ${durationOption?.text || this.filters.duration}`);
+      }
+
+      if (this.filters.features.length > 0) {
+        activeFilters.push(`Features: ${this.filters.features.length} selected`);
+      }
+
+      return activeFilters.join(' | ');
+    },
+    getFeatureDuration(feature) {
+      if (!feature || !feature.elements) return 0;
+
+      let totalDuration = 0;
+      feature.elements.forEach(scenario => {
+        if (scenario.steps) {
+          scenario.steps.forEach(step => {
+            if (step.result && typeof step.result.duration === 'number') {
+              totalDuration += step.result.duration;
+            } else if (typeof step.duration === 'number') {
+              totalDuration += step.duration;
+            }
+          });
+        }
+      });
+
+      // Convert from nanoseconds to seconds if needed
+      if (totalDuration > 1000000) {
+        totalDuration = totalDuration / 1e9;
+      }
+
+      return totalDuration;
+    }
   },
   data() {
     return {
-      error: ''
+      error: '',
+      searchQuery: '',
+      searchResults: {
+        total: 0,
+        features: 0,
+        scenarios: 0,
+        steps: 0
+      },
+      searchDebounceTimer: null,
+      filters: {
+        status: [],
+        tags: [],
+        duration: null,
+        features: []
+      }
     }
   },
   computed: {
@@ -303,7 +555,7 @@ export default {
       let passed = 0, failed = 0, skipped = 0, total = 0, duration = 0;
       if (!this.report || !Array.isArray(this.report.features)) return { passed, failed, skipped, total, duration: 0 };
       this.report.features.forEach(feature => {
-        const scenarios = Array.isArray(feature.elements) ? feature.elements : [];
+        const scenarios = Array.isArray(feature.elements) ? feature.elements.filter(el => el.type !== 'background') : [];
         scenarios.forEach(scenario => {
           const status = this.scenarioStatus(scenario);
           if (status === 'passed') passed++;
@@ -312,6 +564,16 @@ export default {
           total++;
           if (Array.isArray(scenario.steps)) {
             duration += scenario.steps.reduce((acc, st) => acc + (typeof st.result?.duration === 'number' ? st.result.duration : 0), 0);
+          }
+          
+          // Add before hook durations (setup)
+          if (Array.isArray(scenario.before)) {
+            duration += scenario.before.reduce((acc, hook) => acc + (typeof hook.result?.duration === 'number' ? hook.result.duration : 0), 0);
+          }
+          
+          // Add after hook durations (teardown)
+          if (Array.isArray(scenario.after)) {
+            duration += scenario.after.reduce((acc, hook) => acc + (typeof hook.result?.duration === 'number' ? hook.result.duration : 0), 0);
           }
         });
       });
@@ -323,6 +585,202 @@ export default {
         duration: this.formatDuration(duration, true)
       };
     },
+    statusFilterOptions() {
+      return [
+        { text: 'Passed', value: 'passed' },
+        { text: 'Failed', value: 'failed' },
+        { text: 'Skipped', value: 'skipped' }
+      ];
+    },
+    durationFilterOptions() {
+      return [
+        { text: 'Fast tests (< 1s)', value: 'fast' },
+        { text: 'Medium tests (1-10s)', value: 'medium' },
+        { text: 'Slow tests (> 10s)', value: 'slow' }
+      ];
+    },
+    availableTags() {
+      if (!this.report || !this.report.features) return [];
+
+      const tagSet = new Set();
+      this.report.features.forEach(feature => {
+        // Collect feature tags
+        if (feature.tags) {
+          feature.tags.forEach(tag => {
+            const cleanTag = this.cleanTagText(tag);
+            if (cleanTag) tagSet.add(cleanTag);
+          });
+        }
+
+        // Collect scenario tags
+        if (feature.elements) {
+          feature.elements.forEach(scenario => {
+            if (scenario.tags) {
+              scenario.tags.forEach(tag => {
+                const cleanTag = this.cleanTagText(tag);
+                if (cleanTag) tagSet.add(cleanTag);
+              });
+            }
+          });
+        }
+      });
+
+      return Array.from(tagSet).sort();
+    },
+    availableFeatures() {
+      if (!this.report || !this.report.features) return [];
+
+      return this.report.features.map(feature => ({
+        text: feature.name || feature.uri || 'Unnamed Feature',
+        value: feature.id || feature.name || feature.uri
+      }));
+    },
+    hasActiveFilters() {
+      return this.filters.status.length > 0 ||
+        this.filters.tags.length > 0 ||
+        this.filters.duration !== null ||
+        this.filters.features.length > 0;
+    },
+    filteredFeatures() {
+      if (!this.report || !this.report.features) return [];
+      if (!this.hasActiveFilters) return this.report.features;
+
+      return this.report.features.filter(feature => {
+        // Status filter
+        if (this.filters.status.length > 0) {
+          const featureStatusValue = this.featureStatus(feature);
+
+          // If filtering for skipped, check if feature has any scenarios with skipped steps
+          if (this.filters.status.includes('skipped')) {
+            const hasSkippedSteps = feature.elements && feature.elements.some(scenario =>
+              scenario.steps && scenario.steps.some(step =>
+                (step.result && step.result.status === 'skipped') || step.status === 'skipped'
+              )
+            );
+            if (hasSkippedSteps) {
+              // Feature has scenarios with skipped steps, include it
+            } else if (!this.filters.status.includes(featureStatusValue)) {
+              return false;
+            }
+          } else if (!this.filters.status.includes(featureStatusValue)) {
+            return false;
+          }
+        }
+
+        // Tags filter
+        if (this.filters.tags.length > 0) {
+          const featureTags = [];
+
+          // Collect feature tags
+          if (feature.tags) {
+            feature.tags.forEach(tag => {
+              const cleanTag = this.cleanTagText(tag);
+              if (cleanTag) featureTags.push(cleanTag);
+            });
+          }
+
+          // Collect scenario tags
+          if (feature.elements) {
+            feature.elements.forEach(scenario => {
+              if (scenario.tags) {
+                scenario.tags.forEach(tag => {
+                  const cleanTag = this.cleanTagText(tag);
+                  if (cleanTag) featureTags.push(cleanTag);
+                });
+              }
+            });
+          }
+
+          // Check if any selected tags match
+          const hasMatchingTag = this.filters.tags.some(selectedTag =>
+            featureTags.includes(selectedTag)
+          );
+          if (!hasMatchingTag) {
+            return false;
+          }
+        }
+
+        // Duration filter
+        if (this.filters.duration) {
+          const featureDuration = this.getFeatureDuration(feature);
+
+          if (this.filters.duration === 'fast' && featureDuration >= 1) {
+            return false;
+          } else if (this.filters.duration === 'medium' && (featureDuration < 1 || featureDuration > 10)) {
+            return false;
+          } else if (this.filters.duration === 'slow' && featureDuration <= 10) {
+            return false;
+          }
+        }
+
+        // Features filter
+        if (this.filters.features.length > 0) {
+          const featureId = feature.id || feature.name || feature.uri;
+          if (!this.filters.features.includes(featureId)) {
+            return false;
+          }
+        }
+
+        return true;
+      });
+    },
+    filteredFeaturesCount() {
+      return this.filteredFeatures.length;
+    },
+    reportTimestamp() {
+      if (!this.report || !this.report.features) return null;
+      
+      // Find the earliest start_timestamp from all scenarios
+      let earliestTimestamp = null;
+      
+      this.report.features.forEach(feature => {
+        if (feature.elements) {
+          feature.elements.forEach(scenario => {
+            if (scenario.start_timestamp) {
+              const timestamp = new Date(scenario.start_timestamp);
+              if (!earliestTimestamp || timestamp < earliestTimestamp) {
+                earliestTimestamp = timestamp;
+              }
+            }
+          });
+        }
+      });
+      
+      return earliestTimestamp;
+    },
+    timeAgo() {
+      if (!this.reportTimestamp) return '1 day ago';
+      
+      const now = new Date();
+      const diffMs = now - this.reportTimestamp;
+      const diffMinutes = Math.floor(diffMs / (1000 * 60));
+      const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+      const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+      
+      if (diffMinutes < 1) {
+        return 'just now';
+      } else if (diffMinutes < 60) {
+        return `${diffMinutes} minute${diffMinutes !== 1 ? 's' : ''} ago`;
+      } else if (diffHours < 24) {
+        return `${diffHours} hour${diffHours !== 1 ? 's' : ''} ago`;
+      } else if (diffDays < 30) {
+        return `${diffDays} day${diffDays !== 1 ? 's' : ''} ago`;
+      } else {
+        return this.reportTimestamp.toLocaleDateString();
+      }
+    },
+    formattedDate() {
+      if (!this.reportTimestamp) return '';
+      return this.reportTimestamp.toLocaleString();
+    },
+    passedPercentage() {
+      if (this.summary.total === 0) return 0;
+      return (this.summary.passed / this.summary.total * 100).toFixed(1);
+    },
+    failedPercentage() {
+      if (this.summary.total === 0) return 0;
+      return (this.summary.failed / this.summary.total * 100).toFixed(1);
+    }
   }
 }
 </script>
@@ -808,5 +1266,287 @@ export default {
   padding: 0.5em 1em;
   border-radius: 6px;
   margin-top: 1em;
+}
+
+/* Search Bar Styles */
+.cucumber-search-bar {
+  margin-bottom: 1.5rem;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 1rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.search-input {
+  margin-bottom: 0.5rem;
+}
+
+.search-results-summary {
+  color: #388e3c;
+  font-size: 0.95rem;
+  font-weight: 500;
+  padding: 0.5rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.search-results-summary::before {
+  content: "✓";
+  color: #388e3c;
+  font-weight: bold;
+}
+
+.search-no-results {
+  color: #e53935;
+  font-size: 0.95rem;
+  font-weight: 500;
+  padding: 0.5rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.search-no-results::before {
+  content: "⚠";
+  color: #e53935;
+  font-weight: bold;
+}
+
+
+/* Search Bar Styles */
+.cucumber-search-bar {
+  margin-bottom: 1.5rem;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 1rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.search-input {
+  margin-bottom: 0.5rem;
+}
+
+.search-results-summary {
+  color: #388e3c;
+  font-size: 0.95rem;
+  font-weight: 500;
+  padding: 0.5rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.search-results-summary::before {
+  content: "✓";
+  color: #388e3c;
+  font-weight: bold;
+}
+
+.search-no-results {
+  color: #e53935;
+  font-size: 0.95rem;
+  font-weight: 500;
+  padding: 0.5rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.search-no-results::before {
+  content: "⚠";
+  color: #e53935;
+  font-weight: bold;
+}
+
+/* <!-- Advanced Filters Styles --> */
+.cucumber-filters-bar {
+  margin-bottom: 1.5rem;
+  background: #f8f9fa;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 1rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.filters-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: flex-end;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  min-width: 150px;
+  flex: 1;
+}
+
+.filter-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 0.5rem;
+}
+
+.filter-select {
+  min-width: 150px;
+}
+
+.clear-filters-btn {
+  margin-top: 1.5rem;
+  height: 40px;
+}
+
+.active-filters-summary {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.filters-summary-text {
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+.filtered-results-count {
+  color: #1976d2;
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  .filters-row {
+    flex-direction: column;
+  }
+
+  .filter-group {
+    min-width: 100%;
+  }
+
+  .clear-filters-btn {
+    margin-top: 1rem;
+    width: 100%;
+  }
+}
+
+/* Search 
+Bar Styles */
+.cucumber-search-bar {
+  margin-bottom: 1.5rem;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 1rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.search-input {
+  margin-bottom: 0.5rem;
+}
+
+.search-results-summary {
+  color: #388e3c;
+  font-size: 0.95rem;
+  font-weight: 500;
+  padding: 0.5rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.search-results-summary::before {
+  content: "✓";
+  color: #388e3c;
+  font-weight: bold;
+}
+
+.search-no-results {
+  color: #e53935;
+  font-size: 0.95rem;
+  font-weight: 500;
+  padding: 0.5rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.search-no-results::before {
+  content: "⚠";
+  color: #e53935;
+  font-weight: bold;
+}
+
+/* Advanced Filters Styles */
+.cucumber-filters-bar {
+  margin-bottom: 1.5rem;
+  background: #f8f9fa;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 1rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.filters-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: flex-end;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  min-width: 150px;
+  flex: 1;
+}
+
+.filter-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 0.5rem;
+}
+
+.filter-select {
+  min-width: 150px;
+}
+
+.clear-filters-btn {
+  margin-top: 1.5rem;
+  height: 40px;
+}
+
+.active-filters-summary {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.filters-summary-text {
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+.filtered-results-count {
+  color: #1976d2;
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  .filters-row {
+    flex-direction: column;
+  }
+
+  .filter-group {
+    min-width: 100%;
+  }
+
+  .clear-filters-btn {
+    margin-top: 1rem;
+    width: 100%;
+  }
 }
 </style>
