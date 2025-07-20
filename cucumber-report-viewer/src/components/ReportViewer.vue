@@ -1,74 +1,100 @@
 <template>
   <div class="cucumber-report-root">
-    <div class="cucumber-header polished-header mb-5">
-      <div class="header-section">
-        <div class="header-item">
-          <div class="header-subitem">
-            <svg viewBox="0 0 32 32" aria-hidden="true" class="cucumber-logo">
-              <path fill="#23d160"
-                d="M16 2C8.268 2 2 8.268 2 16s6.268 14 14 14 14-6.268 14-14S23.732 2 16 2zm0 25c-6.065 0-11-4.935-11-11S9.935 5 16 5s11 4.935 11 11-4.935 11-11 11z" />
-              <path fill="#23d160" d="M12 10h8v2h-8zm0 4h8v2h-8zm0 4h6v2h-6z" />
-            </svg>
-            <svg viewBox="0 0 128 128" aria-hidden="true" class="header-tech-logo">
-              <path fill="#0074BD"
-                d="M47.617 98.12s-4.767 2.774 3.397 3.71c9.892 1.13 14.947.968 25.845-1.092 0 0 2.871 1.795 6.873 3.351-24.439 10.47-55.308-.607-36.115-5.969zm-2.988-13.665s-5.348 3.959 2.823 4.805c10.567 1.091 18.91 1.18 33.354-1.6 0 0 1.993 2.025 5.132 3.131-29.542 8.64-62.446.68-41.309-6.336z">
-              </path>
-              <path fill="#EA2D2E"
-                d="M69.802 61.271c6.025 6.935-1.58 13.17-1.58 13.17s15.289-7.891 8.269-17.777c-6.559-9.215-11.587-13.792 15.635-29.58 0 .001-42.731 10.67-22.324 34.187z">
-              </path>
-              <path fill="#0074BD"
-                d="M102.123 108.229s3.529 2.91-3.888 5.159c-14.102 4.272-58.706 5.56-71.094.171-4.451-1.938 3.899-4.625 6.526-5.192 2.739-.593 4.303-.485 4.303-.485-4.953-3.487-32.013 6.85-13.743 9.815 49.821 8.076 90.817-3.637 77.896-9.468zM49.912 70.294s-22.686 5.389-8.033 7.348c6.188.828 18.518.638 30.011-.326 9.39-.789 18.813-2.474 18.813-2.474s-3.308 1.419-5.704 3.053c-23.042 6.061-67.544 3.238-54.731-2.958 10.832-5.239 19.644-4.643 19.644-4.643zm40.697 22.747c23.421-12.167 12.591-23.86 5.032-22.285-1.848.385-2.677.72-2.677.72s.688-1.079 2-1.543c14.953-5.255 26.451 15.503-4.823 23.725 0-.002.359-.327.468-.617z">
-              </path>
-              <path fill="#EA2D2E"
-                d="M76.491 1.587S89.459 14.563 64.188 34.51c-20.266 16.006-4.621 25.13-.007 35.559-11.831-10.673-20.509-20.07-14.688-28.815C58.041 28.42 81.722 22.195 76.491 1.587z">
-              </path>
-              <path fill="#0074BD"
-                d="M52.214 126.021c22.476 1.437 57-.8 57.817-11.436 0 0-1.571 4.032-18.577 7.231-19.186 3.612-42.854 3.191-56.887.874 0 .001 2.875 2.381 17.647 3.331z">
-              </path>
-            </svg>
-            <svg viewBox="0 0 128 128" aria-hidden="true" class="header-tech-logo">
-              <path fill="#00ADEF"
-                d="M126 1.637l-67 9.834v49.831l67-.534zM1.647 66.709l.003 42.404 50.791 6.983-.04-49.057zM58.467 67.389l.094 49.465 67.376 9.509.016-58.863zM1.61 19.297l.047 42.383 50.791-.289-.023-49.016z">
-              </path>
-            </svg>
-          </div>
-          <span class="cucumber-header-title">Cucumber Reports</span>
-        </div>
-        <div class="header-item">
-          <div class="header-subitem execution-summary">
-            <span data-testid="setup.phrase">
-              <code><strong>{{ report?.tool || 'cucumber-jvm' }}</strong><span v-if="report?.toolVersion">@{{ report.toolVersion }}</span></code>
-              <em class="conjunction"> with </em>
-              <code><strong>{{ report?.runtime || 'Java HotSpot(TM) 64-Bit Server VM' }}</strong><span v-if="report?.runtimeVersion">@{{ report.runtimeVersion }}</span></code>
-              <em class="conjunction"> on </em>
-              <code><strong>{{ report?.os || 'Windows 11' }}</strong></code>
-            </span>
+    <!-- Enhanced Modern Header -->
+    <div class="modern-header">
+      <div class="header-container">
+        <!-- Brand Section -->
+        <div class="brand-section">
+          <div class="brand-logo">
+            <div class="logo-icon">
+              <v-icon size="32" color="#10B981">mdi-cucumber</v-icon>
+            </div>
+            <div class="brand-text">
+              <h1 class="brand-title">Cucumber Reports</h1>
+              <p class="brand-subtitle">Test Execution Dashboard</p>
+            </div>
           </div>
         </div>
-        <div class="header-item">
-          <div class="header-subitem health-summary">
-            <svg viewBox="0 0 42 42" aria-hidden="true" class="health-chart">
-              <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#e5e7eb" stroke-width="3"></circle>
-              <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#00a818" stroke-width="3"
-                :stroke-dasharray="passedPercentage + ' ' + (100 - passedPercentage)" stroke-dashoffset="25"
-                transform="rotate(-90 21 21)"></circle>
-              <circle v-if="summary.failed > 0" cx="21" cy="21" r="15.915" fill="transparent" stroke="#e53935"
-                stroke-width="3" :stroke-dasharray="failedPercentage + ' ' + (100 - failedPercentage)"
-                :stroke-dashoffset="25 - passedPercentage" transform="rotate(-90 21 21)"></circle>
-            </svg>
-            <span>{{ passedPercentage }}% passed</span>
+
+        <!-- Execution Info Section -->
+        <div class="execution-info">
+          <div class="info-card">
+            <div class="info-icon">
+              <v-icon size="20" color="#FF6B35">mdi-language-java</v-icon>
+            </div>
+            <div class="info-content">
+              <span class="info-label">Runtime</span>
+              <span class="info-value">{{ report?.tool || 'cucumber-jvm' }}</span>
+            </div>
+          </div>
+          <div class="info-card">
+            <div class="info-icon">
+              <v-icon size="20" color="#00BCF2">mdi-microsoft-windows</v-icon>
+            </div>
+            <div class="info-content">
+              <span class="info-label">Environment</span>
+              <span class="info-value">{{ report?.os || 'Windows 11' }}</span>
+            </div>
           </div>
         </div>
-        <div class="header-item">
-          <div class="header-subitem time-summary">
-            <v-icon color="primary" size="18" class="mr-1">mdi-stopwatch</v-icon>
-            <span>
-              <time :title="formattedDate" :datetime="reportTimestamp ? reportTimestamp.toISOString() : ''">
-                {{ timeAgo }}
-              </time>
-              <em class="conjunction"> in </em>
-              <span>{{ summary.duration }}</span>
-            </span>
+
+        <!-- Results Overview Section -->
+        <div class="results-overview">
+          <div class="results-chart">
+            <div class="chart-container">
+              <svg viewBox="0 0 42 42" class="donut-chart">
+                <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#F3F4F6" stroke-width="3"></circle>
+                <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#10B981" stroke-width="3"
+                  :stroke-dasharray="passedPercentage + ' ' + (100 - passedPercentage)" stroke-dashoffset="25"
+                  transform="rotate(-90 21 21)" class="success-arc"></circle>
+                <circle v-if="summary.failed > 0" cx="21" cy="21" r="15.915" fill="transparent" stroke="#EF4444"
+                  stroke-width="3" :stroke-dasharray="failedPercentage + ' ' + (100 - failedPercentage)"
+                  :stroke-dashoffset="25 - passedPercentage" transform="rotate(-90 21 21)" class="error-arc"></circle>
+              </svg>
+              <div class="chart-center">
+                <span class="success-percentage">{{ passedPercentage }}%</span>
+                <span class="chart-label">Passed</span>
+              </div>
+            </div>
+          </div>
+          <div class="results-summary">
+            <div class="summary-item success">
+              <v-icon size="16" color="#10B981">mdi-check-circle</v-icon>
+              <span class="summary-count">{{ summary.passed }}</span>
+              <span class="summary-label">Passed</span>
+            </div>
+            <div class="summary-item error">
+              <v-icon size="16" color="#EF4444">mdi-close-circle</v-icon>
+              <span class="summary-count">{{ summary.failed }}</span>
+              <span class="summary-label">Failed</span>
+            </div>
+            <div class="summary-item warning">
+              <v-icon size="16" color="#F59E0B">mdi-pause-circle</v-icon>
+              <span class="summary-count">{{ summary.skipped }}</span>
+              <span class="summary-label">Skipped</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Time & Duration Section -->
+        <div class="time-section">
+          <div class="time-card">
+            <div class="time-icon">
+              <v-icon size="20" color="#06B6D4">mdi-clock-outline</v-icon>
+            </div>
+            <div class="time-content">
+              <span class="time-label">Execution Time</span>
+              <span class="time-value">{{ timeAgo }}</span>
+            </div>
+          </div>
+          <div class="duration-card">
+            <div class="duration-icon">
+              <v-icon size="20" color="#8B5CF6">mdi-timer-outline</v-icon>
+            </div>
+            <div class="duration-content">
+              <span class="duration-label">Total Duration</span>
+              <span class="duration-value">{{ summary.duration }}</span>
+            </div>
           </div>
         </div>
       </div>
@@ -80,71 +106,171 @@
         No report data available or invalid report format. Please upload a valid Cucumber JSON file.
       </div>
       <template v-else>
-        <!-- Search Bar -->
-        <div class="cucumber-search-bar">
-          <v-text-field v-model="searchQuery" placeholder="Search features, scenarios, and steps..."
-            prepend-inner-icon="mdi-magnify" clearable variant="outlined" density="compact" class="search-input"
-            @input="onSearchInput"></v-text-field>
-          <div v-if="searchQuery && searchResults.total > 0" class="search-results-summary">
-            Found {{ searchResults.total }} results ({{ searchResults.features }} features, {{ searchResults.scenarios
-            }} scenarios, {{ searchResults.steps }} steps)
-          </div>
-          <div v-else-if="searchQuery && searchResults.total === 0" class="search-no-results">
-            No results found for "{{ searchQuery }}"
-          </div>
-        </div>
-
-        <!-- Advanced Filters -->
-        <div class="cucumber-filters-bar">
-          <div class="filters-row">
-            <!-- Status Filter -->
-            <div class="filter-group">
-              <label class="filter-label">Status:</label>
-              <v-select v-model="filters.status" :items="statusFilterOptions" item-title="text" item-value="value"
-                multiple chips closable-chips variant="outlined" density="compact" class="filter-select"
-                placeholder="All statuses" @update:modelValue="applyFilters"></v-select>
+        <!-- Horizontal Controls Bar with Side-by-Side Layout -->
+        <div class="controls-bar-container">
+          <div class="controls-bar">
+            <!-- Search Toggle -->
+            <div class="control-toggle" @click="toggleSearchExpanded"
+              :class="{ 'active': searchQuery || searchExpanded }">
+              <div class="control-icon">
+                <v-icon size="22" :color="searchQuery ? '#6366F1' : '#64748b'">mdi-magnify</v-icon>
+              </div>
+              <div class="control-content">
+                <span class="control-label">Search</span>
+                <v-chip v-if="searchQuery" color="primary" size="x-small" class="results-count">
+                  {{ searchResults.total }}
+                </v-chip>
+              </div>
+              <div class="control-actions">
+                <v-btn v-if="searchQuery && !searchExpanded" @click.stop="clearSearch" variant="text" color="secondary"
+                  size="x-small" class="clear-btn-inline">
+                  <v-icon size="14">mdi-close</v-icon>
+                </v-btn>
+                <v-icon :class="{ 'rotate-180': searchExpanded }" color="#9CA3AF" size="18" class="expand-icon">
+                  mdi-chevron-down
+                </v-icon>
+              </div>
             </div>
 
-            <!-- Tags Filter -->
-            <div class="filter-group">
-              <label class="filter-label">Tags:</label>
-              <v-select v-model="filters.tags" :items="availableTags" multiple chips closable-chips variant="outlined"
-                density="compact" class="filter-select" placeholder="All tags"
-                @update:modelValue="applyFilters"></v-select>
-            </div>
-
-            <!-- Duration Filter -->
-            <div class="filter-group">
-              <label class="filter-label">Duration:</label>
-              <v-select v-model="filters.duration" :items="durationFilterOptions" item-title="text" item-value="value"
-                variant="outlined" density="compact" class="filter-select" placeholder="All durations"
-                @update:modelValue="applyFilters"></v-select>
-            </div>
-
-            <!-- Feature Filter -->
-            <div class="filter-group">
-              <label class="filter-label">Features:</label>
-              <v-select v-model="filters.features" :items="availableFeatures" item-title="text" item-value="value"
-                multiple chips closable-chips variant="outlined" density="compact" class="filter-select"
-                placeholder="All features" @update:modelValue="applyFilters"></v-select>
-            </div>
-
-            <!-- Clear Filters Button -->
-            <div class="filter-group">
-              <v-btn @click="clearAllFilters" variant="outlined" color="secondary" size="small"
-                class="clear-filters-btn">
-                <v-icon size="16" class="mr-1">mdi-filter-remove</v-icon>
-                Clear Filters
-              </v-btn>
+            <!-- Filter Toggle -->
+            <div class="control-toggle" @click="toggleFiltersExpanded"
+              :class="{ 'active': hasActiveFilters || filtersExpanded }">
+              <div class="control-icon">
+                <v-icon size="22" :color="hasActiveFilters ? '#8B5CF6' : '#64748b'">mdi-filter-variant</v-icon>
+              </div>
+              <div class="control-content">
+                <span class="control-label">Filters</span>
+                <v-chip v-if="hasActiveFilters" color="secondary" size="x-small" class="results-count">
+                  {{ getActiveFiltersCount() }}
+                </v-chip>
+              </div>
+              <div class="control-actions">
+                <v-btn v-if="hasActiveFilters && !filtersExpanded" @click.stop="clearAllFilters" variant="text"
+                  color="secondary" size="x-small" class="clear-btn-inline">
+                  <v-icon size="14">mdi-filter-remove</v-icon>
+                </v-btn>
+                <v-icon :class="{ 'rotate-180': filtersExpanded }" color="#9CA3AF" size="18" class="expand-icon">
+                  mdi-chevron-down
+                </v-icon>
+              </div>
             </div>
           </div>
 
-          <!-- Active Filters Summary -->
-          <div v-if="hasActiveFilters" class="active-filters-summary">
-            <span class="filters-summary-text">
-              Active filters: {{ getActiveFiltersText() }}
-              <span class="filtered-results-count">({{ filteredFeaturesCount }} features shown)</span>
-            </span>
+          <!-- Side-by-Side Expandable Panels -->
+          <div class="expandable-panels">
+            <!-- Search Panel -->
+            <div class="panel-container" :class="{ 'expanded': searchExpanded }">
+              <div v-if="searchExpanded" class="search-panel">
+                <div class="panel-content">
+                  <v-text-field v-model="searchQuery" placeholder="Search features, scenarios, and steps..."
+                    prepend-inner-icon="mdi-magnify" clearable variant="outlined" density="comfortable"
+                    class="search-input" @input="onSearchInput" hide-details autofocus>
+                  </v-text-field>
+
+                  <div v-if="searchQuery && searchResults.total > 0" class="search-results-info">
+                    <div class="results-summary">
+                      <v-chip color="success" size="small" variant="flat">
+                        <v-icon size="14" class="mr-1">mdi-check-circle</v-icon>
+                        {{ searchResults.total }} results found
+                      </v-chip>
+                    </div>
+                    <div class="results-breakdown">
+                      <span class="breakdown-item">
+                        <v-icon size="12" color="#6366F1">mdi-file-document</v-icon>
+                        {{ searchResults.features }} features
+                      </span>
+                      <span class="breakdown-item">
+                        <v-icon size="12" color="#8B5CF6">mdi-script-text</v-icon>
+                        {{ searchResults.scenarios }} scenarios
+                      </span>
+                      <span class="breakdown-item">
+                        <v-icon size="12" color="#06B6D4">mdi-format-list-numbered</v-icon>
+                        {{ searchResults.steps }} steps
+                      </span>
+                    </div>
+                  </div>
+
+                  <div v-else-if="searchQuery && searchResults.total === 0" class="search-no-results">
+                    <v-chip color="warning" size="small" variant="flat">
+                      <v-icon size="14" class="mr-1">mdi-alert-circle</v-icon>
+                      No results found
+                    </v-chip>
+                    <p class="no-results-text">Try adjusting your search terms or check spelling</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Filters Panel -->
+            <div class="panel-container" :class="{ 'expanded': filtersExpanded }">
+              <div v-if="filtersExpanded" class="filters-panel">
+                <div class="panel-content">
+                  <div class="filters-grid">
+                    <!-- Status Filter -->
+                    <div class="filter-group">
+                      <label class="filter-label">
+                        <v-icon size="16" color="#10B981" class="mr-1">mdi-check-circle</v-icon>
+                        Status
+                      </label>
+                      <v-select v-model="filters.status" :items="statusFilterOptions" item-title="text"
+                        item-value="value" multiple chips closable-chips variant="outlined" density="compact"
+                        class="filter-select" placeholder="All statuses" @update:modelValue="applyFilters" hide-details>
+                      </v-select>
+                    </div>
+
+                    <!-- Tags Filter -->
+                    <div class="filter-group">
+                      <label class="filter-label">
+                        <v-icon size="16" color="#F59E0B" class="mr-1">mdi-tag</v-icon>
+                        Tags
+                      </label>
+                      <v-select v-model="filters.tags" :items="availableTags" multiple chips closable-chips
+                        variant="outlined" density="compact" class="filter-select" placeholder="All tags"
+                        @update:modelValue="applyFilters" hide-details>
+                      </v-select>
+                    </div>
+
+                    <!-- Duration Filter -->
+                    <div class="filter-group">
+                      <label class="filter-label">
+                        <v-icon size="16" color="#06B6D4" class="mr-1">mdi-timer</v-icon>
+                        Duration
+                      </label>
+                      <v-select v-model="filters.duration" :items="durationFilterOptions" item-title="text"
+                        item-value="value" variant="outlined" density="compact" class="filter-select"
+                        placeholder="All durations" @update:modelValue="applyFilters" hide-details>
+                      </v-select>
+                    </div>
+
+                    <!-- Feature Filter -->
+                    <div class="filter-group">
+                      <label class="filter-label">
+                        <v-icon size="16" color="#8B5CF6" class="mr-1">mdi-file-document</v-icon>
+                        Features
+                      </label>
+                      <v-select v-model="filters.features" :items="availableFeatures" item-title="text"
+                        item-value="value" multiple chips closable-chips variant="outlined" density="compact"
+                        class="filter-select" placeholder="All features" @update:modelValue="applyFilters" hide-details>
+                      </v-select>
+                    </div>
+                  </div>
+
+                  <!-- Active Filters Summary -->
+                  <div v-if="hasActiveFilters" class="active-filters-summary">
+                    <div class="summary-header">
+                      <v-icon size="16" color="#6366F1" class="mr-1">mdi-filter-check</v-icon>
+                      <span class="summary-label">Active Filters</span>
+                    </div>
+                    <div class="summary-content">
+                      <span class="summary-text">{{ getActiveFiltersText() }}</span>
+                      <v-chip color="primary" size="small" variant="outlined" class="results-chip">
+                        {{ filteredFeaturesCount }} features shown
+                      </v-chip>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -669,6 +795,53 @@ export default {
 
       return activeFilters.join(' | ');
     },
+
+    // Collapsible Search Methods
+    toggleSearchExpanded() {
+      this.searchExpanded = !this.searchExpanded;
+    },
+
+    clearSearch() {
+      this.searchQuery = '';
+      this.searchResults = { total: 0, features: 0, scenarios: 0, steps: 0 };
+    },
+
+    // Collapsible Filters Methods
+    toggleFiltersExpanded() {
+      this.filtersExpanded = !this.filtersExpanded;
+    },
+
+    getActiveFiltersCount() {
+      let count = 0;
+      if (this.filters.status.length > 0) count++;
+      if (this.filters.tags.length > 0) count++;
+      if (this.filters.duration) count++;
+      if (this.filters.features.length > 0) count++;
+      return count;
+    },
+
+    getCompactActiveFilters() {
+      const compactFilters = [];
+
+      if (this.filters.status.length > 0) {
+        compactFilters.push(`Status: ${this.filters.status.length}`);
+      }
+
+      if (this.filters.tags.length > 0) {
+        compactFilters.push(`Tags: ${this.filters.tags.length}`);
+      }
+
+      if (this.filters.duration) {
+        const durationOption = this.durationFilterOptions.find(opt => opt.value === this.filters.duration);
+        compactFilters.push(`Duration: ${durationOption?.text || this.filters.duration}`);
+      }
+
+      if (this.filters.features.length > 0) {
+        compactFilters.push(`Features: ${this.filters.features.length}`);
+      }
+
+      return compactFilters.slice(0, 3); // Show only first 3
+    },
     getFeatureDuration(feature) {
       if (!feature || !feature.elements) return 0;
 
@@ -704,12 +877,14 @@ export default {
         steps: 0
       },
       searchDebounceTimer: null,
+      searchExpanded: false,
       filters: {
         status: [],
         tags: [],
         duration: null,
         features: []
-      }
+      },
+      filtersExpanded: false
     }
   },
   computed: {
@@ -948,7 +1123,727 @@ export default {
 </script>
 
 <style scoped>
-/* Polished Cucumber Reports Header */
+/* Modern Enhanced Header */
+.modern-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 24px 32px;
+  margin-bottom: 32px;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.header-container {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr auto;
+  gap: 32px;
+  align-items: center;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* Brand Section */
+.brand-section {
+  display: flex;
+  align-items: center;
+}
+
+.brand-logo {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.logo-icon {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 12px;
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.logo-icon .v-icon {
+  color: white !important;
+  font-weight: 600;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.brand-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.brand-title {
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0;
+  color: white;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.brand-subtitle {
+  font-size: 14px;
+  margin: 0;
+  opacity: 0.8;
+  font-weight: 400;
+}
+
+/* Execution Info Section */
+.execution-info {
+  display: flex;
+  gap: 16px;
+}
+
+.info-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 12px 16px;
+  border-radius: 8px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.info-icon {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 8px;
+  border-radius: 6px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.info-icon .v-icon {
+  color: white !important;
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.info-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.info-label {
+  font-size: 12px;
+  opacity: 0.8;
+  font-weight: 500;
+}
+
+.info-value {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* Results Overview Section */
+.results-overview {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.results-chart {
+  position: relative;
+}
+
+.chart-container {
+  position: relative;
+  width: 100px;
+  height: 100px;
+}
+
+.donut-chart {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.success-arc {
+  stroke-linecap: round;
+  transition: stroke-dasharray 0.6s ease;
+}
+
+.error-arc {
+  stroke-linecap: round;
+  transition: stroke-dasharray 0.6s ease;
+}
+
+.chart-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+.success-percentage {
+  display: block;
+  font-size: 18px;
+  font-weight: 700;
+  color: white;
+}
+
+.chart-label {
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+.results-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.summary-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.summary-count {
+  font-weight: 700;
+  min-width: 24px;
+}
+
+.summary-label {
+  opacity: 0.9;
+}
+
+/* Time Section */
+.time-section {
+  display: flex;
+  gap: 16px;
+}
+
+.time-card,
+.duration-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 12px 16px;
+  border-radius: 8px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.time-icon,
+.duration-icon {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 8px;
+  border-radius: 6px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.time-icon .v-icon,
+.duration-icon .v-icon {
+  color: white !important;
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.time-content,
+.duration-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.time-label,
+.duration-label {
+  font-size: 12px;
+  opacity: 0.8;
+  font-weight: 500;
+}
+
+.time-value,
+.duration-value {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .header-container {
+    grid-template-columns: 1fr;
+    gap: 24px;
+    text-align: center;
+  }
+
+  .execution-info,
+  .time-section {
+    justify-content: center;
+  }
+
+  .results-overview {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 768px) {
+  .modern-header {
+    padding: 20px 16px;
+    margin-bottom: 24px;
+  }
+
+  .execution-info,
+  .time-section {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .results-overview {
+    flex-direction: column;
+    gap: 16px;
+  }
+}
+
+/* Compact Controls Section Styles */
+.controls-section {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 0;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e5e7eb;
+}
+
+.controls-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Control Toggle Header (Search) */
+.control-toggle-header {
+  padding: 16px 20px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+  border-radius: 16px 16px 0 0;
+}
+
+.control-toggle-header:hover {
+  background: #f9fafb;
+}
+
+.control-toggle-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.control-toggle-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.control-toggle-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.control-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0;
+}
+
+.active-badge {
+  margin-left: 8px;
+}
+
+.clear-btn-compact {
+  font-size: 12px !important;
+  min-width: auto !important;
+  padding: 4px 8px !important;
+}
+
+.compact-preview {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.compact-search-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.search-breakdown-compact {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+/* Expandable Control Content */
+.control-content {
+  padding: 0 20px 20px 20px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.search-input-container {
+  padding-top: 16px;
+}
+
+.search-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.search-header {
+  margin-bottom: 20px;
+}
+
+.search-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0 0 4px 0;
+  display: flex;
+  align-items: center;
+}
+
+.search-subtitle {
+  font-size: 14px;
+  color: #6b7280;
+  margin: 0;
+}
+
+.search-input-container {
+  position: relative;
+}
+
+.enhanced-search-input {
+  margin-bottom: 16px;
+}
+
+.search-results-badge {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.search-breakdown {
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.search-no-results {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.no-results-text {
+  font-size: 14px;
+  color: #6b7280;
+}
+
+/* Enhanced Collapsible Filters Section Styles */
+.filters-section {
+  background: #ffffff;
+  border-radius: 16px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e5e7eb;
+  overflow: hidden;
+}
+
+.filters-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Clickable Filter Header */
+.filters-toggle-header {
+  padding: 20px 24px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-bottom: 1px solid transparent;
+  user-select: none;
+  position: relative;
+  z-index: 1;
+}
+
+.filters-toggle-header:hover {
+  background: #f9fafb;
+}
+
+.filters-toggle-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.filters-toggle-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.filters-toggle-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.expand-icon {
+  transition: transform 0.3s ease;
+}
+
+.rotate-180 {
+  transform: rotate(180deg);
+}
+
+.active-filters-badge {
+  margin-left: 8px;
+}
+
+.clear-all-btn-compact {
+  font-size: 12px !important;
+  min-width: auto !important;
+  padding: 4px 8px !important;
+}
+
+.compact-filters-preview {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.compact-filter-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.compact-chip {
+  font-size: 11px !important;
+}
+
+.more-filters-text {
+  font-size: 12px;
+  color: #6b7280;
+  font-style: italic;
+}
+
+/* Expandable Filters Content */
+.filters-content {
+  padding: 0 24px 24px 24px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.filters-expanded-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-top: 20px;
+}
+
+.filters-subtitle {
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.filters-toggle-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.filters-toggle-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.filters-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0;
+  display: flex;
+  align-items: center;
+}
+
+.active-filters-badge {
+  margin-left: 8px;
+}
+
+.filters-toggle-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.clear-all-btn-compact {
+  padding: 4px 8px !important;
+  min-width: auto !important;
+}
+
+.expand-icon {
+  transition: transform 0.3s ease;
+}
+
+.rotate-180 {
+  transform: rotate(180deg);
+}
+
+/* Compact Filters Preview */
+.compact-filters-preview {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #f3f4f6;
+}
+
+.compact-filter-chips {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.compact-chip {
+  font-size: 12px !important;
+}
+
+.more-filters-text {
+  font-size: 12px;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+/* Expandable Content */
+.filters-content {
+  padding: 0 24px 24px 24px;
+  border-top: 1px solid #f3f4f6;
+}
+
+.filters-expanded-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-top: 20px;
+}
+
+.filters-subtitle {
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.clear-all-btn {
+  font-size: 14px !important;
+}
+
+.filters-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.filter-card {
+  background: #f9fafb;
+  border-radius: 12px;
+  padding: 16px;
+  border: 1px solid #e5e7eb;
+  transition: all 0.2s ease;
+}
+
+.filter-card:hover {
+  border-color: #d1d5db;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.filter-card-label {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 8px;
+}
+
+.filter-select {
+  margin-top: 4px;
+}
+
+.active-filters-summary {
+  background: #f0f9ff;
+  border: 1px solid #bae6fd;
+  border-radius: 12px;
+  padding: 16px;
+  margin-top: 16px;
+}
+
+.active-filters-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.active-filters-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #0369a1;
+}
+
+.active-filters-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.filters-summary-text {
+  font-size: 14px;
+  color: #0369a1;
+  flex: 1;
+}
+
+.results-chip {
+  flex-shrink: 0;
+}
+
+/* Responsive Design for Search and Filters */
+@media (max-width: 768px) {
+
+  .search-section,
+  .filters-section {
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+
+  .filters-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .active-filters-content {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .search-results-badge,
+  .search-no-results {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+}
+
+/* Legacy styles for compatibility */
 .polished-header {
   background: #fff;
   border-bottom: 1px solid #e5e7eb;
@@ -1694,107 +2589,380 @@ export default {
   }
 }
 
-/* Search 
-Bar Styles */
-.cucumber-search-bar {
+/* Horizontal Controls Bar - Side by Side Layout */
+.controls-bar-container {
   margin-bottom: 1.5rem;
-  background: #fff;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  padding: 1rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
-.search-input {
-  margin-bottom: 0.5rem;
+.controls-bar {
+  display: flex;
+  background: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
 }
 
-.search-results-summary {
-  color: #388e3c;
-  font-size: 0.95rem;
-  font-weight: 500;
-  padding: 0.5rem 0;
+.control-toggle {
+  flex: 1;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  padding: 16px 20px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-right: 1px solid #e2e8f0;
+  position: relative;
+  background: #ffffff;
 }
 
-.search-results-summary::before {
-  content: "✓";
-  color: #388e3c;
-  font-weight: bold;
+.control-toggle:last-child {
+  border-right: none;
+}
+
+.control-toggle:hover {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.control-toggle.active {
+  background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%);
+  border-color: #c7d2fe;
+}
+
+.control-toggle.active::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #6366f1, #8b5cf6);
+  border-radius: 2px 2px 0 0;
+}
+
+.control-icon {
+  margin-right: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: #f8fafc;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.control-toggle.active .control-icon {
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.control-toggle.active .control-icon .v-icon {
+  color: white !important;
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.control-content {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.control-label {
+  font-size: 15px;
+  font-weight: 600;
+  color: #374151;
+  transition: color 0.3s ease;
+}
+
+.control-toggle.active .control-label {
+  color: #4f46e5;
+}
+
+.results-count {
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.control-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 12px;
+}
+
+.clear-btn-inline {
+  opacity: 0.7;
+  transition: opacity 0.3s ease;
+}
+
+.clear-btn-inline:hover {
+  opacity: 1;
+}
+
+.expand-icon {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.expand-icon.rotate-180 {
+  transform: rotate(180deg);
+}
+
+/* Side-by-Side Expandable Panels */
+.expandable-panels {
+  display: flex;
+  min-height: 0;
+}
+
+.panel-container {
+  flex: 1;
+  overflow: hidden;
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  max-height: 0;
+  opacity: 0;
+}
+
+.panel-container.expanded {
+  max-height: 500px;
+  opacity: 1;
+}
+
+.search-panel,
+.filters-panel {
+  padding: 24px;
+  background: #ffffff;
+  border-right: 1px solid #e2e8f0;
+  height: 100%;
+  animation: slideInFromTop 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.filters-panel {
+  border-right: none;
+  border-left: 1px solid #e2e8f0;
+}
+
+@keyframes slideInFromTop {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.panel-title {
+  display: flex;
+  align-items: center;
+  font-size: 16px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.panel-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.panel-content {
+  animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.1s both;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Search Panel Styles */
+.search-input {
+  margin-bottom: 16px;
+}
+
+.search-input .v-field {
+  border-radius: 10px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.search-input .v-field:hover {
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.1);
+}
+
+.search-input .v-field--focused {
+  box-shadow: 0 4px 20px rgba(99, 102, 241, 0.15);
+}
+
+.search-results-info {
+  background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+  border: 1px solid #bbf7d0;
+  border-radius: 10px;
+  padding: 16px;
+  margin-top: 16px;
+}
+
+.results-summary {
+  margin-bottom: 12px;
+}
+
+.results-breakdown {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.breakdown-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  color: #6b7280;
+  font-weight: 500;
 }
 
 .search-no-results {
-  color: #e53935;
-  font-size: 0.95rem;
-  font-weight: 500;
-  padding: 0.5rem 0;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+  border: 1px solid #fde68a;
+  border-radius: 10px;
+  padding: 16px;
+  margin-top: 16px;
+  text-align: center;
 }
 
-.search-no-results::before {
-  content: "⚠";
-  color: #e53935;
-  font-weight: bold;
+.no-results-text {
+  margin-top: 8px;
+  color: #92400e;
+  font-size: 14px;
 }
 
-/* Advanced Filters Styles */
-.cucumber-filters-bar {
-  margin-bottom: 1.5rem;
-  background: #f8f9fa;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  padding: 1rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-}
-
-.filters-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-  align-items: flex-end;
+/* Filters Panel Styles */
+.filters-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  margin-bottom: 20px;
 }
 
 .filter-group {
   display: flex;
   flex-direction: column;
-  min-width: 150px;
-  flex: 1;
 }
 
 .filter-label {
-  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  font-size: 14px;
   font-weight: 600;
   color: #374151;
-  margin-bottom: 0.5rem;
+  margin-bottom: 8px;
 }
 
-.filter-select {
-  min-width: 150px;
+.filter-select .v-field {
+  border-radius: 8px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.clear-filters-btn {
-  margin-top: 1.5rem;
-  height: 40px;
+.filter-select .v-field:hover {
+  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.1);
+}
+
+.filter-select .v-field--focused {
+  box-shadow: 0 2px 12px rgba(139, 92, 246, 0.15);
 }
 
 .active-filters-summary {
-  margin-top: 1rem;
-  padding-top: 1rem;
-  border-top: 1px solid #e5e7eb;
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  border: 1px solid #bae6fd;
+  border-radius: 10px;
+  padding: 16px;
+  margin-top: 20px;
 }
 
-.filters-summary-text {
-  color: #6b7280;
-  font-size: 0.9rem;
+.summary-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
 }
 
-.filtered-results-count {
-  color: #1976d2;
+.summary-label {
   font-weight: 600;
+  color: #374151;
+}
+
+.summary-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.summary-text {
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.results-chip {
+  font-weight: 600;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .controls-bar {
+    flex-direction: column;
+  }
+
+  .control-toggle {
+    border-right: none;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  .control-toggle:last-child {
+    border-bottom: none;
+  }
+
+  .expandable-panels {
+    flex-direction: column;
+  }
+
+  .search-panel,
+  .filters-panel {
+    border-right: none;
+    border-left: none;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  .filters-panel {
+    border-bottom: none;
+  }
+
+  .filters-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
 }
 
 @media (max-width: 768px) {
