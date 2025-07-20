@@ -5,8 +5,9 @@
         <div class="header-item">
           <div class="header-subitem">
             <svg viewBox="0 0 32 32" aria-hidden="true" class="cucumber-logo">
-              <path fill="#23d160" d="M16 2C8.268 2 2 8.268 2 16s6.268 14 14 14 14-6.268 14-14S23.732 2 16 2zm0 25c-6.065 0-11-4.935-11-11S9.935 5 16 5s11 4.935 11 11-4.935 11-11 11z"/>
-              <path fill="#23d160" d="M12 10h8v2h-8zm0 4h8v2h-8zm0 4h6v2h-6z"/>
+              <path fill="#23d160"
+                d="M16 2C8.268 2 2 8.268 2 16s6.268 14 14 14 14-6.268 14-14S23.732 2 16 2zm0 25c-6.065 0-11-4.935-11-11S9.935 5 16 5s11 4.935 11 11-4.935 11-11 11z" />
+              <path fill="#23d160" d="M12 10h8v2h-8zm0 4h8v2h-8zm0 4h6v2h-6z" />
             </svg>
             <svg viewBox="0 0 128 128" aria-hidden="true" class="header-tech-logo">
               <path fill="#0074BD"
@@ -49,10 +50,10 @@
             <svg viewBox="0 0 42 42" aria-hidden="true" class="health-chart">
               <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#e5e7eb" stroke-width="3"></circle>
               <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#00a818" stroke-width="3"
-                :stroke-dasharray="passedPercentage + ' ' + (100 - passedPercentage)"
-                stroke-dashoffset="25" transform="rotate(-90 21 21)"></circle>
-              <circle v-if="summary.failed > 0" cx="21" cy="21" r="15.915" fill="transparent" stroke="#e53935" stroke-width="3"
-                :stroke-dasharray="failedPercentage + ' ' + (100 - failedPercentage)"
+                :stroke-dasharray="passedPercentage + ' ' + (100 - passedPercentage)" stroke-dashoffset="25"
+                transform="rotate(-90 21 21)"></circle>
+              <circle v-if="summary.failed > 0" cx="21" cy="21" r="15.915" fill="transparent" stroke="#e53935"
+                stroke-width="3" :stroke-dasharray="failedPercentage + ' ' + (100 - failedPercentage)"
                 :stroke-dashoffset="25 - passedPercentage" transform="rotate(-90 21 21)"></circle>
             </svg>
             <span>{{ passedPercentage }}% passed</span>
@@ -229,14 +230,47 @@
                           <span class="step-keyword">{{ step.keyword }}</span>
                           <span class="step-text">{{ step.name }}</span>
                           <span v-if="step.duration" class="step-duration">({{ formatDuration(step.duration) }})</span>
-                          <div v-if="step.errorMessage" class="step-error-block">
-                            <pre class="step-error-message">
-                              {{ shouldTruncate(step.errorMessage) && !step._showFullError ? truncateError(step.errorMessage) : step.errorMessage }}
-                            </pre>
-                            <a v-if="shouldTruncate(step.errorMessage)" @click.prevent="toggleErrorExpand(step)"
-                              class="show-more-link">
-                              {{ step._showFullError ? 'Show less' : 'Show more' }}
-                            </a>
+                          <!-- Enhanced Error Display -->
+                          <div v-if="getStepErrorMessage(step)" class="step-error-block">
+                            <div class="error-header">
+                              <v-icon color="error" size="16" class="mr-1">mdi-alert-circle</v-icon>
+                              <span class="error-label">Error Details:</span>
+                            </div>
+                            <pre class="step-error-message">{{ getDisplayErrorMessage(step) }}</pre>
+                            <div v-if="shouldTruncateError(step)" class="error-actions">
+                              <v-btn @click="toggleErrorExpansion(step)" text small color="primary"
+                                class="expand-error-btn">
+                                <v-icon size="14" class="mr-1">
+                                  {{ step._showFullError ? 'mdi-chevron-up' : 'mdi-chevron-down' }}
+                                </v-icon>
+                                {{ step._showFullError ? 'Show less' : 'Show more...' }}
+                              </v-btn>
+                              <v-btn @click="copyErrorToClipboard(step)" text small color="secondary"
+                                class="copy-error-btn">
+                                <v-icon size="14" class="mr-1">mdi-content-copy</v-icon>
+                                Copy
+                              </v-btn>
+                            </div>
+                          </div>
+
+                          <!-- Screenshot Display - Only for failed steps -->
+                          <div v-if="stepStatus(step) === 'failed' && getScenarioScreenshots(scenario).length > 0"
+                            class="step-screenshots">
+                            <div class="screenshots-header">
+                              <v-icon color="info" size="16" class="mr-1">mdi-camera</v-icon>
+                              <span class="screenshots-label">Screenshots:</span>
+                            </div>
+                            <div class="screenshot-thumbnails">
+                              <div v-for="(screenshot, screenshotIndex) in getScenarioScreenshots(scenario)"
+                                :key="screenshotIndex" class="screenshot-thumbnail"
+                                @click="openScreenshotModal(scenario, screenshotIndex)">
+                                <img :src="screenshot.dataUrl" :alt="`Screenshot ${screenshotIndex + 1}`"
+                                  class="thumbnail-image" @load="onScreenshotLoad" @error="onScreenshotError" />
+                                <div class="thumbnail-overlay">
+                                  <v-icon color="white" size="20">mdi-magnify-plus</v-icon>
+                                </div>
+                              </div>
+                            </div>
                           </div>
                         </li>
                       </ul>
@@ -303,8 +337,136 @@ export default {
         color: '#222',
       };
     },
-    toggleErrorExpand(step) {
-      this.$set(step, '_showFullError', !step._showFullError);
+    // Enhanced Error Handling Methods
+    getStepErrorMessage(step) {
+      // Extract error message from step.result.error_message (actual JSON structure)
+      if (step.result && step.result.error_message) {
+        return step.result.error_message;
+      }
+      // Fallback to step.errorMessage for backward compatibility
+      if (step.errorMessage) {
+        return step.errorMessage;
+      }
+      return null;
+    },
+
+    getDisplayErrorMessage(step) {
+      const errorMessage = this.getStepErrorMessage(step);
+      if (!errorMessage) return '';
+
+      // Show first 3 lines if not expanded, full message if expanded
+      if (step._showFullError) {
+        return errorMessage;
+      } else {
+        // Extract just the main error message (first line with exception type and message)
+        const mainError = this.extractMainErrorMessage(errorMessage);
+        return mainError;
+      }
+    },
+
+    extractMainErrorMessage(fullErrorMessage) {
+      if (!fullErrorMessage) return '';
+
+      const lines = fullErrorMessage.split('\n');
+
+      // Look for the main exception line (usually the first line or first line with exception class)
+      for (let i = 0; i < Math.min(3, lines.length); i++) {
+        const line = lines[i].trim();
+
+        // Check if line contains common exception patterns
+        if (line.includes('Exception:') ||
+          line.includes('Error:') ||
+          line.includes('AssertionError:') ||
+          line.includes('TimeoutException:') ||
+          line.includes('ElementNotFound') ||
+          line.includes('NoSuchElement') ||
+          line.includes('WebDriverException') ||
+          line.match(/^\w+(\.\w+)*Exception:/)) {
+          return line;
+        }
+      }
+
+      // If no exception pattern found, return first non-empty line
+      const firstLine = lines.find(line => line.trim().length > 0);
+      return firstLine ? firstLine.trim() : lines[0] || '';
+    },
+
+    shouldTruncateError(step) {
+      const errorMessage = this.getStepErrorMessage(step);
+      return errorMessage && errorMessage.split('\n').length > 3;
+    },
+
+    toggleErrorExpansion(step) {
+      // Vue 3 compatible way to set reactive property
+      step._showFullError = !step._showFullError;
+    },
+
+    copyErrorToClipboard(step) {
+      const errorMessage = this.getStepErrorMessage(step);
+      if (errorMessage) {
+        navigator.clipboard.writeText(errorMessage).then(() => {
+          // You could add a toast notification here
+          console.log('Error message copied to clipboard');
+        }).catch(err => {
+          console.error('Failed to copy error message:', err);
+        });
+      }
+    },
+
+    // Screenshot Handling Methods
+    getScenarioScreenshots(scenario) {
+      const screenshots = [];
+
+      // Extract screenshots from after hooks (teardown phase)
+      if (scenario.after && Array.isArray(scenario.after)) {
+        scenario.after.forEach(hook => {
+          if (hook.embeddings && Array.isArray(hook.embeddings)) {
+            hook.embeddings.forEach(embedding => {
+              if (embedding.mime_type === 'image/png' ||
+                (embedding.data && embedding.data.startsWith('iVBORw0KGgo'))) {
+                screenshots.push({
+                  dataUrl: `data:image/png;base64,${embedding.data}`,
+                  mimeType: embedding.mime_type || 'image/png'
+                });
+              }
+            });
+          }
+        });
+      }
+
+      return screenshots;
+    },
+
+    openScreenshotModal(scenario, screenshotIndex) {
+      const screenshots = this.getScenarioScreenshots(scenario);
+      if (screenshots.length > screenshotIndex) {
+        // Create a simple modal or use Vuetify dialog
+        this.showScreenshotDialog(screenshots, screenshotIndex);
+      }
+    },
+
+    showScreenshotDialog(screenshots, currentIndex) {
+      // For now, open in new window - you can enhance this with a proper modal
+      const screenshot = screenshots[currentIndex];
+      const newWindow = window.open('', '_blank');
+      newWindow.document.write(`
+        <html>
+          <head><title>Screenshot ${currentIndex + 1}</title></head>
+          <body style="margin:0; background:#000; display:flex; justify-content:center; align-items:center; min-height:100vh;">
+            <img src="${screenshot.dataUrl}" style="max-width:100%; max-height:100%; object-fit:contain;" />
+          </body>
+        </html>
+      `);
+    },
+
+    onScreenshotLoad() {
+      // Handle successful screenshot loading
+      console.log('Screenshot loaded successfully');
+    },
+
+    onScreenshotError() {
+      // Handle screenshot loading errors
+      console.error('Failed to load screenshot');
     },
     stepStatus(step) {
       if (step.result && step.result.status) return step.result.status;
@@ -565,12 +727,12 @@ export default {
           if (Array.isArray(scenario.steps)) {
             duration += scenario.steps.reduce((acc, st) => acc + (typeof st.result?.duration === 'number' ? st.result.duration : 0), 0);
           }
-          
+
           // Add before hook durations (setup)
           if (Array.isArray(scenario.before)) {
             duration += scenario.before.reduce((acc, hook) => acc + (typeof hook.result?.duration === 'number' ? hook.result.duration : 0), 0);
           }
-          
+
           // Add after hook durations (teardown)
           if (Array.isArray(scenario.after)) {
             duration += scenario.after.reduce((acc, hook) => acc + (typeof hook.result?.duration === 'number' ? hook.result.duration : 0), 0);
@@ -729,10 +891,10 @@ export default {
     },
     reportTimestamp() {
       if (!this.report || !this.report.features) return null;
-      
+
       // Find the earliest start_timestamp from all scenarios
       let earliestTimestamp = null;
-      
+
       this.report.features.forEach(feature => {
         if (feature.elements) {
           feature.elements.forEach(scenario => {
@@ -745,18 +907,18 @@ export default {
           });
         }
       });
-      
+
       return earliestTimestamp;
     },
     timeAgo() {
       if (!this.reportTimestamp) return '1 day ago';
-      
+
       const now = new Date();
       const diffMs = now - this.reportTimestamp;
       const diffMinutes = Math.floor(diffMs / (1000 * 60));
       const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
       const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-      
+
       if (diffMinutes < 1) {
         return 'just now';
       } else if (diffMinutes < 60) {
@@ -1180,6 +1342,7 @@ export default {
   background: #ffebee;
   border: 1px solid #ffcdd2;
   border-radius: 4px;
+  border-left: 4px solid #f44336;
   margin-top: 0.3em;
   margin-left: 0;
   padding: 0.7em 1em;
@@ -1188,14 +1351,113 @@ export default {
   word-break: break-word;
 }
 
+.error-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #d32f2f;
+}
+
+.error-label {
+  font-size: 0.9em;
+}
+
 .step-error-message {
   color: #b71c1c;
   font-size: 0.97em;
   font-family: 'JetBrains Mono', 'Consolas', monospace;
   white-space: pre-wrap;
   margin: 0;
-  word-break: break-word;
-  text-align: left;
+  background: #fff;
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid #ffcdd2;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.error-actions {
+  margin-top: 8px;
+  display: flex;
+  gap: 8px;
+}
+
+.expand-error-btn,
+.copy-error-btn {
+  font-size: 0.8em !important;
+  min-width: auto !important;
+  padding: 4px 8px !important;
+}
+
+/* Screenshot Styles */
+.step-screenshots {
+  margin-top: 12px;
+  padding: 12px;
+  background: #f3f4f6;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  border-left: 4px solid #3b82f6;
+}
+
+.screenshots-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #1976d2;
+}
+
+.screenshots-label {
+  font-size: 0.9em;
+}
+
+.screenshot-thumbnails {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.screenshot-thumbnail {
+  position: relative;
+  width: 120px;
+  height: 80px;
+  border-radius: 4px;
+  overflow: hidden;
+  cursor: pointer;
+  border: 2px solid #e5e7eb;
+  transition: all 0.2s ease;
+}
+
+.screenshot-thumbnail:hover {
+  border-color: #3b82f6;
+  transform: scale(1.05);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.thumbnail-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.thumbnail-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.screenshot-thumbnail:hover .thumbnail-overlay {
+  opacity: 1;
 }
 
 .cucumber-summary-bar {
