@@ -44,18 +44,18 @@
 
 - [x] 7. Enhance advanced filtering system
 
-
-
-
   - Implement AND/OR logic combinations for complex queries
   - Add date range filtering with calendar picker
   - Create custom query builder with visual interface
   - Add saved filter presets with sharing capabilities
+
   - _Requirements: 7.2, 7.3, 7.5_
 
-- [ ] 8. Implement filter state management
+- [x] 8. Implement filter state management
+
   - Add URL state preservation for shareable filter links
   - Create filter history and quick access to recent filters
+
   - Implement filter analytics and usage optimization
   - Add bulk filter operations and batch processing
   - _Requirements: 7.5_
@@ -98,8 +98,6 @@
 
 - [x] 13. Implement failed step error logging with preview and expansion
 
-
-
   - Extract error messages from step.result.error_message field
   - Display first 3 lines of error message under failed steps
   - Add "..." (three dots) indicator with click handler for expansion
@@ -107,9 +105,8 @@
   - Add copy-to-clipboard functionality for full error messages
   - _Requirements: 6.1, 6.2_
 
-
-
 - [ ] 14. Create screenshot display functionality for failed tests
+
   - Extract base64 screenshot data from scenario.after[].embeddings[] arrays
   - Convert base64 PNG data to displayable image format with blob URLs
   - Display screenshot thumbnails next to failed steps with loading states
@@ -119,6 +116,7 @@
   - _Requirements: 6.4_
 
 - [ ] 15. Enhance error analysis and grouping
+
   - Create stack trace visualization with syntax highlighting
   - Implement error grouping by similarity with occurrence counts
   - Build error pattern detection and categorization system

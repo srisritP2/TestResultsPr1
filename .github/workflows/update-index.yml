@@ -5,26 +5,128 @@ on:
     paths:
       - 'cucumber-report-viewer/public/TestResultsJsons/*.json'
       - '!cucumber-report-viewer/public/TestResultsJsons/index.json'
+      - '!cucumber-report-viewer/public/TestResultsJsons/stats.json'
+  workflow_dispatch:
+    inputs:
+      validate_reports:
+        description: 'Validate report structure'
+        required: false
+        default: 'true'
+        type: boolean
+      generate_stats:
+        description: 'Generate statistics'
+        required: false
+        default: 'true'
+        type: boolean
+      organize_files:
+        description: 'Organize and rename files'
+        required: false
+        default: 'true'
+        type: boolean
 
 jobs:
   update-index:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
 
       - name: Set up Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
+          cache: 'npm'
 
-      - name: Generate index.json for Cucumber reports
+      - name: Install dependencies
         run: |
           cd cucumber-report-viewer/public/TestResultsJsons
-          node ../../../../.github/scripts/generate-index.js
+          npm init -y 2>/dev/null || true
 
-      - name: Commit and push index.json
+      - name: Generate enhanced index.json
+        run: |
+          cd cucumber-report-viewer/public/TestResultsJsons
+          node generate-index-enhanced.js --verbose
+        env:
+          VALIDATE_REPORTS: ${{ github.event.inputs.validate_reports || 'true' }}
+          GENERATE_STATS: ${{ github.event.inputs.generate_stats || 'true' }}
+
+      - name: Validate generated files
+        run: |
+          cd cucumber-report-viewer/public/TestResultsJsons
+          if [ ! -f "index.json" ]; then
+            echo "❌ index.json was not generated"
+            exit 1
+          fi
+          
+          # Validate JSON syntax
+          if ! jq empty index.json; then
+            echo "❌ index.json has invalid JSON syntax"
+            exit 1
+          fi
+          
+          echo "✅ Generated files are valid"
+
+      - name: Create summary report
+        run: |
+          cd cucumber-report-viewer/public/TestResultsJsons
+          echo "## 📊 Cucumber Reports Index Update" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [ -f "stats.json" ]; then
+            TOTAL_REPORTS=$(jq -r '.totalReports' stats.json)
+            PASS_RATE=$(jq -r '.passRate' stats.json)
+            TOTAL_SCENARIOS=$(jq -r '.totalScenarios' stats.json)
+            
+            echo "- **Total Reports**: $TOTAL_REPORTS" >> $GITHUB_STEP_SUMMARY
+            echo "- **Total Scenarios**: $TOTAL_SCENARIOS" >> $GITHUB_STEP_SUMMARY
+            echo "- **Pass Rate**: $PASS_RATE%" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          REPORT_COUNT=$(jq -r '.reports | length' index.json)
+          echo "- **Index Updated**: $REPORT_COUNT reports processed" >> $GITHUB_STEP_SUMMARY
+
+      - name: Commit and push changes
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: 'Auto-update index.json for Cucumber reports'
-          file_pattern: 'cucumber-report-viewer/public/TestResultsJsons/index.json'
+          commit_message: '🤖 Auto-update Cucumber reports index and statistics'
+          file_pattern: |
+            cucumber-report-viewer/public/TestResultsJsons/index.json
+            cucumber-report-viewer/public/TestResultsJsons/stats.json
+            cucumber-report-viewer/public/TestResultsJsons/*.json
+          commit_user_name: 'cucumber-bot'
+          commit_user_email: 'cucumber-bot@github.com'
+          commit_author: 'Cucumber Bot <cucumber-bot@github.com>'
+
+      - name: Create deployment comment
+        if: github.event_name == 'push'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = 'cucumber-report-viewer/public/TestResultsJsons/stats.json';
+            
+            if (fs.existsSync(path)) {
+              const stats = JSON.parse(fs.readFileSync(path, 'utf8'));
+              
+              const comment = `## 🥒 Cucumber Reports Updated
+              
+              **Summary:**
+              - 📊 **${stats.totalReports}** reports processed
+              - 🧪 **${stats.totalScenarios}** scenarios
+              - ✅ **${stats.passRate}%** pass rate
+              - ⏱️ **${stats.averageDuration}s** average duration
+              
+              **Latest Report:** ${stats.newestReport?.name || 'N/A'}
+              
+              [View Reports](https://your-domain.com/cucumber-reports)`;
+              
+              github.rest.repos.createCommitComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                commit_sha: context.sha,
+                body: comment
+              });
+            }
