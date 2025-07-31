@@ -7,7 +7,7 @@
         <div class="brand-section">
           <div class="brand-logo">
             <div class="logo-icon">
-              <v-icon size="32" color="#10B981">mdi-cucumber</v-icon>
+              <v-icon size="32" :color="isDarkTheme ? '#34D399' : '#10B981'">mdi-leaf</v-icon>
             </div>
             <div class="brand-text">
               <h1 class="brand-title">Cucumber Reports</h1>
@@ -113,7 +113,8 @@
             <div class="control-toggle" @click="toggleSearchExpanded"
               :class="{ 'active': searchQuery || searchExpanded }">
               <div class="control-icon">
-                <v-icon size="22" :color="searchQuery ? '#6366F1' : '#64748b'">mdi-magnify</v-icon>
+                <v-icon size="22" :color="searchQuery ? '#60A5FA' : (isDarkTheme ? '#94A3B8' : '#64748b')"
+                  class="control-icon-search">mdi-magnify</v-icon>
               </div>
               <div class="control-content">
                 <span class="control-label">Search</span>
@@ -136,7 +137,8 @@
             <div class="control-toggle" @click="toggleFiltersExpanded"
               :class="{ 'active': hasActiveFilters || filtersExpanded }">
               <div class="control-icon">
-                <v-icon size="22" :color="hasActiveFilters ? '#8B5CF6' : '#64748b'">mdi-filter-variant</v-icon>
+                <v-icon size="22" :color="hasActiveFilters ? '#A78BFA' : (isDarkTheme ? '#94A3B8' : '#64748b')"
+                  class="control-icon-filter">mdi-filter-variant</v-icon>
               </div>
               <div class="control-content">
                 <span class="control-label">Filters</span>
@@ -279,7 +281,7 @@
           <div class="summary-env">
             <v-icon color="primary" size="18" class="mr-1">mdi-laptop</v-icon>
             <span class="env-label">Environment:</span>
-            <span class="env-value">{{ report.environment || 'N/A' }}</span>
+            <span class="env-value">{{ report.environment || 'Test Environment' }}</span>
           </div>
           <div class="summary-stats">
             <span class="stat passed">
@@ -621,8 +623,7 @@ export default {
     truncateError(msg) {
       if (!msg) return '';
       const lines = msg.split('\n');
-      if (lines.length <= 5) return msg;
-      return lines.slice(0, 5).join('\n') + '\n...';
+      return lines.slice(0, 5).join('\n') + (lines.length > 5 ? '\n...' : '');
     },
     summaryBarWidth(type) {
       const total = this.summary.total || 1;
@@ -888,6 +889,9 @@ export default {
     }
   },
   computed: {
+    isDarkTheme() {
+      return this.$store.getters['theme/isDark'];
+    },
     summary() {
       let passed = 0, failed = 0, skipped = 0, total = 0, duration = 0;
       if (!this.report || !Array.isArray(this.report.features)) return { passed, failed, skipped, total, duration: 0 };
@@ -2977,6 +2981,796 @@ export default {
   .clear-filters-btn {
     margin-top: 1rem;
     width: 100%;
+  }
+}
+</style>
+
+<style scoped>
+/* Premium Dark Theme Compatibility for ReportViewer */
+
+/* Main Content Area Dark Theme */
+[data-theme="dark"] .cucumber-report-root {
+  background: var(--theme-background) !important;
+  color: var(--theme-text-primary) !important;
+  min-height: 100vh;
+}
+
+[data-theme="dark"] .cucumber-report-content {
+  background: var(--theme-background) !important;
+  color: var(--theme-text-primary) !important;
+}
+
+/* Fix white backgrounds in main content */
+[data-theme="dark"] .cucumber-report-content>* {
+  background: transparent !important;
+}
+
+/* Ensure all child elements inherit dark theme */
+[data-theme="dark"] .cucumber-report-root * {
+  border-color: var(--theme-border) !important;
+}
+
+/* Modern Header Dark Theme with Premium Effects */
+[data-theme="dark"] .modern-header {
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.9) 100%);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(96, 165, 250, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+[data-theme="dark"] .modern-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(96, 165, 250, 0.1) 0%, transparent 40%),
+    radial-gradient(circle at 80% 80%, rgba(52, 211, 153, 0.08) 0%, transparent 40%);
+  pointer-events: none;
+}
+
+[data-theme="dark"] .modern-header>* {
+  position: relative;
+  z-index: 1;
+}
+
+[data-theme="dark"] .brand-title {
+  color: var(--theme-text-primary);
+}
+
+[data-theme="dark"] .brand-subtitle {
+  color: var(--theme-text-secondary);
+}
+
+[data-theme="dark"] .info-card {
+  background: linear-gradient(145deg, rgba(74, 85, 104, 0.6) 0%, rgba(45, 55, 72, 0.8) 100%);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(96, 165, 250, 0.2);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+}
+
+[data-theme="dark"] .info-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  border-color: rgba(96, 165, 250, 0.4);
+}
+
+[data-theme="dark"] .info-label {
+  color: var(--theme-text-secondary);
+  font-weight: 500;
+}
+
+[data-theme="dark"] .info-value {
+  color: var(--theme-text-primary);
+  font-weight: 600;
+}
+
+/* Premium Chart and Results Overview Dark Theme */
+[data-theme="dark"] .results-chart {
+  position: relative;
+}
+
+[data-theme="dark"] .results-chart::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 120px;
+  height: 120px;
+  background: radial-gradient(circle, rgba(96, 165, 250, 0.1) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+  animation: pulse 3s ease-in-out infinite;
+}
+
+@keyframes pulse {
+
+  0%,
+  100% {
+    opacity: 0.5;
+    transform: translate(-50%, -50%) scale(1);
+  }
+
+  50% {
+    opacity: 0.8;
+    transform: translate(-50%, -50%) scale(1.1);
+  }
+}
+
+[data-theme="dark"] .results-chart .donut-chart circle:first-child {
+  stroke: rgba(74, 85, 104, 0.8);
+  stroke-width: 2;
+}
+
+[data-theme="dark"] .chart-center .success-percentage {
+  color: #34d399;
+  text-shadow: 0 0 20px rgba(52, 211, 153, 0.5);
+  font-weight: 800;
+}
+
+[data-theme="dark"] .chart-center .chart-label {
+  color: var(--theme-text-secondary);
+  font-weight: 500;
+}
+
+[data-theme="dark"] .time-card,
+[data-theme="dark"] .duration-card {
+  background: linear-gradient(145deg, rgba(74, 85, 104, 0.6) 0%, rgba(45, 55, 72, 0.8) 100%);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(96, 165, 250, 0.2);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+[data-theme="dark"] .time-card::before,
+[data-theme="dark"] .duration-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(96, 165, 250, 0.1), transparent);
+  transition: left 0.6s ease;
+}
+
+[data-theme="dark"] .time-card:hover,
+[data-theme="dark"] .duration-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  border-color: rgba(96, 165, 250, 0.4);
+}
+
+[data-theme="dark"] .time-card:hover::before,
+[data-theme="dark"] .duration-card:hover::before {
+  left: 100%;
+}
+
+[data-theme="dark"] .time-label,
+[data-theme="dark"] .duration-label {
+  color: var(--theme-text-secondary);
+}
+
+[data-theme="dark"] .time-value,
+[data-theme="dark"] .duration-value {
+  color: var(--theme-text-primary);
+}
+
+/* Controls Bar Dark Theme */
+[data-theme="dark"] .controls-bar-container {
+  background: var(--theme-surface);
+  border-bottom: 1px solid var(--theme-border);
+}
+
+[data-theme="dark"] .controls-bar {
+  background: var(--theme-surface);
+}
+
+[data-theme="dark"] .control-toggle {
+  background: var(--theme-surface-variant);
+  border: 1px solid var(--theme-border);
+  color: var(--theme-text-primary);
+}
+
+[data-theme="dark"] .control-toggle:hover {
+  background: var(--theme-hover-overlay);
+  border-color: var(--theme-text-secondary);
+  color: var(--theme-text-primary);
+}
+
+[data-theme="dark"] .control-toggle.active {
+  background: rgba(96, 165, 250, 0.15);
+  border-color: #60A5FA;
+  color: var(--theme-text-primary);
+}
+
+[data-theme="dark"] .control-toggle.active .control-icon {
+  background: linear-gradient(135deg, #60A5FA, #A78BFA);
+  box-shadow: 0 4px 12px rgba(96, 165, 250, 0.3);
+}
+
+[data-theme="dark"] .control-toggle.active .control-icon .v-icon {
+  color: white !important;
+}
+
+/* Simplified hover effects for control icons */
+[data-theme="dark"] .control-toggle:hover .control-icon {
+  background: rgba(96, 165, 250, 0.1);
+  transform: scale(1.05);
+  transition: all 0.3s ease;
+}
+
+/* Specific icon styling for better visibility - Override any conflicting styles */
+[data-theme="dark"] .control-icon-search,
+[data-theme="dark"] .control-icon-filter {
+  transition: all 0.3s ease;
+  -webkit-text-fill-color: initial !important;
+  background: none !important;
+  -webkit-background-clip: initial !important;
+  background-clip: initial !important;
+}
+
+/* Fixed icon visibility - removed problematic gradient effects */
+[data-theme="dark"] .control-toggle:not(.active) .control-icon-search,
+[data-theme="dark"] .control-toggle:not(.active) .control-icon-filter {
+  color: #94A3B8 !important;
+  opacity: 1;
+}
+
+/* Hover state - solid colors instead of gradient */
+[data-theme="dark"] .control-toggle:not(.active):hover .control-icon-search {
+  color: #60A5FA !important;
+  opacity: 1;
+  filter: drop-shadow(0 0 4px rgba(96, 165, 250, 0.3));
+}
+
+[data-theme="dark"] .control-toggle:not(.active):hover .control-icon-filter {
+  color: #A78BFA !important;
+  opacity: 1;
+  filter: drop-shadow(0 0 4px rgba(167, 139, 250, 0.3));
+}
+
+[data-theme="dark"] .control-label {
+  color: var(--theme-text-primary) !important;
+}
+
+[data-theme="dark"] .control-content {
+  color: var(--theme-text-primary);
+}
+
+[data-theme="dark"] .expand-icon {
+  color: var(--theme-text-secondary) !important;
+}
+
+/* Search and Filter Panels Dark Theme */
+[data-theme="dark"] .expandable-panels {
+  background: var(--theme-surface);
+}
+
+[data-theme="dark"] .panel-container {
+  background: var(--theme-surface);
+}
+
+[data-theme="dark"] .search-panel,
+[data-theme="dark"] .filters-panel {
+  background: var(--theme-surface) !important;
+  border: 1px solid var(--theme-border) !important;
+  color: var(--theme-text-primary) !important;
+}
+
+[data-theme="dark"] .panel-content {
+  background: var(--theme-surface) !important;
+  color: var(--theme-text-primary) !important;
+}
+
+/* Search Input Specific Styling - Complete Double Border Fix */
+[data-theme="dark"] .search-input .v-field {
+  background: var(--theme-surface-variant) !important;
+  border: 1px solid var(--theme-border) !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+[data-theme="dark"] .search-input .v-field--focused {
+  background: var(--theme-surface) !important;
+  border: 1px solid #60A5FA !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+[data-theme="dark"] .search-input .v-field__input {
+  color: var(--theme-text-primary) !important;
+}
+
+[data-theme="dark"] .search-input .v-field__input::placeholder {
+  color: var(--theme-text-secondary) !important;
+  opacity: 0.8 !important;
+}
+
+[data-theme="dark"] .search-input .v-field__prepend-inner {
+  color: #60A5FA !important;
+}
+
+[data-theme="dark"] .search-input:hover .v-field {
+  background: var(--theme-surface) !important;
+  border-color: var(--theme-text-secondary) !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+[data-theme="dark"] .search-input:focus-within .v-field {
+  background: var(--theme-surface) !important;
+  border-color: #60A5FA !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+/* Override any Vuetify focus styles */
+[data-theme="dark"] .search-input .v-text-field--focused .v-field {
+  background: var(--theme-surface) !important;
+  border: 1px solid #60A5FA !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Removed duplicate search input styles to prevent conflicts */
+
+[data-theme="dark"] .search-results-info {
+  background: var(--theme-surface-variant);
+  border: 1px solid var(--theme-border);
+}
+
+[data-theme="dark"] .results-breakdown .breakdown-item {
+  color: var(--theme-text-secondary);
+}
+
+[data-theme="dark"] .filter-label {
+  color: var(--theme-text-primary) !important;
+}
+
+/* Filter Select Styling - Complete Double Border Fix */
+[data-theme="dark"] .filter-select .v-field {
+  background: var(--theme-surface-variant) !important;
+  border: 1px solid var(--theme-border) !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+[data-theme="dark"] .filter-select .v-field--focused {
+  background: var(--theme-surface) !important;
+  border: 1px solid #60A5FA !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+[data-theme="dark"] .filter-select .v-field__input {
+  color: var(--theme-text-primary) !important;
+}
+
+[data-theme="dark"] .filter-select .v-field__input::placeholder {
+  color: var(--theme-text-secondary) !important;
+  opacity: 0.8 !important;
+}
+
+[data-theme="dark"] .filter-select .v-field__append-inner {
+  color: #8B5CF6 !important;
+}
+
+[data-theme="dark"] .filter-select:hover .v-field {
+  background: var(--theme-surface) !important;
+  border-color: var(--theme-text-secondary) !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+[data-theme="dark"] .filter-select:focus-within .v-field {
+  background: var(--theme-surface) !important;
+  border-color: #60A5FA !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+/* Override any Vuetify focus styles for selects */
+[data-theme="dark"] .filter-select .v-select--focused .v-field {
+  background: var(--theme-surface) !important;
+  border: 1px solid #60A5FA !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Removed duplicate filter select styles to prevent conflicts */
+
+[data-theme="dark"] .filter-group {
+  color: var(--theme-text-primary);
+}
+
+[data-theme="dark"] .active-filters-summary {
+  background: var(--theme-surface-variant);
+  border: 1px solid var(--theme-border);
+}
+
+[data-theme="dark"] .summary-label {
+  color: var(--theme-text-primary);
+}
+
+[data-theme="dark"] .summary-text {
+  color: var(--theme-text-secondary);
+}
+
+/* Summary Bar Dark Theme */
+[data-theme="dark"] .cucumber-summary-bar {
+  background: var(--theme-surface);
+  border-bottom: 1px solid var(--theme-border);
+}
+
+[data-theme="dark"] .env-label {
+  color: var(--theme-text-secondary);
+}
+
+[data-theme="dark"] .env-value {
+  color: var(--theme-text-primary);
+}
+
+[data-theme="dark"] .stat {
+  color: var(--theme-text-primary);
+}
+
+/* Features List Dark Theme */
+[data-theme="dark"] .cucumber-features-list {
+  background: var(--theme-background) !important;
+}
+
+/* Fix any remaining white backgrounds */
+[data-theme="dark"] .cucumber-report-content,
+[data-theme="dark"] .cucumber-report-content>div,
+[data-theme="dark"] .cucumber-report-content>div>div {
+  background: var(--theme-background) !important;
+}
+
+/* Ensure expansion panels have dark background */
+[data-theme="dark"] .v-expansion-panels {
+  background: var(--theme-background) !important;
+}
+
+[data-theme="dark"] .v-expansion-panels {
+  background: var(--theme-background) !important;
+}
+
+[data-theme="dark"] .v-expansion-panel {
+  background: var(--theme-surface) !important;
+  border: 1px solid var(--theme-border) !important;
+  color: var(--theme-text-primary) !important;
+}
+
+[data-theme="dark"] .v-expansion-panel-title {
+  background: var(--theme-surface) !important;
+  color: var(--theme-text-primary) !important;
+}
+
+[data-theme="dark"] .v-expansion-panel-title:hover {
+  background: var(--theme-surface-variant) !important;
+  color: var(--theme-text-primary) !important;
+}
+
+[data-theme="dark"] .v-expansion-panel-text {
+  background: var(--theme-surface) !important;
+  color: var(--theme-text-primary) !important;
+}
+
+[data-theme="dark"] .v-expansion-panel-text__wrap {
+  background: var(--theme-surface) !important;
+  color: var(--theme-text-primary) !important;
+}
+
+[data-theme="dark"] .cucumber-feature-row {
+  background: var(--theme-surface) !important;
+  border-bottom: 1px solid var(--theme-border);
+  color: var(--theme-text-primary) !important;
+}
+
+[data-theme="dark"] .cucumber-feature-row:hover {
+  background: var(--theme-surface-variant) !important;
+  color: var(--theme-text-primary) !important;
+}
+
+[data-theme="dark"] .feature-file {
+  color: var(--theme-text-primary) !important;
+}
+
+[data-theme="dark"] .feature-tag {
+  background: var(--theme-surface-variant);
+  color: var(--theme-text-secondary);
+  border: 1px solid var(--theme-border);
+}
+
+[data-theme="dark"] .feature-description {
+  color: var(--theme-text-secondary);
+}
+
+/* Scenario Blocks Dark Theme */
+[data-theme="dark"] .cucumber-scenario-block {
+  background: var(--theme-surface) !important;
+  border: 1px solid var(--theme-border);
+}
+
+[data-theme="dark"] .scenario-header-row {
+  background: var(--theme-surface-variant) !important;
+  border-bottom: 1px solid var(--theme-border);
+  color: var(--theme-text-primary) !important;
+}
+
+[data-theme="dark"] .scenario-header-row:hover {
+  background: var(--theme-hover-overlay) !important;
+  color: var(--theme-text-primary) !important;
+}
+
+[data-theme="dark"] .scenario-title {
+  color: var(--theme-text-primary) !important;
+}
+
+[data-theme="dark"] .scenario-header-content {
+  color: var(--theme-text-primary) !important;
+}
+
+[data-theme="dark"] .scenario-title-row {
+  color: var(--theme-text-primary) !important;
+}
+
+[data-theme="dark"] .scenario-duration {
+  color: var(--theme-text-secondary);
+}
+
+[data-theme="dark"] .scenario-tag {
+  background: var(--theme-surface-variant);
+  color: var(--theme-text-secondary);
+  border: 1px solid var(--theme-border);
+}
+
+/* Steps List Dark Theme */
+[data-theme="dark"] .cucumber-steps-list {
+  background: var(--theme-surface) !important;
+  color: var(--theme-text-primary) !important;
+}
+
+[data-theme="dark"] .cucumber-step-row {
+  border-bottom: 1px solid var(--theme-border-light);
+  background: var(--theme-surface) !important;
+  color: var(--theme-text-primary) !important;
+}
+
+[data-theme="dark"] .cucumber-step-row:hover {
+  background: var(--theme-surface-variant) !important;
+  color: var(--theme-text-primary) !important;
+}
+
+[data-theme="dark"] .step-keyword {
+  color: #60A5FA;
+  font-weight: 600;
+}
+
+[data-theme="dark"] .step-text {
+  color: var(--theme-text-primary);
+}
+
+[data-theme="dark"] .step-duration {
+  color: var(--theme-text-secondary);
+}
+
+/* Error Display Dark Theme */
+[data-theme="dark"] .step-error-block {
+  background: rgba(248, 113, 113, 0.1);
+  border: 1px solid rgba(248, 113, 113, 0.3);
+}
+
+[data-theme="dark"] .error-header {
+  color: var(--theme-error);
+}
+
+[data-theme="dark"] .error-label {
+  color: var(--theme-error);
+}
+
+[data-theme="dark"] .step-error-message {
+  background: var(--theme-surface-variant);
+  color: var(--theme-text-primary);
+  border: 1px solid var(--theme-border);
+}
+
+[data-theme="dark"] .error-actions {
+  background: var(--theme-surface-variant);
+  border-top: 1px solid var(--theme-border);
+}
+
+/* Screenshot Display Dark Theme */
+[data-theme="dark"] .step-screenshots {
+  background: var(--theme-surface-variant);
+  border: 1px solid var(--theme-border);
+}
+
+[data-theme="dark"] .screenshots-header {
+  color: var(--theme-info);
+}
+
+[data-theme="dark"] .screenshots-label {
+  color: var(--theme-info);
+}
+
+[data-theme="dark"] .screenshot-thumbnail {
+  border: 2px solid var(--theme-border);
+  background: var(--theme-surface);
+}
+
+[data-theme="dark"] .screenshot-thumbnail:hover {
+  border-color: var(--theme-info);
+}
+
+[data-theme="dark"] .thumbnail-overlay {
+  background: rgba(0, 0, 0, 0.7);
+}
+
+/* Alert Messages Dark Theme */
+[data-theme="dark"] .cucumber-alert {
+  background: var(--theme-surface-variant);
+  border: 1px solid var(--theme-border);
+  color: var(--theme-text-primary);
+}
+
+[data-theme="dark"] .cucumber-alert.error {
+  background: rgba(248, 113, 113, 0.1);
+  border-color: var(--theme-error);
+  color: var(--theme-error);
+}
+
+[data-theme="dark"] .cucumber-alert.info {
+  background: rgba(34, 211, 238, 0.1);
+  border-color: var(--theme-info);
+  color: var(--theme-info);
+}
+
+[data-theme="dark"] .cucumber-alert.warning {
+  background: rgba(251, 191, 36, 0.1);
+  border-color: var(--theme-warning);
+  color: var(--theme-warning);
+}
+
+/* Comprehensive Vuetify Component Overrides for Dark Theme */
+
+/* Dropdown menus and overlays */
+[data-theme="dark"] .v-overlay__content {
+  background: var(--theme-surface) !important;
+  border: 1px solid var(--theme-border) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4) !important;
+}
+
+[data-theme="dark"] .v-list {
+  background: var(--theme-surface) !important;
+  color: var(--theme-text-primary) !important;
+}
+
+[data-theme="dark"] .v-list-item {
+  color: var(--theme-text-primary) !important;
+}
+
+[data-theme="dark"] .v-list-item:hover {
+  background: var(--theme-hover-overlay) !important;
+}
+
+[data-theme="dark"] .v-list-item--active {
+  background: rgba(96, 165, 250, 0.2) !important;
+  color: #60A5FA !important;
+}
+
+/* Text fields */
+[data-theme="dark"] .v-text-field {
+  background: var(--theme-surface-variant) !important;
+}
+
+[data-theme="dark"] .v-text-field .v-field {
+  background: var(--theme-surface-variant) !important;
+  border: 1px solid var(--theme-border) !important;
+}
+
+[data-theme="dark"] .v-text-field .v-field__input {
+  color: var(--theme-text-primary) !important;
+}
+
+[data-theme="dark"] .v-text-field .v-field__input::placeholder {
+  color: var(--theme-text-secondary) !important;
+  opacity: 0.7 !important;
+}
+
+[data-theme="dark"] .v-text-field .v-label {
+  color: var(--theme-text-secondary) !important;
+}
+
+[data-theme="dark"] .v-text-field:hover .v-field {
+  background: var(--theme-surface) !important;
+  border-color: var(--theme-text-secondary) !important;
+}
+
+[data-theme="dark"] .v-text-field:focus-within .v-field {
+  background: var(--theme-surface) !important;
+  border-color: #60A5FA !important;
+}
+
+[data-theme="dark"] .v-select {
+  background: var(--theme-surface-variant) !important;
+}
+
+[data-theme="dark"] .v-select .v-field {
+  background: var(--theme-surface-variant) !important;
+  border: 1px solid var(--theme-border) !important;
+}
+
+[data-theme="dark"] .v-select .v-field__input {
+  color: var(--theme-text-primary) !important;
+}
+
+[data-theme="dark"] .v-select .v-field__input::placeholder {
+  color: var(--theme-text-secondary) !important;
+  opacity: 0.7 !important;
+}
+
+[data-theme="dark"] .v-select:hover .v-field {
+  background: var(--theme-surface) !important;
+  border-color: var(--theme-text-secondary) !important;
+}
+
+[data-theme="dark"] .v-select:focus-within .v-field {
+  background: var(--theme-surface) !important;
+  border-color: #60A5FA !important;
+}
+
+[data-theme="dark"] .v-chip {
+  background: var(--theme-surface-variant) !important;
+  color: var(--theme-text-primary) !important;
+  border: 1px solid var(--theme-border) !important;
+}
+
+[data-theme="dark"] .v-btn {
+  background: var(--theme-surface-variant) !important;
+  color: var(--theme-text-primary) !important;
+  border: 1px solid var(--theme-border) !important;
+}
+
+[data-theme="dark"] .v-btn:hover {
+  background: var(--theme-hover-overlay) !important;
+}
+
+/* Status-specific colors that work in both themes */
+.cucumber-step-row .v-icon[color="success"] {
+  color: var(--theme-success) !important;
+}
+
+.cucumber-step-row .v-icon[color="error"] {
+  color: var(--theme-error) !important;
+}
+
+.cucumber-step-row .v-icon[color="warning"] {
+  color: var(--theme-warning) !important;
+}
+
+.cucumber-step-row .v-icon[color="info"] {
+  color: var(--theme-info) !important;
+}
+
+/* Responsive adjustments for dark theme */
+@media (max-width: 768px) {
+  [data-theme="dark"] .modern-header {
+    background: var(--theme-background);
+  }
+
+  [data-theme="dark"] .controls-bar {
+    background: var(--theme-surface);
+    border-bottom: 1px solid var(--theme-border);
   }
 }
 </style>

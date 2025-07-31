@@ -10,4 +10,16 @@ const app = createApp(App);
 app.use(router);
 app.use(store);
 app.use(vuetify);
+
+// Initialize theme system
+store.dispatch('theme/initializeTheme');
+
+// Watch for theme changes and update Vuetify
+store.watch(
+  (state) => state.theme.isDark,
+  (isDark) => {
+    vuetify.theme.global.name.value = isDark ? 'dark' : 'light';
+  }
+);
+
 app.mount('#app');

@@ -1,4 +1,5 @@
 import { createStore } from 'vuex';
+import theme from './modules/theme';
 
 export default createStore({
   state: {
@@ -17,4 +18,7 @@ export default createStore({
   getters: {
     getReportData: (state) => state.reportData,
   },
+  modules: {
+    theme
+  }
 });

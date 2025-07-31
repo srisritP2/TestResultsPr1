@@ -521,4 +521,264 @@ export default {
   align-items: center;
   gap: 4px;
 }
+
+/* Dark Theme Compatibility for ReportUploader */
+
+/* Main Card Dark Theme */
+[data-theme="dark"] .v-card {
+  background: var(--theme-surface) !important;
+  border: 1px solid var(--theme-border) !important;
+  box-shadow: 0 4px 12px var(--theme-shadow) !important;
+}
+
+/* Card Title Dark Theme */
+[data-theme="dark"] .v-card-title {
+  color: var(--theme-text-primary) !important;
+  background: var(--theme-surface) !important;
+}
+
+/* Card Text Dark Theme */
+[data-theme="dark"] .v-card-text {
+  background: var(--theme-surface) !important;
+  color: var(--theme-text-primary) !important;
+}
+
+/* File Input Dark Theme */
+[data-theme="dark"] .v-file-input {
+  background: var(--theme-surface-variant) !important;
+}
+
+[data-theme="dark"] .v-file-input .v-field {
+  background: var(--theme-surface-variant) !important;
+  border: 1px solid var(--theme-border) !important;
+}
+
+[data-theme="dark"] .v-file-input .v-field__input {
+  color: var(--theme-text-primary) !important;
+}
+
+[data-theme="dark"] .v-file-input .v-field__input::placeholder {
+  color: var(--theme-text-secondary) !important;
+  opacity: 0.8 !important;
+}
+
+[data-theme="dark"] .v-file-input .v-field__prepend-inner {
+  color: var(--theme-text-secondary) !important;
+}
+
+[data-theme="dark"] .v-file-input .v-label {
+  color: var(--theme-text-secondary) !important;
+}
+
+[data-theme="dark"] .v-file-input:hover .v-field {
+  background: var(--theme-surface) !important;
+  border-color: var(--theme-text-secondary) !important;
+}
+
+[data-theme="dark"] .v-file-input:focus-within .v-field {
+  background: var(--theme-surface) !important;
+  border-color: #60A5FA !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+/* Alert Dark Theme */
+[data-theme="dark"] .v-alert {
+  background: var(--theme-surface-variant) !important;
+  border: 1px solid var(--theme-border) !important;
+  color: var(--theme-text-primary) !important;
+}
+
+[data-theme="dark"] .v-alert.v-alert--type-error {
+  background: rgba(248, 113, 113, 0.1) !important;
+  border-color: var(--theme-error) !important;
+  color: var(--theme-error) !important;
+}
+
+[data-theme="dark"] .v-alert.v-alert--type-success {
+  background: rgba(52, 211, 153, 0.1) !important;
+  border-color: var(--theme-success) !important;
+  color: var(--theme-success) !important;
+}
+
+[data-theme="dark"] .v-alert.v-alert--type-warning {
+  background: rgba(251, 191, 36, 0.1) !important;
+  border-color: var(--theme-warning) !important;
+  color: var(--theme-warning) !important;
+}
+
+[data-theme="dark"] .v-alert.v-alert--type-info {
+  background: rgba(34, 211, 238, 0.1) !important;
+  border-color: var(--theme-info) !important;
+  color: var(--theme-info) !important;
+}
+
+/* Alert Icons Dark Theme */
+[data-theme="dark"] .v-alert .v-icon {
+  color: inherit !important;
+}
+
+/* Chip Dark Theme */
+[data-theme="dark"] .v-chip {
+  background: var(--theme-surface-variant) !important;
+  color: var(--theme-text-primary) !important;
+  border: 1px solid var(--theme-border) !important;
+}
+
+/* Button Dark Theme */
+[data-theme="dark"] .v-btn {
+  background: var(--theme-surface-variant) !important;
+  color: var(--theme-text-primary) !important;
+  border: 1px solid var(--theme-border) !important;
+}
+
+[data-theme="dark"] .v-btn:hover {
+  background: var(--theme-hover-overlay) !important;
+}
+
+[data-theme="dark"] .v-btn:disabled {
+  background: var(--theme-surface-variant) !important;
+  color: var(--theme-text-secondary) !important;
+  opacity: 0.6;
+}
+
+/* Divider Dark Theme */
+[data-theme="dark"] .v-divider {
+  border-color: var(--theme-border) !important;
+}
+
+/* Storage Management Section Dark Theme */
+[data-theme="dark"] .stored-report-item {
+  background: var(--theme-surface-variant);
+  border: 1px solid var(--theme-border);
+}
+
+[data-theme="dark"] .stored-report-item:hover {
+  background: var(--theme-hover-overlay);
+  border-color: var(--theme-text-secondary);
+}
+
+[data-theme="dark"] .stored-report-item.session-only {
+  border-left: 4px solid #60A5FA;
+  background: linear-gradient(90deg, rgba(96, 165, 250, 0.1) 0%, var(--theme-surface-variant) 20%);
+}
+
+[data-theme="dark"] .text-body-2 {
+  color: var(--theme-text-primary) !important;
+}
+
+[data-theme="dark"] .text-caption {
+  color: var(--theme-text-secondary) !important;
+}
+
+[data-theme="dark"] .text-medium-emphasis {
+  color: var(--theme-text-secondary) !important;
+}
+
+[data-theme="dark"] .text-subtitle-2 {
+  color: var(--theme-text-primary) !important;
+}
+
+/* Storage Info Dark Theme */
+[data-theme="dark"] .storage-info {
+  background: var(--theme-surface);
+}
+
+[data-theme="dark"] .storage-info .v-chip {
+  background: var(--theme-surface-variant) !important;
+  color: var(--theme-text-primary) !important;
+  border: 1px solid var(--theme-border) !important;
+}
+
+/* Stored Reports List Dark Theme */
+[data-theme="dark"] .stored-reports-list {
+  background: var(--theme-surface);
+}
+
+[data-theme="dark"] .stored-reports-list::-webkit-scrollbar-track {
+  background: var(--theme-surface-variant);
+}
+
+[data-theme="dark"] .stored-reports-list::-webkit-scrollbar-thumb {
+  background: var(--theme-text-secondary);
+}
+
+[data-theme="dark"] .stored-reports-list::-webkit-scrollbar-thumb:hover {
+  background: var(--theme-text-primary);
+}
+
+/* Clickable Area Dark Theme */
+[data-theme="dark"] .clickable-area {
+  color: var(--theme-text-primary);
+}
+
+[data-theme="dark"] .clickable-area:hover {
+  color: #60A5FA;
+}
+
+/* Report Actions Dark Theme */
+[data-theme="dark"] .report-actions .v-btn {
+  background: transparent !important;
+  color: var(--theme-text-secondary) !important;
+  border: none !important;
+}
+
+[data-theme="dark"] .report-actions .v-btn:hover {
+  background: var(--theme-hover-overlay) !important;
+  color: var(--theme-text-primary) !important;
+}
+
+/* Expand Transition Dark Theme */
+[data-theme="dark"] .v-expand-transition-enter-active,
+[data-theme="dark"] .v-expand-transition-leave-active {
+  background: var(--theme-surface);
+}
+
+/* Card Actions Dark Theme */
+[data-theme="dark"] .v-card-actions {
+  background: var(--theme-surface) !important;
+  border-top: 1px solid var(--theme-border-light);
+}
+
+/* Text Color Overrides for Dark Theme */
+[data-theme="dark"] .grey--text {
+  color: var(--theme-text-secondary) !important;
+}
+
+[data-theme="dark"] .text--darken-1 {
+  color: var(--theme-text-secondary) !important;
+}
+
+/* Font Weight Classes Dark Theme */
+[data-theme="dark"] .font-weight-medium {
+  color: var(--theme-text-primary) !important;
+}
+
+[data-theme="dark"] .font-weight-bold {
+  color: var(--theme-text-primary) !important;
+}
+
+/* Responsive Dark Theme Adjustments */
+@media (max-width: 768px) {
+  [data-theme="dark"] .v-card {
+    background: var(--theme-surface) !important;
+    border: 1px solid var(--theme-border) !important;
+  }
+  
+  [data-theme="dark"] .stored-report-item {
+    background: var(--theme-surface-variant);
+    border: 1px solid var(--theme-border);
+  }
+}
+
+@media (max-width: 480px) {
+  [data-theme="dark"] .v-card-title {
+    background: var(--theme-surface) !important;
+    color: var(--theme-text-primary) !important;
+  }
+  
+  [data-theme="dark"] .v-card-text {
+    background: var(--theme-surface) !important;
+  }
+}
 </style>

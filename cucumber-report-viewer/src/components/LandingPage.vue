@@ -10,7 +10,10 @@
           </span>
           <span class="brand-title">Automation Test Results || Cucumber Reports</span>
         </div>
-        <a href="https://cucumber.io" target="_blank" class="navbar-link">cucumber.io</a>
+        <div class="navbar-actions">
+          <ThemeToggle />
+          <a href="https://cucumber.io" target="_blank" class="navbar-link">cucumber.io</a>
+        </div>
       </div>
     </nav>
     <main class="main-content">
@@ -54,13 +57,15 @@
 <script>
 import ReportUploader from './ReportUploader.vue';
 import ReportsCollection from './ReportsCollection.vue';
+import ThemeToggle from './ThemeToggle.vue';
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
 export default {
   components: {
     ReportUploader,
-    ReportsCollection
+    ReportsCollection,
+    ThemeToggle
   },
   setup() {
     const router = useRouter();
@@ -94,6 +99,34 @@ export default {
   font-family: 'Segoe UI', 'Roboto', 'Arial', sans-serif;
   display: flex;
   flex-direction: column;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Premium Dark Theme for Landing Page */
+[data-theme="dark"] .landing-bg {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+  position: relative;
+}
+
+[data-theme="dark"] .landing-bg::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(circle at 20% 80%, rgba(96, 165, 250, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(52, 211, 153, 0.08) 0%, transparent 50%),
+    radial-gradient(circle at 40% 40%, rgba(139, 92, 246, 0.06) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+[data-theme="dark"] .landing-bg > * {
+  position: relative;
+  z-index: 1;
 }
 
 .navbar {
@@ -103,6 +136,16 @@ export default {
   position: sticky;
   top: 0;
   z-index: 10;
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Premium Dark Navbar */
+[data-theme="dark"] .navbar {
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(96, 165, 250, 0.2);
+  box-shadow: 0 4px 32px rgba(0, 0, 0, 0.3);
 }
 
 .navbar-content {
@@ -130,6 +173,18 @@ export default {
   font-size: 1.2rem;
   color: #1e293b;
   letter-spacing: 0.5px;
+  transition: all 0.3s ease;
+}
+
+[data-theme="dark"] .brand-title {
+  color: #e2e8f0;
+  text-shadow: 0 0 20px rgba(96, 165, 250, 0.3);
+}
+
+.navbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
 }
 
 .navbar-link {
@@ -162,6 +217,27 @@ export default {
   margin-bottom: 2.5rem;
   text-align: center;
   border-top: 4px solid #00a818;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Premium Dark Upload Card */
+[data-theme="dark"] .upload-card {
+  background: linear-gradient(145deg, rgba(45, 55, 72, 0.9) 0%, rgba(74, 85, 104, 0.8) 100%);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(96, 165, 250, 0.2);
+  border-top: 4px solid #60a5fa;
+  box-shadow: 
+    0 20px 60px rgba(0, 0, 0, 0.4),
+    0 8px 32px rgba(96, 165, 250, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .upload-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 
+    0 32px 80px rgba(0, 0, 0, 0.5),
+    0 12px 48px rgba(96, 165, 250, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
 
 .main-title {
@@ -169,16 +245,38 @@ export default {
   font-weight: 700;
   margin-bottom: 1rem;
   color: #1e293b;
+  transition: all 0.3s ease;
+}
+
+[data-theme="dark"] .main-title {
+  color: #f1f5f9;
+  background: linear-gradient(135deg, #60a5fa 0%, #34d399 50%, #a78bfa 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 30px rgba(96, 165, 250, 0.3);
 }
 
 .subtitle {
   font-size: 1.1rem;
   color: #64748b;
   margin-bottom: 2rem;
+  transition: all 0.3s ease;
 }
+
 .accent {
   color: #00a818;
   font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+[data-theme="dark"] .subtitle {
+  color: #cbd5e0;
+}
+
+[data-theme="dark"] .accent {
+  color: #60a5fa;
+  text-shadow: 0 0 10px rgba(96, 165, 250, 0.3);
 }
 
 .upload-area {
@@ -187,11 +285,44 @@ export default {
   padding: 2rem 1rem 1.5rem 1rem;
   background: #f6fff9;
   margin-bottom: 0.5rem;
-  transition: border-color 0.2s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
 }
+
 .upload-area:hover {
   border-color: #059c1b;
+  transform: scale(1.02);
+}
+
+/* Premium Dark Upload Area */
+[data-theme="dark"] .upload-area {
+  border: 2px dashed rgba(96, 165, 250, 0.4);
+  background: linear-gradient(135deg, rgba(96, 165, 250, 0.05) 0%, rgba(52, 211, 153, 0.03) 100%);
+  backdrop-filter: blur(10px);
+  position: relative;
+  overflow: hidden;
+}
+
+[data-theme="dark"] .upload-area::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(96, 165, 250, 0.1), transparent);
+  transition: left 0.6s ease;
+}
+
+[data-theme="dark"] .upload-area:hover {
+  border-color: rgba(96, 165, 250, 0.6);
+  background: linear-gradient(135deg, rgba(96, 165, 250, 0.08) 0%, rgba(52, 211, 153, 0.05) 100%);
+  box-shadow: 0 8px 32px rgba(96, 165, 250, 0.2);
+  transform: scale(1.02);
+}
+
+[data-theme="dark"] .upload-area:hover::before {
+  left: 100%;
 }
 
 .upload-hint {
@@ -218,10 +349,21 @@ export default {
   font-size: 1.3rem;
   font-weight: 600;
   margin-bottom: 1.2rem;
+  transition: all 0.3s ease;
 }
 
 .highlight {
   color: #00a818;
+  transition: all 0.3s ease;
+}
+
+[data-theme="dark"] .howto-section h2 {
+  color: #f1f5f9;
+}
+
+[data-theme="dark"] .highlight {
+  color: #34d399;
+  text-shadow: 0 0 15px rgba(52, 211, 153, 0.4);
 }
 
 .howto-cards {
@@ -240,10 +382,27 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: center;
-  transition: box-shadow 0.2s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
+
 .howto-card:hover {
   box-shadow: 0 4px 16px rgba(0,168,24,0.09);
+  transform: translateY(-4px);
+}
+
+/* Premium Dark How-to Cards */
+[data-theme="dark"] .howto-card {
+  background: linear-gradient(145deg, rgba(45, 55, 72, 0.8) 0%, rgba(74, 85, 104, 0.6) 100%);
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(96, 165, 250, 0.15);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .howto-card:hover {
+  transform: translateY(-8px) scale(1.05);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+  border-color: rgba(96, 165, 250, 0.3);
+  background: linear-gradient(145deg, rgba(45, 55, 72, 0.9) 0%, rgba(74, 85, 104, 0.7) 100%);
 }
 
 .howto-icon {
@@ -256,6 +415,7 @@ export default {
   font-weight: 600;
   margin-bottom: 0.5rem;
   color: #1e293b;
+  transition: all 0.3s ease;
 }
 
 code {
@@ -264,6 +424,18 @@ code {
   padding: 0.2rem 0.5rem;
   font-size: 0.95em;
   color: #334155;
+  transition: all 0.3s ease;
+}
+
+[data-theme="dark"] .howto-title {
+  color: #e2e8f0;
+}
+
+[data-theme="dark"] code {
+  background: rgba(74, 85, 104, 0.6);
+  color: #94a3b8;
+  border: 1px solid rgba(96, 165, 250, 0.2);
+  backdrop-filter: blur(5px);
 }
 
 .footer {
@@ -273,6 +445,25 @@ code {
   padding: 1.5rem 0 1rem 0;
   font-size: 0.95rem;
   margin-top: auto;
+  transition: all 0.3s ease;
+}
+
+[data-theme="dark"] .footer {
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(30, 41, 59, 0.8) 100%);
+  backdrop-filter: blur(20px);
+  color: #94a3b8;
+  border-top: 1px solid rgba(96, 165, 250, 0.2);
+  position: relative;
+}
+
+[data-theme="dark"] .footer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(96, 165, 250, 0.5), transparent);
 }
 
 .footer-link {

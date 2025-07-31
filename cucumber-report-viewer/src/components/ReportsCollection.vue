@@ -1048,8 +1048,326 @@ export default {
   border-radius: 3px !important;
 }
 
-.v-chip {
-  font-size: 0.75rem !important;
-  height: 24px !important;
+/* Dark Theme Compatibility for ReportsCollection */
+
+/* Main Container Dark Theme */
+[data-theme="dark"] .reports-collection-container {
+  background: var(--theme-background);
+}
+
+[data-theme="dark"] .reports-collection-card {
+  background: var(--theme-surface);
+  border: 1px solid var(--theme-border);
+  box-shadow: 0 8px 32px var(--theme-shadow);
+}
+
+/* Header Dark Theme */
+[data-theme="dark"] .reports-collection-header {
+  background: var(--theme-surface);
+  border-bottom: 1px solid var(--theme-border);
+}
+
+[data-theme="dark"] .collection-title {
+  color: var(--theme-text-primary);
+}
+
+[data-theme="dark"] .collection-subtitle {
+  color: var(--theme-text-secondary);
+}
+
+/* Filters Section Dark Theme */
+[data-theme="dark"] .filters-section {
+  background: var(--theme-surface-variant);
+  border-bottom: 1px solid var(--theme-border);
+}
+
+[data-theme="dark"] .search-field {
+  background: var(--theme-surface) !important;
+}
+
+[data-theme="dark"] .search-field .v-field {
+  background: var(--theme-surface-variant) !important;
+  border: 1px solid var(--theme-border) !important;
+}
+
+[data-theme="dark"] .search-field .v-field__input {
+  color: var(--theme-text-primary) !important;
+}
+
+[data-theme="dark"] .search-field .v-field__input::placeholder {
+  color: var(--theme-text-secondary) !important;
+  opacity: 0.8 !important;
+}
+
+[data-theme="dark"] .search-field:hover .v-field {
+  background: var(--theme-surface) !important;
+  border-color: var(--theme-text-secondary) !important;
+}
+
+[data-theme="dark"] .search-field:focus-within .v-field {
+  background: var(--theme-surface) !important;
+  border-color: #60A5FA !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+[data-theme="dark"] .v-select {
+  background: var(--theme-surface) !important;
+}
+
+[data-theme="dark"] .v-select .v-field {
+  background: var(--theme-surface-variant) !important;
+  border: 1px solid var(--theme-border) !important;
+}
+
+[data-theme="dark"] .v-select .v-field__input {
+  color: var(--theme-text-primary) !important;
+}
+
+[data-theme="dark"] .v-select .v-field__input::placeholder {
+  color: var(--theme-text-secondary) !important;
+  opacity: 0.8 !important;
+}
+
+[data-theme="dark"] .v-select:hover .v-field {
+  background: var(--theme-surface) !important;
+  border-color: var(--theme-text-secondary) !important;
+}
+
+[data-theme="dark"] .v-select:focus-within .v-field {
+  background: var(--theme-surface) !important;
+  border-color: #60A5FA !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+/* Content Area Dark Theme */
+[data-theme="dark"] .reports-content {
+  background: var(--theme-surface);
+}
+
+/* Loading State Dark Theme */
+[data-theme="dark"] .loading-state {
+  color: var(--theme-text-secondary);
+}
+
+[data-theme="dark"] .loading-state p {
+  color: var(--theme-text-secondary);
+}
+
+/* Empty State Dark Theme */
+[data-theme="dark"] .empty-state {
+  color: var(--theme-text-secondary);
+}
+
+[data-theme="dark"] .empty-state h4 {
+  color: var(--theme-text-primary);
+}
+
+[data-theme="dark"] .empty-state p {
+  color: var(--theme-text-secondary);
+}
+
+/* Report Cards Dark Theme */
+[data-theme="dark"] .report-card {
+  background: var(--theme-surface);
+  border: 1px solid var(--theme-border);
+  box-shadow: 0 4px 16px var(--theme-shadow);
+}
+
+[data-theme="dark"] .report-card:hover {
+  border-color: #60A5FA;
+  box-shadow: 0 12px 35px rgba(96, 165, 250, 0.2);
+  background: var(--theme-surface-variant);
+}
+
+[data-theme="dark"] .report-card.report-failed {
+  border-left: 4px solid var(--theme-error);
+}
+
+[data-theme="dark"] .report-content {
+  background: var(--theme-surface);
+}
+
+/* Report Header Dark Theme */
+[data-theme="dark"] .report-header-single-line {
+  border-bottom: 1px solid var(--theme-border-light);
+}
+
+[data-theme="dark"] .date-info {
+  color: var(--theme-text-secondary);
+}
+
+[data-theme="dark"] .test-counts-info {
+  color: var(--theme-text-primary);
+}
+
+[data-theme="dark"] .passed-count {
+  color: var(--theme-success);
+}
+
+[data-theme="dark"] .failed-count {
+  color: var(--theme-error);
+}
+
+[data-theme="dark"] .skipped-count {
+  color: var(--theme-warning);
+}
+
+/* Progress Section Dark Theme */
+[data-theme="dark"] .compact-progress-section {
+  background: var(--theme-surface);
+}
+
+[data-theme="dark"] .compact-stats {
+  color: var(--theme-text-secondary);
+}
+
+[data-theme="dark"] .total-tests {
+  color: var(--theme-text-secondary);
+}
+
+[data-theme="dark"] .pass-rate-text {
+  color: var(--theme-text-primary);
+}
+
+/* Pass Rate Classes for Dark Theme */
+[data-theme="dark"] .pass-rate-excellent {
+  color: var(--theme-success) !important;
+}
+
+[data-theme="dark"] .pass-rate-good {
+  color: #22D3EE !important;
+}
+
+[data-theme="dark"] .pass-rate-warning {
+  color: var(--theme-warning) !important;
+}
+
+[data-theme="dark"] .pass-rate-poor {
+  color: var(--theme-error) !important;
+}
+
+/* Tags Section Dark Theme */
+[data-theme="dark"] .tags-section {
+  background: var(--theme-surface);
+}
+
+[data-theme="dark"] .v-chip {
+  background: var(--theme-surface-variant) !important;
+  color: var(--theme-text-primary) !important;
+  border: 1px solid var(--theme-border) !important;
+}
+
+[data-theme="dark"] .more-tags {
+  color: var(--theme-text-secondary);
+}
+
+/* Report Identifier Dark Theme */
+[data-theme="dark"] .report-identifier {
+  border-top: 1px solid var(--theme-border-light);
+}
+
+[data-theme="dark"] .json-filename {
+  background: var(--theme-surface-variant);
+  color: var(--theme-text-secondary);
+  border: 1px solid var(--theme-border);
+}
+
+/* Report Actions Dark Theme */
+[data-theme="dark"] .report-actions {
+  background: var(--theme-surface);
+}
+
+[data-theme="dark"] .v-btn {
+  background: var(--theme-surface-variant) !important;
+  color: var(--theme-text-primary) !important;
+  border: 1px solid var(--theme-border) !important;
+}
+
+[data-theme="dark"] .v-btn:hover {
+  background: var(--theme-hover-overlay) !important;
+}
+
+/* Menu and List Items Dark Theme */
+[data-theme="dark"] .v-menu .v-list {
+  background: var(--theme-surface) !important;
+  border: 1px solid var(--theme-border) !important;
+}
+
+[data-theme="dark"] .v-list-item {
+  background: var(--theme-surface) !important;
+  color: var(--theme-text-primary) !important;
+}
+
+[data-theme="dark"] .v-list-item:hover {
+  background: var(--theme-hover-overlay) !important;
+}
+
+[data-theme="dark"] .v-list-item-title {
+  color: var(--theme-text-primary) !important;
+}
+
+[data-theme="dark"] .v-list-item.text-error {
+  color: var(--theme-error) !important;
+}
+
+/* Progress Linear Dark Theme */
+[data-theme="dark"] .v-progress-linear {
+  background: var(--theme-surface-variant) !important;
+}
+
+/* Alert Dark Theme */
+[data-theme="dark"] .v-alert {
+  background: var(--theme-surface-variant) !important;
+  color: var(--theme-text-primary) !important;
+  border: 1px solid var(--theme-border) !important;
+}
+
+[data-theme="dark"] .v-alert.v-alert--type-error {
+  background: rgba(248, 113, 113, 0.1) !important;
+  color: var(--theme-error) !important;
+  border-color: var(--theme-error) !important;
+}
+
+/* Animation Keyframes for Dark Theme */
+@keyframes fadeInUpDark {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+    background: var(--theme-surface-variant);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    background: var(--theme-surface);
+  }
+}
+
+[data-theme="dark"] .report-card {
+  animation: fadeInUpDark 0.5s ease-out forwards;
+}
+
+/* Responsive Dark Theme Adjustments */
+@media (max-width: 768px) {
+  [data-theme="dark"] .reports-collection-header {
+    background: var(--theme-surface);
+    border-bottom: 1px solid var(--theme-border);
+  }
+  
+  [data-theme="dark"] .filters-section {
+    background: var(--theme-surface-variant);
+  }
+  
+  [data-theme="dark"] .reports-content {
+    background: var(--theme-background);
+  }
+}
+
+@media (max-width: 480px) {
+  [data-theme="dark"] .report-content {
+    background: var(--theme-surface);
+    border: 1px solid var(--theme-border);
+  }
 }
 </style>
