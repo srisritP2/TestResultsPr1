@@ -504,8 +504,9 @@ export default {
           console.log(`Report ${report.id} published to GitHub Pages`);
         }
 
-        // Update GitHub Pages index
+        // Update GitHub Pages index and save file for GitHub Pages
         await this.updateGitHubPagesIndex();
+        await this.saveReportForGitHubPages(report);
         
         // Force reactivity update
         this.$forceUpdate();
@@ -549,6 +550,116 @@ export default {
         
       } catch (error) {
         console.error('Error updating GitHub Pages index:', error);
+      }
+    },
+
+    async saveReportForGitHubPages(report) {
+      try {
+        // Get the actual report data from localStorage
+        const reportData = localStorage.getItem('uploaded-report-' + report.id);
+        if (reportData) {
+          // Save to uploads folder and trigger index generation
+          await this.saveToUploadsFolder(report.id, reportData);
+        }
+      } catch (error) {
+        console.error('Error saving report for GitHub Pages:', error);
+        alert('Failed to publish report to GitHub Pages. Please try again.');
+      }
+    },
+
+    async saveToUploadsFolder(reportId, reportData) {
+      try {
+        // Since we can't directly write files from browser, we'll use a different approach
+        // Create a form to submit the data to a backend endpoint or use the File System Access API
+        
+        if ('showDirectoryPicker' in window) {
+          // Use File System Access API (modern browsers)
+          await this.saveWithFileSystemAPI(reportId, reportData);
+        } else {
+          // Fallback: Download file with instructions
+          await this.downloadWithInstructions(reportId, reportData);
+        }
+      } catch (error) {
+        console.error('Error saving to uploads folder:', error);
+        // Fallback to download
+        await this.downloadWithInstructions(reportId, reportData);
+      }
+    },
+
+    async saveWithFileSystemAPI(reportId, reportData) {
+      try {
+        // Request directory access
+        const dirHandle = await window.showDirectoryPicker();
+        
+        // Create the file
+        const fileHandle = await dirHandle.getFileHandle(`${reportId}.json`, { create: true });
+        const writable = await fileHandle.createWritable();
+        
+        // Write the data
+        await writable.write(reportData);
+        await writable.close();
+        
+        console.log(`✅ Report ${reportId} saved to uploads folder`);
+        alert(`Report published successfully! The file has been saved and will be included in the next GitHub Pages update.`);
+        
+        // Trigger index generation
+        await this.triggerIndexGeneration();
+        
+      } catch (error) {
+        if (error.name === 'AbortError') {
+          console.log('User cancelled directory selection');
+        } else {
+          throw error;
+        }
+      }
+    },
+
+    async downloadWithInstructions(reportId, reportData) {
+      // Create a downloadable file with clear instructions
+      const blob = new Blob([reportData], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${reportId}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
+      console.log(`📁 Report ${reportId} downloaded for manual upload`);
+      
+      // Show detailed instructions
+      const instructions = `
+📋 To complete GitHub Pages publishing:
+
+1. Save the downloaded file to: 
+   cucumber-report-viewer/public/TestResultsJsons/
+
+2. Run the index generator:
+   cd cucumber-report-viewer/public/TestResultsJsons
+   node generate-index-enhanced.js
+
+3. Commit and push the changes:
+   git add .
+   git commit -m "Add new test report"
+   git push
+
+The GitHub workflow will automatically update your GitHub Pages site!
+      `;
+      
+      alert(instructions);
+    },
+
+    async triggerIndexGeneration() {
+      try {
+        // This would ideally call the generate-index-enhanced.js script
+        // Since we can't run Node.js from browser, we'll show instructions
+        console.log('🔄 Index generation needed - run generate-index-enhanced.js');
+        
+        // You could implement a backend endpoint here to trigger the script
+        // For now, we'll just log the instruction
+      } catch (error) {
+        console.error('Error triggering index generation:', error);
       }
     },
 

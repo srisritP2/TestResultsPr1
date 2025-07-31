@@ -29,12 +29,14 @@
             :color="storageStatus.type === 'success' ? 'success' : storageStatus.type === 'warning' ? 'warning' : 'info'" 
             class="mr-2"
           >
-            {{ storageStatus.strategy === 'persistent' ? 'mdi-check-circle' : 
+            {{ storageStatus.strategy === 'server' ? 'mdi-cloud-upload' :
+               storageStatus.strategy === 'persistent' ? 'mdi-check-circle' : 
                storageStatus.strategy === 'compressed' ? 'mdi-alert-circle' : 'mdi-information' }}
           </v-icon>
           <div>
             <div class="font-weight-medium">
-              {{ storageStatus.strategy === 'persistent' ? 'Saved Successfully!' : 
+              {{ storageStatus.strategy === 'server' ? 'Uploaded to Server!' :
+                 storageStatus.strategy === 'persistent' ? 'Saved Successfully!' : 
                  storageStatus.strategy === 'compressed' ? 'Saved with Compression' : 'Session Only' }}
             </div>
             <div class="text-caption">{{ storageStatus.message }}</div>
@@ -133,6 +135,8 @@
 </template>
 
 <script>
+import UploadService from '@/services/UploadService';
+
 // Simple Cucumber JSON validation utility
 function isCucumberJson(json) {
   return Array.isArray(json) && json.length > 0 && json[0].hasOwnProperty('elements');
@@ -145,7 +149,8 @@ export default {
       errorMessage: '',
       storageStatus: null,
       showStorageInfo: false,
-      showStorageManager: false
+      showStorageManager: false,
+      $uploadService: UploadService
     };
   },
   computed: {
@@ -195,21 +200,46 @@ export default {
               this.errorMessage = 'File does not appear to be a valid Cucumber JSON report (features missing scenarios/elements).';
               return;
             }
-            // Save file to uploads folder and update index.json (for demo, just emit)
-            // In real app, would POST to backend API
             // Generate a unique id for the report
             const id = 'report-' + Date.now();
             const name = this.selectedFile.name.replace(/\.json$/i, '');
             const date = new Date().toISOString();
-            // Enhanced storage strategy with multiple options
+            
+            // Set report data in store for immediate viewing
             this.$store.commit('setReportData', reportData);
             
-            // Try to save to localStorage with compression and fallback strategies
+            // Try to upload to server first
+            try {
+              const uploadResult = await this.$uploadService.uploadReport(id, reportData, name);
+              
+              if (uploadResult.success) {
+                // Server upload successful
+                this.showStorageStatus('server', `Report uploaded to server successfully! Available at: ${uploadResult.url}`);
+                
+                // Also save to localStorage as backup
+                this.saveToLocalStorage(id, reportData, name, date, 'server');
+                
+                this.$emit('report-uploaded', { 
+                  ...reportData, 
+                  _uploadedId: id, 
+                  _storageStrategy: 'server',
+                  _storageMessage: 'Report saved to server and will be available in the reports index.',
+                  _serverUrl: uploadResult.url
+                });
+                
+                this.selectedFile = null;
+                return;
+              }
+            } catch (serverError) {
+              console.warn('Server upload failed, falling back to localStorage:', serverError.message);
+            }
+            
+            // Fallback to localStorage if server upload fails
             const reportSize = JSON.stringify(reportData).length;
             const maxSize = 5 * 1024 * 1024; // 5MB limit for localStorage
             
             let storageStrategy = 'session'; // default to session-only
-            let storageMessage = 'This uploaded report is only available for this session. It will be lost if you refresh or close the page.';
+            let storageMessage = 'Report uploaded successfully for this session.';
             
             if (reportSize < maxSize) {
               try {
@@ -252,20 +282,11 @@ export default {
                 }
               }
             } else {
-              storageMessage = 'Report is too large for persistent storage (>5MB). Available for this session only.';
+              storageMessage = 'Large report uploaded successfully (session only due to size).';
             }
             
-            // Update index with storage strategy info
-            let index = JSON.parse(localStorage.getItem('uploaded-reports-index') || '[]');
-            index.unshift({ 
-              id, 
-              name, 
-              date, 
-              size: reportSize,
-              storageStrategy,
-              persistent: storageStrategy !== 'session'
-            });
-            localStorage.setItem('uploaded-reports-index', JSON.stringify(index));
+            // Save to localStorage index
+            this.saveToLocalStorage(id, reportData, name, date, storageStrategy);
             
             // Show storage status to user
             this.$emit('report-uploaded', { 
@@ -294,7 +315,7 @@ export default {
       this.showStorageInfo = true;
       
       // Auto-hide success messages after 5 seconds
-      if (strategy === 'persistent') {
+      if (strategy === 'persistent' || strategy === 'server') {
         setTimeout(() => {
           this.showStorageInfo = false;
         }, 5000);
@@ -302,10 +323,30 @@ export default {
     },
     getStorageAlertType(strategy) {
       switch (strategy) {
+        case 'server': return 'success';
         case 'persistent': return 'success';
         case 'compressed': return 'warning';
         case 'session': return 'info';
         default: return 'info';
+      }
+    },
+    saveToLocalStorage(id, reportData, name, date, storageStrategy) {
+      try {
+        const reportSize = JSON.stringify(reportData).length;
+        
+        // Update index with storage strategy info
+        let index = JSON.parse(localStorage.getItem('uploaded-reports-index') || '[]');
+        index.unshift({ 
+          id, 
+          name, 
+          date, 
+          size: reportSize,
+          storageStrategy,
+          persistent: storageStrategy !== 'session'
+        });
+        localStorage.setItem('uploaded-reports-index', JSON.stringify(index));
+      } catch (error) {
+        console.warn('Failed to update localStorage index:', error);
       }
     },
     dismissStorageInfo() {
@@ -332,6 +373,7 @@ export default {
     },
     getStorageChipColor(strategy) {
       switch (strategy) {
+        case 'server': return 'primary';
         case 'persistent': return 'success';
         case 'compressed': return 'warning';
         case 'session': return 'info';
@@ -340,6 +382,7 @@ export default {
     },
     getStorageLabel(strategy) {
       switch (strategy) {
+        case 'server': return 'Server';
         case 'persistent': return 'Saved';
         case 'compressed': return 'Compressed';
         case 'session': return 'Session';

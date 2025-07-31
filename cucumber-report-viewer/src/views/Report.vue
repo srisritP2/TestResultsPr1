@@ -22,9 +22,6 @@
         <p>This report link has expired (older than 24 hours).</p>
       </div>
       <div v-else-if="reportData" class="dashboard-grid">
-        <div v-if="sessionOnly" class="cucumber-alert warning" style="margin-bottom:1em;">
-          This uploaded report is only available for this session. It will be lost if you refresh or close the page.
-        </div>
         <ReportViewer 
           :report="reportData" 
           :selectedFeatureIndex="selectedFeatureIndex"

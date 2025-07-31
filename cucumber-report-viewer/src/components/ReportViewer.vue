@@ -303,8 +303,32 @@
           </div>
         </div>
 
-        <!-- Features list with expandable scenarios -->
-        <v-expansion-panels multiple class="cucumber-features-list">
+        <!-- Features list with virtual scrolling for performance -->
+        <VirtualScroller v-if="filteredFeatures.length > 50" :items="filteredFeatures" :item-height="120"
+          :container-height="600" class="cucumber-features-list">
+          <template #default="{ item: feature, index }">
+            <v-expansion-panel :key="feature.id || feature.name" class="virtual-feature-panel">
+              <v-expansion-panel-title class="cucumber-feature-row" :class="[featureStatus(feature)]">
+                <v-icon v-if="featureStatus(feature) === 'passed'" color="success" size="18">mdi-check-circle</v-icon>
+                <v-icon v-else-if="featureStatus(feature) === 'failed'" color="error"
+                  size="18">mdi-close-circle</v-icon>
+                <v-icon v-else-if="featureStatus(feature) === 'skipped'" color="warning"
+                  size="18">mdi-alert-circle</v-icon>
+                <v-icon v-else color="grey" size="18">mdi-help-circle</v-icon>
+                <span class="feature-file">{{ feature.uri || feature.name }}</span>
+                <span v-if="feature.tags && feature.tags.length" class="feature-tags">
+                  <span v-for="tag in feature.tags" :key="tag" class="feature-tag">{{ cleanTagText(tag) }}</span>
+                </span>
+              </v-expansion-panel-title>
+              <v-expansion-panel-text>
+                <LazyScenarios :feature="feature" />
+              </v-expansion-panel-text>
+            </v-expansion-panel>
+          </template>
+        </VirtualScroller>
+
+        <!-- Regular expansion panels for smaller reports -->
+        <v-expansion-panels v-else multiple class="cucumber-features-list">
           <v-expansion-panel v-for="(feature, idx) in filteredFeatures" :key="feature.id || feature.name">
             <v-expansion-panel-title class="cucumber-feature-row" :class="[featureStatus(feature)]">
               <v-icon v-if="featureStatus(feature) === 'passed'" color="success" size="18">mdi-check-circle</v-icon>
@@ -891,6 +915,13 @@ export default {
   computed: {
     isDarkTheme() {
       return this.$store.getters['theme/isDark'];
+    },
+    // Memoized computed properties for better performance
+    reportFeatures() {
+      return this.report?.features || [];
+    },
+    featuresCount() {
+      return this.reportFeatures.length;
     },
     summary() {
       let passed = 0, failed = 0, skipped = 0, total = 0, duration = 0;

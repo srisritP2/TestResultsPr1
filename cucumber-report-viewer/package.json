@@ -6,10 +6,19 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint"
+    "build:analyze": "vue-cli-service build --report",
+    "build:modern": "vue-cli-service build --modern",
+    "lint": "vue-cli-service lint",
+    "perf": "npm run build && npm run serve:dist",
+    "serve:dist": "npx http-server dist -p 8080 -g",
+    "server": "node server.js",
+    "dev": "concurrently \"npm run serve\" \"npm run server\"",
+    "start": "npm run server"
   },
   "dependencies": {
     "@mdi/font": "^7.4.47",
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
     "sass": "^1.89.2",
     "sass-loader": "^13.3.3",
     "vue": "^3.0.0",
@@ -19,10 +28,15 @@
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "^5.0.8",
+    "@vue/cli-plugin-pwa": "^5.0.8",
     "@vue/cli-service": "^5.0.0",
+    "compression-webpack-plugin": "^10.0.0",
+    "concurrently": "^7.6.0",
     "eslint": "^7.0.0",
     "eslint-plugin-vue": "^7.0.0",
-    "vue-cli-plugin-vuetify": "~2.5.8"
+    "image-webpack-loader": "^8.1.0",
+    "vue-cli-plugin-vuetify": "~2.5.8",
+    "webpack-bundle-analyzer": "^4.9.0"
   },
   "author": "",
   "license": "MIT"
