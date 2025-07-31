@@ -188,8 +188,14 @@ export default {
           try {
             const jsonData = JSON.parse(e.target.result);
             let reportData = jsonData;
-            if (Array.isArray(jsonData)) {
-              reportData = { features: jsonData };
+            
+            // Normalize to standard Cucumber JSON format (array of features)
+            if (jsonData.features && Array.isArray(jsonData.features)) {
+              // Convert {features: [...]} to [...]
+              reportData = jsonData.features;
+            } else if (!Array.isArray(jsonData)) {
+              // If it's not an array and doesn't have features, wrap it
+              reportData = [jsonData];
             }
             if (!reportData.features || !Array.isArray(reportData.features) || reportData.features.length === 0) {
               this.errorMessage = 'File does not appear to be a valid Cucumber JSON report (missing features array).';

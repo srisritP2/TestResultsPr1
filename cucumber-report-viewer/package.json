@@ -13,7 +13,10 @@
     "serve:dist": "npx http-server dist -p 8080 -g",
     "server": "node server.js",
     "dev": "concurrently \"npm run serve\" \"npm run server\"",
-    "start": "npm run server"
+    "start": "npm run server",
+    "fix-reports": "node scripts/fix-report-formats.js",
+    "update-index": "cd public/TestResultsJsons && node generate-index-enhanced.js --verbose",
+    "fix-and-index": "npm run fix-reports && npm run update-index"
   },
   "dependencies": {
     "@mdi/font": "^7.4.47",

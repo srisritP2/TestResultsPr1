@@ -45,6 +45,11 @@ jobs:
           cd cucumber-report-viewer/public/TestResultsJsons
           npm init -y 2>/dev/null || true
 
+      - name: Fix report formats
+        run: |
+          cd cucumber-report-viewer
+          node scripts/fix-report-formats.js
+
       - name: Generate enhanced index.json
         run: |
           cd cucumber-report-viewer/public/TestResultsJsons

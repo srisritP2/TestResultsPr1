@@ -29,19 +29,45 @@ if (!fs.existsSync(UPLOADS_DIR)) {
 }
 
 /**
+ * Normalize report data to standard Cucumber JSON format
+ */
+function normalizeReportFormat(reportData) {
+  // If it has features property, extract the array
+  if (reportData.features && Array.isArray(reportData.features)) {
+    return reportData.features;
+  }
+  
+  // If it's already an array, return as-is
+  if (Array.isArray(reportData)) {
+    return reportData;
+  }
+  
+  // If it's a single feature object, wrap in array
+  if (reportData.name && reportData.elements) {
+    return [reportData];
+  }
+  
+  // Default: return as-is and let validation catch issues
+  return reportData;
+}
+
+/**
  * Save report data to TestResultsJsons directory
  */
 function saveReportToDirectory(reportId, reportData) {
   try {
+    // Normalize the format before saving
+    const normalizedData = normalizeReportFormat(reportData);
+    
     // Generate filename with timestamp
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
     const filename = `${reportId}-${timestamp}.json`;
     const filepath = path.join(UPLOADS_DIR, filename);
 
     // Write file with proper formatting
-    fs.writeFileSync(filepath, JSON.stringify(reportData, null, 2));
+    fs.writeFileSync(filepath, JSON.stringify(normalizedData, null, 2));
     
-    console.log(`✅ Report saved: ${filename}`);
+    console.log(`✅ Report saved: ${filename} (format normalized)`);
     return filename;
   } catch (error) {
     console.error('❌ Error saving report:', error.message);
