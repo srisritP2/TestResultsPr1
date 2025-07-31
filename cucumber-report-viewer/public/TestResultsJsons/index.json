@@ -1,5 +1,5 @@
 {
-  "generated": "2025-07-31T13:46:20.820Z",
+  "generated": "2025-07-31T14:29:02.151Z",
   "version": "2.0.0",
   "reports": [
     {
@@ -89,6 +89,25 @@
       "hash": "9070cfb6ae22d2083d44f48e2335d40c"
     },
     {
+      "id": "Members-Page-Test-Scenarios-2025-07-16T12-45-28-395Z",
+      "name": "Members Page || Test Scenarios",
+      "date": "2025-07-16T12:45:28.395Z",
+      "features": 1,
+      "scenarios": 1,
+      "steps": 10,
+      "passed": 0,
+      "failed": 0,
+      "skipped": 10,
+      "duration": 0.0083716,
+      "size": 42920,
+      "tags": [
+        "RunNow"
+      ],
+      "environment": null,
+      "tool": null,
+      "hash": "14bad134cd8115966282a1b7bcb74934"
+    },
+    {
       "id": "Admin-Client-Settings-Page-Test-Scenarios-2025-07-02T09-30-30-010Z",
       "name": "Admin Client Settings Page || Test Scenarios",
       "date": "2025-07-02T09:30:30.010Z",
@@ -133,19 +152,19 @@
     }
   ],
   "statistics": {
-    "totalReports": 3,
-    "totalFeatures": 45,
-    "totalScenarios": 156,
-    "totalSteps": 1977,
+    "totalReports": 4,
+    "totalFeatures": 46,
+    "totalScenarios": 157,
+    "totalSteps": 1987,
     "totalPassed": 1974,
     "totalFailed": 2,
-    "totalSkipped": 1,
-    "totalDuration": 3045.0783698,
-    "totalSize": 1159504,
-    "averageDuration": "1015.03",
-    "passRate": "99.85",
+    "totalSkipped": 11,
+    "totalDuration": 3045.0867414,
+    "totalSize": 1202424,
+    "averageDuration": "761.27",
+    "passRate": "99.35",
     "failRate": "0.10",
-    "skipRate": "0.05",
+    "skipRate": "0.55",
     "oldestReport": {
       "id": "Admin-Client-Settings-Page-Test-Scenarios-2025-07-02T09-30-30-010Z",
       "name": "Admin Client Settings Page || Test Scenarios",
@@ -282,7 +301,7 @@
       ]
     },
     {
-      "file": "report-1753968610030.json",
+      "file": "Admin-Client-Settings-Page-Test-Scenarios-2025-07-30T12-29-58-033Z.json",
       "errors": [
         "Feature 2, Scenario 0: Missing name",
         "Feature 2, Scenario 2: Missing name"
@@ -297,8 +316,8 @@
   ],
   "renames": [
     {
-      "from": "report-1753968610030.json",
-      "to": "Admin-Client-Settings-Page-Test-Scenarios-2025-07-30T12-29-58-033Z.json"
+      "from": "report-1753971263013.json",
+      "to": "Members-Page-Test-Scenarios-2025-07-16T12-45-28-395Z.json"
     }
   ]
 }
