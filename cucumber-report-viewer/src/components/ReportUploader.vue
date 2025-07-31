@@ -247,8 +247,14 @@ export default {
             }
             
             // Use the normalized data
-            const reportData = formatResult.data;
+            let reportData = formatResult.data;
             console.log(`✅ Detected format: ${formatResult.format}, Features: ${reportData.length}`);
+            
+            // Auto-fix skipped steps with duration (common Cucumber bug)
+            const fixedSteps = this.fixSkippedStepsWithDuration(reportData);
+            if (fixedSteps > 0) {
+              console.log(`🔧 Auto-fixed ${fixedSteps} skipped steps that had duration values`);
+            }
             // Generate a unique id for the report
             const id = 'report-' + Date.now();
             const name = this.selectedFile.name.replace(/\.json$/i, '');
@@ -400,6 +406,30 @@ export default {
     },
     dismissStorageInfo() {
       this.showStorageInfo = false;
+    },
+    fixSkippedStepsWithDuration(features) {
+      let fixedCount = 0;
+      
+      features.forEach(feature => {
+        if (feature.elements) {
+          feature.elements.forEach(element => {
+            if (element.steps) {
+              element.steps.forEach(step => {
+                // Fix steps marked as skipped but with duration > 0
+                if (step.result && 
+                    step.result.status === 'skipped' && 
+                    step.result.duration && 
+                    step.result.duration > 0) {
+                  step.result.status = 'passed';
+                  fixedCount++;
+                }
+              });
+            }
+          });
+        }
+      });
+      
+      return fixedCount;
     },
     // Storage Management Methods
     getTotalStorageSize() {

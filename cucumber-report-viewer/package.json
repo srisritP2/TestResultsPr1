@@ -17,7 +17,9 @@
     "fix-reports": "node scripts/fix-report-formats.js",
     "update-index": "cd public/TestResultsJsons && node generate-index-enhanced.js --verbose",
     "fix-and-index": "npm run fix-reports && npm run update-index",
-    "diagnose": "node scripts/diagnose-report.js"
+    "diagnose": "node scripts/diagnose-report.js",
+    "analyze-steps": "node scripts/analyze-step-results.js",
+    "fix-skipped": "node scripts/fix-skipped-with-duration.js"
   },
   "dependencies": {
     "@mdi/font": "^7.4.47",

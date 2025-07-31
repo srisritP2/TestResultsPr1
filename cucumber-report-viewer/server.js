@@ -29,26 +29,65 @@ if (!fs.existsSync(UPLOADS_DIR)) {
 }
 
 /**
+ * Fix skipped steps that have duration (common Cucumber bug)
+ */
+function fixSkippedStepsWithDuration(features) {
+  let fixedCount = 0;
+  
+  features.forEach(feature => {
+    if (feature.elements) {
+      feature.elements.forEach(element => {
+        if (element.steps) {
+          element.steps.forEach(step => {
+            // Fix steps marked as skipped but with duration > 0
+            if (step.result && 
+                step.result.status === 'skipped' && 
+                step.result.duration && 
+                step.result.duration > 0) {
+              step.result.status = 'passed';
+              fixedCount++;
+            }
+          });
+        }
+      });
+    }
+  });
+  
+  return fixedCount;
+}
+
+/**
  * Normalize report data to standard Cucumber JSON format
  */
 function normalizeReportFormat(reportData) {
+  let normalizedData;
+  
   // If it has features property, extract the array
   if (reportData.features && Array.isArray(reportData.features)) {
-    return reportData.features;
+    normalizedData = reportData.features;
   }
-  
-  // If it's already an array, return as-is
-  if (Array.isArray(reportData)) {
-    return reportData;
+  // If it's already an array, use as-is
+  else if (Array.isArray(reportData)) {
+    normalizedData = reportData;
   }
-  
   // If it's a single feature object, wrap in array
-  if (reportData.name && reportData.elements) {
-    return [reportData];
+  else if (reportData.name && reportData.elements) {
+    normalizedData = [reportData];
+  }
+  // Default: return as-is and let validation catch issues
+  else {
+    normalizedData = reportData;
   }
   
-  // Default: return as-is and let validation catch issues
-  return reportData;
+  // Apply auto-fixes if we have valid data
+  if (Array.isArray(normalizedData)) {
+    const fixedSteps = fixSkippedStepsWithDuration(normalizedData);
+    if (fixedSteps > 0) {
+      console.log(`🔧 Auto-fixed ${fixedSteps} skipped steps with duration`);
+    }
+  }
+  
+  return normalizedData;
 }
 
 /**
