@@ -137,9 +137,52 @@
 <script>
 import UploadService from '@/services/UploadService';
 
-// Simple Cucumber JSON validation utility
-function isCucumberJson(json) {
-  return Array.isArray(json) && json.length > 0 && json[0].hasOwnProperty('elements');
+// Enhanced Cucumber JSON validation and normalization utilities
+function detectCucumberFormat(json) {
+  // Format 1: Standard array of features
+  if (Array.isArray(json) && json.length > 0) {
+    const firstItem = json[0];
+    if (firstItem.name && (firstItem.elements || firstItem.scenarios)) {
+      return { format: 'standard', data: json };
+    }
+  }
+  
+  // Format 2: Wrapped in features property
+  if (json.features && Array.isArray(json.features)) {
+    return { format: 'wrapped', data: json.features };
+  }
+  
+  // Format 3: Single feature object
+  if (json.name && (json.elements || json.scenarios)) {
+    return { format: 'single', data: [json] };
+  }
+  
+  // Format 4: TestNG/other format with results property
+  if (json.results && Array.isArray(json.results)) {
+    return { format: 'testng', data: json.results };
+  }
+  
+  return { format: 'unknown', data: null };
+}
+
+function validateCucumberFeatures(features) {
+  if (!Array.isArray(features) || features.length === 0) {
+    return { valid: false, error: 'No features found' };
+  }
+  
+  // Check if at least one feature has scenarios/elements
+  const hasValidFeatures = features.some(feature => {
+    return feature.name && (
+      (feature.elements && Array.isArray(feature.elements)) ||
+      (feature.scenarios && Array.isArray(feature.scenarios))
+    );
+  });
+  
+  if (!hasValidFeatures) {
+    return { valid: false, error: 'No valid features with scenarios found' };
+  }
+  
+  return { valid: true };
 }
 
 export default {
@@ -187,25 +230,25 @@ export default {
         reader.onload = async (e) => {
           try {
             const jsonData = JSON.parse(e.target.result);
-            let reportData = jsonData;
             
-            // Normalize to standard Cucumber JSON format (array of features)
-            if (jsonData.features && Array.isArray(jsonData.features)) {
-              // Convert {features: [...]} to [...]
-              reportData = jsonData.features;
-            } else if (!Array.isArray(jsonData)) {
-              // If it's not an array and doesn't have features, wrap it
-              reportData = [jsonData];
-            }
-            if (!reportData.features || !Array.isArray(reportData.features) || reportData.features.length === 0) {
-              this.errorMessage = 'File does not appear to be a valid Cucumber JSON report (missing features array).';
+            // Detect and normalize the format
+            const formatResult = detectCucumberFormat(jsonData);
+            
+            if (formatResult.format === 'unknown' || !formatResult.data) {
+              this.errorMessage = `Unsupported file format. Expected Cucumber JSON report but found: ${typeof jsonData}. Please check the file format.`;
               return;
             }
-            const hasElements = reportData.features.some(f => Array.isArray(f.elements) || Array.isArray(f.scenarios));
-            if (!hasElements) {
-              this.errorMessage = 'File does not appear to be a valid Cucumber JSON report (features missing scenarios/elements).';
+            
+            // Validate the normalized data
+            const validation = validateCucumberFeatures(formatResult.data);
+            if (!validation.valid) {
+              this.errorMessage = `Invalid Cucumber JSON report: ${validation.error}. Please ensure the file contains valid test results.`;
               return;
             }
+            
+            // Use the normalized data
+            const reportData = formatResult.data;
+            console.log(`✅ Detected format: ${formatResult.format}, Features: ${reportData.length}`);
             // Generate a unique id for the report
             const id = 'report-' + Date.now();
             const name = this.selectedFile.name.replace(/\.json$/i, '');
