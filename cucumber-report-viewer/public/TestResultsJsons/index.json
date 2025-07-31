@@ -1,7 +1,26 @@
 {
-  "generated": "2025-07-31T14:29:02.151Z",
+  "generated": "2025-07-31T14:49:53.842Z",
   "version": "2.0.0",
   "reports": [
+    {
+      "id": "Members-Page-Test-Scenarios-2025-07-31T14-42-28-659Z",
+      "name": "Members Page || Test Scenarios",
+      "date": "2025-07-31T14:42:28.659Z",
+      "features": 1,
+      "scenarios": 1,
+      "steps": 10,
+      "passed": 9,
+      "failed": 1,
+      "skipped": 0,
+      "duration": 28.2589566,
+      "size": 132405,
+      "tags": [
+        "RunNow"
+      ],
+      "environment": null,
+      "tool": null,
+      "hash": "3c02a972518fa6ef7e5a2ded3c83cc4a"
+    },
     {
       "id": "Admin-Client-Settings-Page-Test-Scenarios-2025-07-30T12-29-58-033Z",
       "name": "Admin Client Settings Page || Test Scenarios",
@@ -152,18 +171,18 @@
     }
   ],
   "statistics": {
-    "totalReports": 4,
-    "totalFeatures": 46,
-    "totalScenarios": 157,
-    "totalSteps": 1987,
-    "totalPassed": 1974,
-    "totalFailed": 2,
+    "totalReports": 5,
+    "totalFeatures": 47,
+    "totalScenarios": 158,
+    "totalSteps": 1997,
+    "totalPassed": 1983,
+    "totalFailed": 3,
     "totalSkipped": 11,
-    "totalDuration": 3045.0867414,
-    "totalSize": 1202424,
-    "averageDuration": "761.27",
-    "passRate": "99.35",
-    "failRate": "0.10",
+    "totalDuration": 3073.3456979999996,
+    "totalSize": 1334829,
+    "averageDuration": "614.67",
+    "passRate": "99.30",
+    "failRate": "0.15",
     "skipRate": "0.55",
     "oldestReport": {
       "id": "Admin-Client-Settings-Page-Test-Scenarios-2025-07-02T09-30-30-010Z",
@@ -211,49 +230,25 @@
       "suggestedFilename": "Admin-Client-Settings-Page-Test-Scenarios-2025-07-02T09-30-30-010Z.json"
     },
     "newestReport": {
-      "id": "Admin-Client-Settings-Page-Test-Scenarios-2025-07-30T12-29-58-033Z",
-      "name": "Admin Client Settings Page || Test Scenarios",
-      "date": "2025-07-30T12:29:58.033Z",
-      "size": 201258,
-      "features": 15,
-      "scenarios": 52,
-      "steps": 659,
-      "passed": 659,
-      "failed": 0,
+      "id": "Members-Page-Test-Scenarios-2025-07-31T14-42-28-659Z",
+      "name": "Members Page || Test Scenarios",
+      "date": "2025-07-31T14:42:28.659Z",
+      "size": 132405,
+      "features": 1,
+      "scenarios": 1,
+      "steps": 10,
+      "passed": 9,
+      "failed": 1,
       "skipped": 0,
-      "duration": 1054.1004453,
+      "duration": 28.2589566,
       "tags": [
-        "AddResponse",
-        "AddResponseFlowValidation",
-        "AuthDashBoard",
-        "AuthTicket",
-        "CreateTicket",
-        "EndToEndSuite",
-        "Excavators",
-        "ExistingUserData",
-        "HomeOwnerTicket",
-        "MyCompanyTickets",
-        "OpenTicketInResponses",
-        "PrintTicket",
-        "QuickTestSuite",
-        "RegressionSuite",
-        "RememberMe",
-        "ResetPassword",
-        "Responses",
-        "RunNow",
-        "SignIn",
-        "SignUp",
-        "TicketDrafts",
-        "TicketSearch",
-        "UnAuthDashBoard",
-        "ViewTicketDetails",
-        "WorkAreaWithPolygon"
+        "RunNow"
       ],
       "environment": null,
       "tool": null,
       "version": null,
-      "hash": "8810a4a2a2f8ea492333742ac22a09a6",
-      "suggestedFilename": "Admin-Client-Settings-Page-Test-Scenarios-2025-07-30T12-29-58-033Z.json"
+      "hash": "3c02a972518fa6ef7e5a2ded3c83cc4a",
+      "suggestedFilename": "Members-Page-Test-Scenarios-2025-07-31T14-42-28-659Z.json"
     },
     "allTags": [
       "AddResponse",
@@ -316,8 +311,8 @@
   ],
   "renames": [
     {
-      "from": "report-1753971263013.json",
-      "to": "Members-Page-Test-Scenarios-2025-07-16T12-45-28-395Z.json"
+      "from": "report-1753973196220.json",
+      "to": "Members-Page-Test-Scenarios-2025-07-31T14-42-28-659Z.json"
     }
   ]
 }
