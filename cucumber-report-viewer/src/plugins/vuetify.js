@@ -62,6 +62,23 @@ const darkTheme = {
   }
 };
 
+// Determine initial theme before creating Vuetify instance
+function getInitialTheme() {
+  const systemPrefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const savedPreference = localStorage.getItem('theme-preference') || 'system';
+  
+  let shouldBeDark = false;
+  if (savedPreference === 'dark') {
+    shouldBeDark = true;
+  } else if (savedPreference === 'light') {
+    shouldBeDark = false;
+  } else { // system
+    shouldBeDark = systemPrefersDark;
+  }
+  
+  return shouldBeDark ? 'dark' : 'light';
+}
+
 const vuetify = createVuetify({
   components,
   directives,
@@ -73,7 +90,7 @@ const vuetify = createVuetify({
     },
   },
   theme: {
-    defaultTheme: 'light',
+    defaultTheme: getInitialTheme(),
     themes: {
       light: lightTheme,
       dark: darkTheme,

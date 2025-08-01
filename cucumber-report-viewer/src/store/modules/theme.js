@@ -22,25 +22,14 @@ export default {
   },
   
   actions: {
-    // Initialize theme on app startup
-    initializeTheme({ commit, dispatch }) {
-      // Detect system preference
-      const systemPrefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-      commit('SET_SYSTEM_PREFERENCE', systemPrefersDark);
-      
-      // Load user preference from localStorage
-      const savedPreference = localStorage.getItem('theme-preference') || 'system';
-      commit('SET_USER_PREFERENCE', savedPreference);
-      
-      // Apply theme based on preference
-      dispatch('applyTheme');
-      
+    // Initialize theme on app startup (listeners only, state already set in main.js)
+    initializeTheme({ state, commit, dispatch }) {
       // Listen for system preference changes
       if (window.matchMedia) {
         const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
         mediaQuery.addEventListener('change', (e) => {
           commit('SET_SYSTEM_PREFERENCE', e.matches);
-          if (savedPreference === 'system') {
+          if (state.userPreference === 'system') {
             dispatch('applyTheme');
           }
         });

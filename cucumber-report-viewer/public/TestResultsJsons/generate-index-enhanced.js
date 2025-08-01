@@ -306,6 +306,23 @@ class CucumberIndexGenerator {
   }
 
   /**
+   * Load deleted reports list
+   */
+  async getDeletedReports() {
+    try {
+      const deletedPath = path.join(this.reportsDir, '.deleted-reports.json');
+      if (!fs.existsSync(deletedPath)) {
+        return [];
+      }
+      const data = fs.readFileSync(deletedPath, 'utf8');
+      return JSON.parse(data);
+    } catch (error) {
+      this.log(`Error loading deleted reports: ${error.message}`);
+      return [];
+    }
+  }
+
+  /**
    * Main generation method
    */
   async generate() {
@@ -317,9 +334,15 @@ class CucumberIndexGenerator {
         .filter(f => f.endsWith('.json') && 
                     f !== 'index.json' && 
                     !f.startsWith('generate-index') &&
-                    f !== 'stats.json');
+                    f !== 'stats.json' &&
+                    !f.startsWith('.deleted-reports'));
 
       this.log(`Found ${files.length} report files`);
+
+      // Load deleted reports list
+      const deletedReports = await this.getDeletedReports();
+      const deletedFilenames = deletedReports.map(r => r.filename);
+      this.log(`Found ${deletedReports.length} deleted reports`);
 
       const reports = [];
       const errors = [];
@@ -327,6 +350,12 @@ class CucumberIndexGenerator {
       // Process each file
       for (const filename of files) {
         try {
+          // Skip deleted reports (soft delete)
+          if (deletedFilenames.includes(filename)) {
+            this.log(`Skipping deleted report: ${filename}`);
+            continue;
+          }
+
           const filePath = path.join(this.reportsDir, filename);
           const json = JSON.parse(fs.readFileSync(filePath, 'utf8'));
 
@@ -341,6 +370,11 @@ class CucumberIndexGenerator {
 
           // Extract metadata
           const metadata = this.extractMetadata(json, filename);
+          
+          // Add deletion status
+          metadata.status = 'active';
+          metadata.isDeleted = false;
+          
           reports.push(metadata);
 
         } catch (error) {
@@ -364,7 +398,7 @@ class CucumberIndexGenerator {
       // Create enhanced index
       const index = {
         generated: new Date().toISOString(),
-        version: '2.0.0',
+        version: '2.1.0',
         reports: reports.map(r => ({
           id: r.id,
           name: r.name,
@@ -380,8 +414,16 @@ class CucumberIndexGenerator {
           tags: r.tags,
           environment: r.environment,
           tool: r.tool,
-          hash: r.hash
+          hash: r.hash,
+          status: r.status,
+          isDeleted: r.isDeleted
         })),
+        deletionInfo: {
+          deletedCount: deletedReports.length,
+          pendingCleanup: deletedReports.filter(r => r.needsCleanup).length,
+          lastDeletionAt: deletedReports.length > 0 ? 
+            Math.max(...deletedReports.map(r => new Date(r.deletedAt).getTime())) : null
+        },
         statistics,
         errors: errors.length > 0 ? errors : undefined,
         renames: renames.length > 0 ? renames : undefined
@@ -397,7 +439,10 @@ class CucumberIndexGenerator {
         fs.writeFileSync(statsPath, JSON.stringify(statistics, null, 2));
       }
 
-      this.log(`✅ Generated ${this.outputFile} with ${reports.length} reports`);
+      this.log(`✅ Generated ${this.outputFile} with ${reports.length} active reports`);
+      if (deletedReports.length > 0) {
+        this.log(`🗑️  Excluded ${deletedReports.length} deleted reports from index`);
+      }
       if (errors.length > 0) {
         this.log(`⚠️  Found ${errors.length} files with validation errors`);
       }

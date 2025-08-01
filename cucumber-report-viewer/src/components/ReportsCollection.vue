@@ -107,10 +107,16 @@
                           {{ isPublished(report) ? 'Unpublish' : 'Publish to GitHub Pages' }}
                         </v-list-item-title>
                       </v-list-item>
-                      <v-list-item @click="deleteReport(report)" class="text-error">
+                      <v-list-item 
+                    @click="deleteReport(report)" 
+                    class="text-error"
+                    :disabled="report.deleting"
+                  >
                         <v-list-item-title>
-                          <v-icon size="16" class="mr-2">mdi-delete</v-icon>
-                          Delete
+                          <v-icon size="16" class="mr-2">
+                            {{ report.deleting ? 'mdi-loading mdi-spin' : 'mdi-delete' }}
+                          </v-icon>
+                          {{ report.deleting ? 'Deleting...' : 'Delete' }}
                         </v-list-item-title>
                       </v-list-item>
                     </v-list>
@@ -151,14 +157,52 @@
         </div>
       </v-card-text>
     </v-card>
+
+    <!-- Confirmation Dialog -->
+    <ConfirmationDialog
+      v-model="confirmationDialog.show"
+      :title="confirmationDialog.title"
+      :message="confirmationDialog.message"
+      :details="confirmationDialog.details"
+      :type="confirmationDialog.type"
+      :confirm-text="confirmationDialog.confirmText"
+      :confirm-color="confirmationDialog.confirmColor"
+      :show-environment-info="confirmationDialog.showEnvironmentInfo"
+      :environment="confirmationDialog.environment"
+      @confirm="confirmationDialog.onConfirm"
+      @cancel="confirmationDialog.onCancel"
+    />
+
+    <!-- Success/Error Snackbar -->
+    <v-snackbar
+      v-model="snackbar.show"
+      :color="snackbar.color"
+      :timeout="snackbar.timeout"
+      location="top right"
+    >
+      {{ snackbar.message }}
+      <template #actions>
+        <v-btn
+          variant="text"
+          @click="snackbar.show = false"
+        >
+          Close
+        </v-btn>
+      </template>
+    </v-snackbar>
   </div>
 </template>
 
 <script>
 import ReportService from '@/services/ReportService';
+import DeletionService from '@/services/DeletionService';
+import ConfirmationDialog from '@/components/ConfirmationDialog.vue';
 
 export default {
   name: 'ReportsCollection',
+  components: {
+    ConfirmationDialog
+  },
   data() {
     return {
       reportsCollection: [],
@@ -180,7 +224,28 @@ export default {
         { title: 'Duration', value: 'duration' },
         { title: 'Scenarios', value: 'scenarios' },
         { title: 'Pass Rate', value: 'passRate' }
-      ]
+      ],
+      // Confirmation dialog state
+      confirmationDialog: {
+        show: false,
+        title: '',
+        message: '',
+        details: '',
+        type: 'default',
+        confirmText: 'Confirm',
+        confirmColor: 'primary',
+        showEnvironmentInfo: false,
+        environment: 'localhost',
+        onConfirm: null,
+        onCancel: null
+      },
+      // Snackbar for notifications
+      snackbar: {
+        show: false,
+        message: '',
+        color: 'info',
+        timeout: 3000
+      }
     };
   },
   computed: {
@@ -256,25 +321,113 @@ export default {
     },
 
     async deleteReport(report) {
-      if (!confirm(`Are you sure you want to delete "${report.name}"?`)) return;
-
       try {
-        // Remove from localStorage (for uploaded reports)
-        let index = JSON.parse(localStorage.getItem('uploaded-reports-index') || '[]');
-        index = index.filter(r => r.id !== report.id);
-        localStorage.setItem('uploaded-reports-index', JSON.stringify(index));
-        localStorage.removeItem('uploaded-report-' + report.id);
+        // Show confirmation dialog first
+        const confirmed = await this.showDeleteConfirmation(report);
+        if (!confirmed) {
+          return;
+        }
 
-        // Update local collection
-        this.reportsCollection = this.reportsCollection.filter(r => r.id !== report.id);
+        // Show loading state
+        this.setReportLoading(report.id, true);
 
-        // Show success message
-        this.$emit('report-deleted', report);
+        // Use the comprehensive DeletionService
+        const deletionService = new DeletionService();
+        const result = await deletionService.deleteReport(report.id, {
+          confirm: false, // We already confirmed above
+          showFeedback: false // We'll handle feedback ourselves
+        });
+
+        if (result.success && !result.cancelled) {
+          // Update local collection immediately
+          this.reportsCollection = this.reportsCollection.filter(r => r.id !== report.id);
+
+          // Remove from localStorage (for uploaded reports)
+          let index = JSON.parse(localStorage.getItem('uploaded-reports-index') || '[]');
+          index = index.filter(r => r.id !== report.id);
+          localStorage.setItem('uploaded-reports-index', JSON.stringify(index));
+          localStorage.removeItem('uploaded-report-' + report.id);
+
+          // Show success message
+          this.showSuccessMessage(result.deletionType === 'soft' 
+            ? 'Report hidden from collection' 
+            : 'Report deleted successfully'
+          );
+
+          // Emit event for parent components
+          this.$emit('report-deleted', {
+            report,
+            result,
+            deletionType: result.deletionType
+          });
+
+          console.log(`✅ Report ${report.id} deleted successfully (${result.deletionType})`);
+        }
 
       } catch (error) {
         console.error('Failed to delete report:', error);
-        alert('Failed to delete report. Please try again.');
+        this.showErrorMessage(`Failed to delete report: ${error.message}`);
+      } finally {
+        this.setReportLoading(report.id, false);
       }
+    },
+
+    async showDeleteConfirmation(report) {
+      return new Promise((resolve) => {
+        const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+        
+        this.confirmationDialog = {
+          show: true,
+          title: isLocalhost ? 'Delete Report' : 'Hide Report',
+          message: isLocalhost 
+            ? 'This will permanently delete the report file from the server.'
+            : 'This will hide the report from the collection. The file will remain until next deployment.',
+          details: `Report: ${report.name || report.id}`,
+          type: 'delete',
+          confirmText: isLocalhost ? 'Delete' : 'Hide',
+          confirmColor: 'error',
+          showEnvironmentInfo: true,
+          environment: isLocalhost ? 'localhost' : 'production',
+          onConfirm: () => {
+            this.confirmationDialog.show = false;
+            resolve(true);
+          },
+          onCancel: () => {
+            this.confirmationDialog.show = false;
+            resolve(false);
+          }
+        };
+      });
+    },
+
+    setReportLoading(reportId, loading) {
+      // Find the report and set loading state
+      const reportIndex = this.reportsCollection.findIndex(r => r.id === reportId);
+      if (reportIndex !== -1) {
+        // Vue 3 compatible way to set reactive property
+        this.reportsCollection[reportIndex] = {
+          ...this.reportsCollection[reportIndex],
+          deleting: loading
+        };
+      }
+    },
+
+    showSuccessMessage(message) {
+      this.snackbar = {
+        show: true,
+        message,
+        color: 'success',
+        timeout: 3000
+      };
+    },
+
+    showErrorMessage(message) {
+      this.snackbar = {
+        show: true,
+        message,
+        color: 'error',
+        timeout: 5000
+      };
     },
 
     getStatusIcon(report) {
@@ -701,11 +854,34 @@ The GitHub workflow will automatically update your GitHub Pages site!
         failRate,
         skipRate
       };
+    },
+
+    // Add event handlers
+    handleReportDeleted(event) {
+      const { reportId } = event.detail;
+      console.log(`🗑️ Report ${reportId} deleted - refreshing collection`);
+      this.refreshReports();
+    },
+
+    handleReportRestored(event) {
+      const { reportId } = event.detail;
+      console.log(`♻️ Report ${reportId} restored - refreshing collection`);
+      this.refreshReports();
     }
   },
 
   async mounted() {
     await this.fetchReports();
+    
+    // Listen for deletion events to refresh the reports list
+    window.addEventListener('reportDeleted', this.handleReportDeleted);
+    window.addEventListener('reportRestored', this.handleReportRestored);
+  },
+
+  beforeUnmount() {
+    // Clean up event listeners
+    window.removeEventListener('reportDeleted', this.handleReportDeleted);
+    window.removeEventListener('reportRestored', this.handleReportRestored);
   }
 };
 </script>
@@ -1163,7 +1339,7 @@ The GitHub workflow will automatically update your GitHub Pages site!
 
 /* Main Container Dark Theme */
 [data-theme="dark"] .reports-collection-container {
-  background: var(--theme-background);
+  background: transparent;
 }
 
 [data-theme="dark"] .reports-collection-card {

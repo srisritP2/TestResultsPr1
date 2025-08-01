@@ -10,6 +10,7 @@ const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
+const DeletionUtils = require('./src/utils/deletionUtils');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -17,6 +18,9 @@ const PORT = process.env.PORT || 3001;
 // Configuration
 const UPLOADS_DIR = path.join(__dirname, 'public/TestResultsJsons');
 const INDEX_SCRIPT = path.join(UPLOADS_DIR, 'generate-index-enhanced.js');
+
+// Initialize deletion utilities
+const deletionUtils = new DeletionUtils(UPLOADS_DIR);
 
 // Middleware
 app.use(cors());
@@ -219,29 +223,53 @@ app.get('/api/reports', (req, res) => {
 
 /**
  * DELETE /api/reports/:filename
- * Delete a specific report file and update index
+ * Enhanced delete with support for both hard and soft delete
+ * Query params:
+ * - soft: true/false (default: false for localhost, true for others)
  */
-app.delete('/api/reports/:filename', (req, res) => {
+app.delete('/api/reports/:filename', async (req, res) => {
   try {
     const { filename } = req.params;
-    const filepath = path.join(UPLOADS_DIR, filename);
+    const { soft } = req.query;
     
-    if (!fs.existsSync(filepath)) {
-      return res.status(404).json({
-        success: false,
-        error: 'Report file not found'
-      });
+    // Determine deletion type based on environment and query param
+    const isLocalhost = req.hostname === 'localhost' || req.hostname === '127.0.0.1';
+    const shouldSoftDelete = soft === 'true' || (!isLocalhost && soft !== 'false');
+    
+    console.log(`🗑️  Delete request: ${filename} (soft: ${shouldSoftDelete})`);
+    
+    let result;
+    
+    if (shouldSoftDelete) {
+      // Soft delete - mark as deleted in metadata
+      result = await deletionUtils.markReportAsDeleted(filename);
+    } else {
+      // Hard delete - remove file and update index
+      const filepath = path.join(UPLOADS_DIR, filename);
+      
+      if (!fs.existsSync(filepath)) {
+        return res.status(404).json({
+          success: false,
+          error: 'Report file not found'
+        });
+      }
+      
+      // Delete the file
+      result = await deletionUtils.deleteReportFile(filename);
+      
+      // Remove from index
+      await deletionUtils.removeFromIndex(filename);
     }
     
-    // Delete the file
-    fs.unlinkSync(filepath);
-    
-    // Regenerate index
+    // Regenerate index to reflect changes
     generateIndex();
     
     res.json({
       success: true,
-      message: 'Report deleted successfully'
+      message: result.message,
+      deletionType: result.type,
+      filename: result.filename,
+      environment: isLocalhost ? 'localhost' : 'production'
     });
     
   } catch (error) {
@@ -268,6 +296,93 @@ app.post('/api/regenerate-index', (req, res) => {
     
   } catch (error) {
     console.error('Index regeneration error:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+/**
+ * GET /api/reports/deleted
+ * Get list of deleted reports
+ */
+app.get('/api/reports/deleted', async (req, res) => {
+  try {
+    const deletedReports = await deletionUtils.getDeletedReports();
+    
+    res.json({
+      success: true,
+      deletedReports,
+      count: deletedReports.length
+    });
+    
+  } catch (error) {
+    console.error('Error getting deleted reports:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+/**
+ * POST /api/reports/:filename/restore
+ * Restore a soft-deleted report
+ */
+app.post('/api/reports/:filename/restore', async (req, res) => {
+  try {
+    const { filename } = req.params;
+    
+    const result = await deletionUtils.restoreReport(filename);
+    
+    if (result.success) {
+      // Regenerate index to show restored report
+      generateIndex();
+    }
+    
+    res.json(result);
+    
+  } catch (error) {
+    console.error('Restore error:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+/**
+ * GET /api/sync/status
+ * Get synchronization status between local and published reports
+ */
+app.get('/api/sync/status', async (req, res) => {
+  try {
+    const indexPath = path.join(UPLOADS_DIR, 'index.json');
+    const index = fs.existsSync(indexPath) ? 
+      JSON.parse(fs.readFileSync(indexPath, 'utf8')) : { reports: [] };
+    
+    const deletedReports = await deletionUtils.getDeletedReports();
+    const reportsNeedingCleanup = await deletionUtils.getReportsNeedingCleanup();
+    
+    const syncStatus = {
+      localReports: index.reports?.length || 0,
+      deletedReports: deletedReports.length,
+      pendingCleanup: reportsNeedingCleanup.length,
+      lastSyncAt: index.generated || null,
+      needsCleanup: reportsNeedingCleanup.map(r => ({
+        filename: r.filename,
+        deletedAt: r.deletedAt
+      }))
+    };
+    
+    res.json({
+      success: true,
+      syncStatus
+    });
+    
+  } catch (error) {
+    console.error('Sync status error:', error);
     res.status(500).json({
       success: false,
       error: error.message

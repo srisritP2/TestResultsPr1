@@ -97,6 +97,48 @@
             </div>
           </div>
         </div>
+
+        <!-- Action Buttons Section -->
+        <div class="actions-section">
+          <v-menu>
+            <template #activator="{ props }">
+              <v-btn
+                v-bind="props"
+                icon="mdi-dots-vertical"
+                variant="text"
+                size="small"
+                class="action-menu-btn"
+              />
+            </template>
+            <v-list>
+              <v-list-item @click="goBackToCollection">
+                <v-list-item-title>
+                  <v-icon size="16" class="mr-2">mdi-arrow-left</v-icon>
+                  Back to Collection
+                </v-list-item-title>
+              </v-list-item>
+              <v-list-item @click="refreshReport">
+                <v-list-item-title>
+                  <v-icon size="16" class="mr-2">mdi-refresh</v-icon>
+                  Refresh Report
+                </v-list-item-title>
+              </v-list-item>
+              <v-divider />
+              <v-list-item 
+                @click="deleteCurrentReport" 
+                class="text-error"
+                :disabled="deleting"
+              >
+                <v-list-item-title>
+                  <v-icon size="16" class="mr-2">
+                    {{ deleting ? 'mdi-loading mdi-spin' : 'mdi-delete' }}
+                  </v-icon>
+                  {{ deleting ? 'Deleting...' : 'Delete Report' }}
+                </v-list-item-title>
+              </v-list-item>
+            </v-list>
+          </v-menu>
+        </div>
       </div>
     </div>
     <div class="cucumber-report-content">
@@ -435,6 +477,39 @@
         </v-expansion-panels>
       </template>
     </div>
+
+    <!-- Confirmation Dialog -->
+    <ConfirmationDialog
+      v-model="confirmationDialog.show"
+      :title="confirmationDialog.title"
+      :message="confirmationDialog.message"
+      :details="confirmationDialog.details"
+      :type="confirmationDialog.type"
+      :confirm-text="confirmationDialog.confirmText"
+      :confirm-color="confirmationDialog.confirmColor"
+      :show-environment-info="confirmationDialog.showEnvironmentInfo"
+      :environment="confirmationDialog.environment"
+      @confirm="confirmationDialog.onConfirm"
+      @cancel="confirmationDialog.onCancel"
+    />
+
+    <!-- Success/Error Snackbar -->
+    <v-snackbar
+      v-model="snackbar.show"
+      :color="snackbar.color"
+      :timeout="snackbar.timeout"
+      location="top right"
+    >
+      {{ snackbar.message }}
+      <template #actions>
+        <v-btn
+          variant="text"
+          @click="snackbar.show = false"
+        >
+          Close
+        </v-btn>
+      </template>
+    </v-snackbar>
   </div>
 </template>
 
@@ -447,8 +522,13 @@ function getScenarioList(feature) {
   return [];
 }
 
+import ConfirmationDialog from '@/components/ConfirmationDialog.vue';
+
 export default {
   name: 'ReportViewer',
+  components: {
+    ConfirmationDialog
+  },
   props: {
     report: {
       type: Object,
@@ -459,6 +539,189 @@ export default {
       type: Number,
       default: 0,
     },
+  },
+  data() {
+    return {
+      error: '',
+      searchQuery: '',
+      searchResults: {
+        total: 0,
+        features: 0,
+        scenarios: 0,
+        steps: 0
+      },
+      searchDebounceTimer: null,
+      searchExpanded: false,
+      filters: {
+        status: [],
+        tags: [],
+        duration: null,
+        features: []
+      },
+      filtersExpanded: false,
+      deleting: false,
+      // Confirmation dialog state
+      confirmationDialog: {
+        show: false,
+        title: '',
+        message: '',
+        details: '',
+        type: 'default',
+        confirmText: 'Confirm',
+        confirmColor: 'primary',
+        showEnvironmentInfo: false,
+        environment: 'localhost',
+        onConfirm: null,
+        onCancel: null
+      },
+      // Snackbar for notifications
+      snackbar: {
+        show: false,
+        message: '',
+        color: 'info',
+        timeout: 3000
+      }
+    }
+  },
+  computed: {
+    statusFilterOptions() {
+      return [
+        { text: 'All', value: 'all' },
+        { text: 'Passed', value: 'passed' },
+        { text: 'Failed', value: 'failed' },
+        { text: 'Skipped', value: 'skipped' }
+      ];
+    },
+    tagFilterOptions() {
+      const tags = new Set();
+      if (this.report && this.report.features) {
+        this.report.features.forEach(feature => {
+          if (feature.tags) {
+            feature.tags.forEach(tag => {
+              const cleanTag = this.cleanTagText(tag);
+              if (cleanTag) tags.add(cleanTag);
+            });
+          }
+          if (feature.elements) {
+            feature.elements.forEach(scenario => {
+              if (scenario.tags) {
+                scenario.tags.forEach(tag => {
+                  const cleanTag = this.cleanTagText(tag);
+                  if (cleanTag) tags.add(cleanTag);
+                });
+              }
+            });
+          }
+        });
+      }
+      return Array.from(tags).sort().map(tag => ({ text: tag, value: tag }));
+    },
+    durationFilterOptions() {
+      return [
+        { text: 'All Durations', value: null },
+        { text: 'Fast (< 1s)', value: 'fast' },
+        { text: 'Medium (1-10s)', value: 'medium' },
+        { text: 'Slow (> 10s)', value: 'slow' }
+      ];
+    },
+    featureFilterOptions() {
+      if (!this.report || !this.report.features) return [];
+      return this.report.features.map((feature, index) => ({
+        text: feature.name || `Feature ${index + 1}`,
+        value: index
+      }));
+    },
+    filteredFeatures() {
+      if (!this.report || !this.report.features) return [];
+      return this.report.features.filter(feature => this.shouldShowFeature(feature));
+    },
+    hasActiveFilters() {
+      return this.filters.status.length > 0 ||
+        this.filters.tags.length > 0 ||
+        this.filters.duration !== null ||
+        this.filters.features.length > 0;
+    },
+    reportTimestamp() {
+      if (!this.report || !this.report.timestamp) return null;
+      return new Date(this.report.timestamp);
+    },
+    timeAgo() {
+      if (!this.reportTimestamp) return '';
+      const now = new Date();
+      const diffMs = now - this.reportTimestamp;
+      const diffMinutes = Math.floor(diffMs / (1000 * 60));
+      const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+      const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+      if (diffMinutes < 1) {
+        return 'Just now';
+      } else if (diffMinutes < 60) {
+        return `${diffMinutes} minute${diffMinutes !== 1 ? 's' : ''} ago`;
+      } else if (diffHours < 24) {
+        return `${diffHours} hour${diffHours !== 1 ? 's' : ''} ago`;
+      } else if (diffDays < 30) {
+        return `${diffDays} day${diffDays !== 1 ? 's' : ''} ago`;
+      } else {
+        return this.reportTimestamp.toLocaleDateString();
+      }
+    },
+    formattedDate() {
+      if (!this.reportTimestamp) return '';
+      return this.reportTimestamp.toLocaleString();
+    },
+    passedPercentage() {
+      if (this.summary.total === 0) return 0;
+      return (this.summary.passed / this.summary.total * 100).toFixed(1);
+    },
+    failedPercentage() {
+      if (this.summary.total === 0) return 0;
+      return (this.summary.failed / this.summary.total * 100).toFixed(1);
+    },
+    isDarkTheme() {
+      return this.$store.getters['theme/isDark'];
+    },
+    // Memoized computed properties for better performance
+    reportFeatures() {
+      return this.report?.features || [];
+    },
+    featuresCount() {
+      return this.reportFeatures.length;
+    },
+    summary() {
+      let passed = 0, failed = 0, skipped = 0, total = 0, duration = 0;
+      if (!this.report || !Array.isArray(this.report.features)) return { passed, failed, skipped, total, duration: 0 };
+
+      this.report.features.forEach(feature => {
+        const scenarios = Array.isArray(feature.elements) ? feature.elements.filter(el => el.type !== 'background') : [];
+        scenarios.forEach(scenario => {
+          const status = this.scenarioStatus(scenario);
+          if (status === 'passed') passed++;
+          else if (status === 'failed') failed++;
+          else skipped++;
+          total++;
+          if (Array.isArray(scenario.steps)) {
+            duration += scenario.steps.reduce((acc, st) => acc + (typeof st.result?.duration === 'number' ? st.result.duration : 0), 0);
+          }
+
+          // Add before hook durations (setup)
+          if (Array.isArray(scenario.before)) {
+            duration += scenario.before.reduce((acc, hook) => acc + (typeof hook.result?.duration === 'number' ? hook.result.duration : 0), 0);
+          }
+
+          // Add after hook durations (teardown)
+          if (Array.isArray(scenario.after)) {
+            duration += scenario.after.reduce((acc, hook) => acc + (typeof hook.result?.duration === 'number' ? hook.result.duration : 0), 0);
+          }
+        });
+      });
+      return {
+        passed,
+        failed,
+        skipped,
+        total,
+        duration: this.formatDuration(duration, true)
+      };
+    }
   },
   methods: {
     scenarioStatus(scenario) {
@@ -889,269 +1152,195 @@ export default {
       }
 
       return totalDuration;
-    }
-  },
-  data() {
-    return {
-      error: '',
-      searchQuery: '',
-      searchResults: {
-        total: 0,
-        features: 0,
-        scenarios: 0,
-        steps: 0
-      },
-      searchDebounceTimer: null,
-      searchExpanded: false,
-      filters: {
-        status: [],
-        tags: [],
-        duration: null,
-        features: []
-      },
-      filtersExpanded: false
-    }
-  },
-  computed: {
-    isDarkTheme() {
-      return this.$store.getters['theme/isDark'];
     },
-    // Memoized computed properties for better performance
-    reportFeatures() {
-      return this.report?.features || [];
-    },
-    featuresCount() {
-      return this.reportFeatures.length;
-    },
-    summary() {
-      let passed = 0, failed = 0, skipped = 0, total = 0, duration = 0;
-      if (!this.report || !Array.isArray(this.report.features)) return { passed, failed, skipped, total, duration: 0 };
-      this.report.features.forEach(feature => {
-        const scenarios = Array.isArray(feature.elements) ? feature.elements.filter(el => el.type !== 'background') : [];
-        scenarios.forEach(scenario => {
-          const status = this.scenarioStatus(scenario);
-          if (status === 'passed') passed++;
-          else if (status === 'failed') failed++;
-          else skipped++;
-          total++;
-          if (Array.isArray(scenario.steps)) {
-            duration += scenario.steps.reduce((acc, st) => acc + (typeof st.result?.duration === 'number' ? st.result.duration : 0), 0);
-          }
 
-          // Add before hook durations (setup)
-          if (Array.isArray(scenario.before)) {
-            duration += scenario.before.reduce((acc, hook) => acc + (typeof hook.result?.duration === 'number' ? hook.result.duration : 0), 0);
-          }
+    // Add delete functionality methods
+    async deleteCurrentReport() {
+      try {
+        // Show confirmation dialog first
+        const confirmed = await this.showDeleteConfirmation();
+        if (!confirmed) {
+          return;
+        }
 
-          // Add after hook durations (teardown)
-          if (Array.isArray(scenario.after)) {
-            duration += scenario.after.reduce((acc, hook) => acc + (typeof hook.result?.duration === 'number' ? hook.result.duration : 0), 0);
-          }
+        this.deleting = true;
+
+        // Import DeletionService dynamically
+        const { default: DeletionService } = await import('@/services/DeletionService');
+        const deletionService = new DeletionService();
+        
+        // Get report ID from route params
+        const reportId = this.$route.params.id;
+        
+        const result = await deletionService.deleteReport(reportId, {
+          confirm: false, // We already confirmed above
+          showFeedback: false // We'll handle feedback ourselves
         });
+
+        if (result.success && !result.cancelled) {
+          // Show success message
+          this.showSuccessMessage(result.deletionType === 'soft' 
+            ? 'Report hidden from collection' 
+            : 'Report deleted successfully'
+          );
+
+          // Navigate back to collection after a short delay
+          setTimeout(() => {
+            this.$router.push('/');
+          }, 1500);
+        }
+
+      } catch (error) {
+        console.error('Failed to delete report:', error);
+        this.showErrorMessage(`Failed to delete report: ${error.message}`);
+      } finally {
+        this.deleting = false;
+      }
+    },
+
+    async showDeleteConfirmation() {
+      return new Promise((resolve) => {
+        const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+        
+        this.confirmationDialog = {
+          show: true,
+          title: isLocalhost ? 'Delete Report' : 'Hide Report',
+          message: isLocalhost 
+            ? 'This will permanently delete the report file from the server.'
+            : 'This will hide the report from the collection. The file will remain until next deployment.',
+          details: `Report: ${this.report?.name || this.$route.params.id}`,
+          type: 'delete',
+          confirmText: isLocalhost ? 'Delete' : 'Hide',
+          confirmColor: 'error',
+          showEnvironmentInfo: true,
+          environment: isLocalhost ? 'localhost' : 'production',
+          onConfirm: () => {
+            this.confirmationDialog.show = false;
+            resolve(true);
+          },
+          onCancel: () => {
+            this.confirmationDialog.show = false;
+            resolve(false);
+          }
+        };
       });
-      return {
-        passed,
-        failed,
-        skipped,
-        total,
-        duration: this.formatDuration(duration, true)
+    },
+
+    goBackToCollection() {
+      this.$router.push('/');
+    },
+
+    refreshReport() {
+      // Reload the current route to refresh the report
+      this.$router.go(0);
+    },
+
+    showSuccessMessage(message) {
+      this.snackbar = {
+        show: true,
+        message,
+        color: 'success',
+        timeout: 3000
       };
     },
-    statusFilterOptions() {
-      return [
-        { text: 'Passed', value: 'passed' },
-        { text: 'Failed', value: 'failed' },
-        { text: 'Skipped', value: 'skipped' }
-      ];
-    },
-    durationFilterOptions() {
-      return [
-        { text: 'Fast tests (< 1s)', value: 'fast' },
-        { text: 'Medium tests (1-10s)', value: 'medium' },
-        { text: 'Slow tests (> 10s)', value: 'slow' }
-      ];
-    },
-    availableTags() {
-      if (!this.report || !this.report.features) return [];
 
-      const tagSet = new Set();
-      this.report.features.forEach(feature => {
+    showErrorMessage(message) {
+      this.snackbar = {
+        show: true,
+        message,
+        color: 'error',
+        timeout: 5000
+      };
+    },
+
+    // Feature filtering method
+    shouldShowFeature(feature) {
+      // Status filter
+      if (this.filters.status.length > 0) {
+        const featureStatus = this.featureStatus(feature);
+        if (!this.filters.status.includes(featureStatus)) {
+          return false;
+        }
+      }
+
+      // Tags filter
+      if (this.filters.tags.length > 0) {
+        const featureTags = [];
+        
         // Collect feature tags
         if (feature.tags) {
           feature.tags.forEach(tag => {
             const cleanTag = this.cleanTagText(tag);
-            if (cleanTag) tagSet.add(cleanTag);
+            if (cleanTag) featureTags.push(cleanTag);
           });
         }
-
+        
         // Collect scenario tags
         if (feature.elements) {
           feature.elements.forEach(scenario => {
             if (scenario.tags) {
               scenario.tags.forEach(tag => {
                 const cleanTag = this.cleanTagText(tag);
-                if (cleanTag) tagSet.add(cleanTag);
+                if (cleanTag) featureTags.push(cleanTag);
               });
             }
           });
         }
-      });
-
-      return Array.from(tagSet).sort();
-    },
-    availableFeatures() {
-      if (!this.report || !this.report.features) return [];
-
-      return this.report.features.map(feature => ({
-        text: feature.name || feature.uri || 'Unnamed Feature',
-        value: feature.id || feature.name || feature.uri
-      }));
-    },
-    hasActiveFilters() {
-      return this.filters.status.length > 0 ||
-        this.filters.tags.length > 0 ||
-        this.filters.duration !== null ||
-        this.filters.features.length > 0;
-    },
-    filteredFeatures() {
-      if (!this.report || !this.report.features) return [];
-      if (!this.hasActiveFilters) return this.report.features;
-
-      return this.report.features.filter(feature => {
-        // Status filter
-        if (this.filters.status.length > 0) {
-          const featureStatusValue = this.featureStatus(feature);
-
-          // If filtering for skipped, check if feature has any scenarios with skipped steps
-          if (this.filters.status.includes('skipped')) {
-            const hasSkippedSteps = feature.elements && feature.elements.some(scenario =>
-              scenario.steps && scenario.steps.some(step =>
-                (step.result && step.result.status === 'skipped') || step.status === 'skipped'
-              )
-            );
-            if (hasSkippedSteps) {
-              // Feature has scenarios with skipped steps, include it
-            } else if (!this.filters.status.includes(featureStatusValue)) {
-              return false;
-            }
-          } else if (!this.filters.status.includes(featureStatusValue)) {
-            return false;
-          }
+        
+        // Check if any selected tags match
+        const hasMatchingTag = this.filters.tags.some(selectedTag =>
+          featureTags.includes(selectedTag)
+        );
+        if (!hasMatchingTag) {
+          return false;
         }
+      }
 
-        // Tags filter
-        if (this.filters.tags.length > 0) {
-          const featureTags = [];
-
-          // Collect feature tags
-          if (feature.tags) {
-            feature.tags.forEach(tag => {
-              const cleanTag = this.cleanTagText(tag);
-              if (cleanTag) featureTags.push(cleanTag);
-            });
-          }
-
-          // Collect scenario tags
-          if (feature.elements) {
-            feature.elements.forEach(scenario => {
-              if (scenario.tags) {
-                scenario.tags.forEach(tag => {
-                  const cleanTag = this.cleanTagText(tag);
-                  if (cleanTag) featureTags.push(cleanTag);
-                });
-              }
-            });
-          }
-
-          // Check if any selected tags match
-          const hasMatchingTag = this.filters.tags.some(selectedTag =>
-            featureTags.includes(selectedTag)
-          );
-          if (!hasMatchingTag) {
-            return false;
-          }
+      // Duration filter
+      if (this.filters.duration) {
+        const featureDuration = this.getFeatureDuration(feature);
+        
+        if (this.filters.duration === 'fast' && featureDuration >= 1) {
+          return false;
+        } else if (this.filters.duration === 'medium' && (featureDuration < 1 || featureDuration > 10)) {
+          return false;
+        } else if (this.filters.duration === 'slow' && featureDuration <= 10) {
+          return false;
         }
+      }
 
-        // Duration filter
-        if (this.filters.duration) {
-          const featureDuration = this.getFeatureDuration(feature);
-
-          if (this.filters.duration === 'fast' && featureDuration >= 1) {
-            return false;
-          } else if (this.filters.duration === 'medium' && (featureDuration < 1 || featureDuration > 10)) {
-            return false;
-          } else if (this.filters.duration === 'slow' && featureDuration <= 10) {
-            return false;
-          }
+      // Features filter
+      if (this.filters.features.length > 0) {
+        const featureId = feature.id || feature.name;
+        if (!this.filters.features.includes(featureId)) {
+          return false;
         }
+      }
 
-        // Features filter
-        if (this.filters.features.length > 0) {
-          const featureId = feature.id || feature.name || feature.uri;
-          if (!this.filters.features.includes(featureId)) {
-            return false;
-          }
-        }
-
-        return true;
-      });
+      return true;
     },
-    filteredFeaturesCount() {
-      return this.filteredFeatures.length;
-    },
-    reportTimestamp() {
-      if (!this.report || !this.report.features) return null;
 
-      // Find the earliest start_timestamp from all scenarios
-      let earliestTimestamp = null;
-
-      this.report.features.forEach(feature => {
-        if (feature.elements) {
-          feature.elements.forEach(scenario => {
-            if (scenario.start_timestamp) {
-              const timestamp = new Date(scenario.start_timestamp);
-              if (!earliestTimestamp || timestamp < earliestTimestamp) {
-                earliestTimestamp = timestamp;
-              }
+    // Get feature duration helper
+    getFeatureDuration(feature) {
+      if (!feature.elements) return 0;
+      
+      let totalDuration = 0;
+      feature.elements.forEach(scenario => {
+        if (scenario.steps) {
+          scenario.steps.forEach(step => {
+            if (step.result && typeof step.result.duration === 'number') {
+              totalDuration += step.result.duration;
             }
           });
         }
       });
-
-      return earliestTimestamp;
-    },
-    timeAgo() {
-      if (!this.reportTimestamp) return '1 day ago';
-
-      const now = new Date();
-      const diffMs = now - this.reportTimestamp;
-      const diffMinutes = Math.floor(diffMs / (1000 * 60));
-      const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-      const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-
-      if (diffMinutes < 1) {
-        return 'just now';
-      } else if (diffMinutes < 60) {
-        return `${diffMinutes} minute${diffMinutes !== 1 ? 's' : ''} ago`;
-      } else if (diffHours < 24) {
-        return `${diffHours} hour${diffHours !== 1 ? 's' : ''} ago`;
-      } else if (diffDays < 30) {
-        return `${diffDays} day${diffDays !== 1 ? 's' : ''} ago`;
-      } else {
-        return this.reportTimestamp.toLocaleDateString();
+      
+      // Convert nanoseconds to seconds if needed
+      if (totalDuration > 1000000) {
+        totalDuration = totalDuration / 1e9;
       }
-    },
-    formattedDate() {
-      if (!this.reportTimestamp) return '';
-      return this.reportTimestamp.toLocaleString();
-    },
-    passedPercentage() {
-      if (this.summary.total === 0) return 0;
-      return (this.summary.passed / this.summary.total * 100).toFixed(1);
-    },
-    failedPercentage() {
-      if (this.summary.total === 0) return 0;
-      return (this.summary.failed / this.summary.total * 100).toFixed(1);
+      
+      return totalDuration;
     }
   }
 }
@@ -1349,6 +1538,22 @@ export default {
 .time-section {
   display: flex;
   gap: 16px;
+}
+
+/* Actions Section */
+.actions-section {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.action-menu-btn {
+  color: rgba(255, 255, 255, 0.8) !important;
+}
+
+.action-menu-btn:hover {
+  color: white !important;
+  background-color: rgba(255, 255, 255, 0.1) !important;
 }
 
 .time-card,
