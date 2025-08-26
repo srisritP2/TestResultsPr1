@@ -34,6 +34,8 @@
               clearable hide-details />
             <v-select v-model="sortBy" :items="sortOptions" label="Sort by" variant="outlined" density="compact"
               hide-details />
+            <v-select v-model="syncStatusFilter" :items="syncStatusOptions" label="Sync Status" variant="outlined"
+              density="compact" clearable hide-details />
           </div>
         </v-card-text>
       </v-expand-transition>
@@ -70,7 +72,7 @@
           <v-card v-for="report in filteredReports" :key="report.id" class="report-card"
             :class="{ 'report-failed': report.failed > 0 }" @click="navigateToReport(report)">
             <v-card-text class="report-content">
-              <!-- Single Line Header: Status + Date + Test Counts + Menu -->
+              <!-- Single Line Header: Status + Date + Test Counts + Sync Status + Menu -->
               <div class="report-header-single-line">
                 <v-icon :color="getStatusColor(report)" size="20" class="status-icon">
                   {{ getStatusIcon(report) }}
@@ -79,17 +81,21 @@
                 <span class="test-counts-info">
                   <span class="passed-count">{{ report.passed || 0 }}</span>:<span class="failed-count">{{ report.failed
                     || 0
-                    }}</span>:<span class="skipped-count">{{ report.skipped || 0 }}</span>
+                  }}</span>:<span class="skipped-count">{{ report.skipped || 0 }}</span>
                 </span>
+                <!-- Sync Status Indicators -->
+                <div class="sync-status-indicators">
+                  <v-chip v-if="getReportSyncStatus(report) !== 'synced'" :color="getSyncStatusColor(report)"
+                    size="x-small" variant="outlined" class="sync-status-chip">
+                    <v-icon size="12" class="mr-1">{{ getSyncStatusIcon(report) }}</v-icon>
+                    {{ getSyncStatusLabel(report) }}
+                  </v-chip>
+                </div>
                 <div class="report-actions">
-                  <v-btn 
-                    :icon="isPublished(report) ? 'mdi-cloud-check' : 'mdi-cloud-upload'" 
-                    size="small" 
-                    variant="text" 
-                    :color="isPublished(report) ? 'success' : 'primary'"
+                  <v-btn :icon="isPublished(report) ? 'mdi-cloud-check' : 'mdi-cloud-upload'" size="small"
+                    variant="text" :color="isPublished(report) ? 'success' : 'primary'"
                     @click.stop="togglePublishStatus(report)"
-                    :title="isPublished(report) ? 'Unpublish from GitHub Pages' : 'Publish to GitHub Pages'"
-                  ></v-btn>
+                    :title="isPublished(report) ? 'Unpublish from GitHub Pages' : 'Publish to GitHub Pages'"></v-btn>
                   <v-menu>
                     <template #activator="{ props }">
                       <v-btn icon="mdi-dots-vertical" size="small" variant="text" v-bind="props" @click.stop></v-btn>
@@ -103,15 +109,12 @@
                       </v-list-item>
                       <v-list-item @click="togglePublishStatus(report)">
                         <v-list-item-title>
-                          <v-icon size="16" class="mr-2">{{ isPublished(report) ? 'mdi-cloud-off' : 'mdi-cloud-upload' }}</v-icon>
+                          <v-icon size="16" class="mr-2">{{ isPublished(report) ? 'mdi-cloud-off' : 'mdi-cloud-upload'
+                            }}</v-icon>
                           {{ isPublished(report) ? 'Unpublish' : 'Publish to GitHub Pages' }}
                         </v-list-item-title>
                       </v-list-item>
-                      <v-list-item 
-                    @click="deleteReport(report)" 
-                    class="text-error"
-                    :disabled="report.deleting"
-                  >
+                      <v-list-item @click="deleteReport(report)" class="text-error" :disabled="report.deleting">
                         <v-list-item-title>
                           <v-icon size="16" class="mr-2">
                             {{ report.deleting ? 'mdi-loading mdi-spin' : 'mdi-delete' }}
@@ -159,33 +162,17 @@
     </v-card>
 
     <!-- Confirmation Dialog -->
-    <ConfirmationDialog
-      v-model="confirmationDialog.show"
-      :title="confirmationDialog.title"
-      :message="confirmationDialog.message"
-      :details="confirmationDialog.details"
-      :type="confirmationDialog.type"
-      :confirm-text="confirmationDialog.confirmText"
-      :confirm-color="confirmationDialog.confirmColor"
-      :show-environment-info="confirmationDialog.showEnvironmentInfo"
-      :environment="confirmationDialog.environment"
-      @confirm="confirmationDialog.onConfirm"
-      @cancel="confirmationDialog.onCancel"
-    />
+    <ConfirmationDialog v-model="confirmationDialog.show" :title="confirmationDialog.title"
+      :message="confirmationDialog.message" :details="confirmationDialog.details" :type="confirmationDialog.type"
+      :confirm-text="confirmationDialog.confirmText" :confirm-color="confirmationDialog.confirmColor"
+      :show-environment-info="confirmationDialog.showEnvironmentInfo" :environment="confirmationDialog.environment"
+      @confirm="confirmationDialog.onConfirm" @cancel="confirmationDialog.onCancel" />
 
     <!-- Success/Error Snackbar -->
-    <v-snackbar
-      v-model="snackbar.show"
-      :color="snackbar.color"
-      :timeout="snackbar.timeout"
-      location="top right"
-    >
+    <v-snackbar v-model="snackbar.show" :color="snackbar.color" :timeout="snackbar.timeout" location="top right">
       {{ snackbar.message }}
       <template #actions>
-        <v-btn
-          variant="text"
-          @click="snackbar.show = false"
-        >
+        <v-btn variant="text" @click="snackbar.show = false">
           Close
         </v-btn>
       </template>
@@ -213,6 +200,7 @@ export default {
       searchQuery: '',
       statusFilter: null,
       sortBy: 'date',
+      deletionService: new DeletionService(),
       statusOptions: [
         { title: 'All Passed', value: 'passed' },
         { title: 'Has Failures', value: 'failed' },
@@ -224,6 +212,14 @@ export default {
         { title: 'Duration', value: 'duration' },
         { title: 'Scenarios', value: 'scenarios' },
         { title: 'Pass Rate', value: 'passRate' }
+      ],
+      syncStatusFilter: null,
+      syncStatusOptions: [
+        { title: 'Synced', value: 'synced' },
+        { title: 'Local Only', value: 'local-only' },
+        { title: 'Published Only', value: 'published-only' },
+        { title: 'Deleted', value: 'deleted' },
+        { title: 'Unknown', value: 'unknown' }
       ],
       // Confirmation dialog state
       confirmationDialog: {
@@ -248,6 +244,21 @@ export default {
       }
     };
   },
+
+  mounted() {
+    this.fetchReports();
+
+    // Listen for deletion events from other components
+    window.addEventListener('reportDeleted', this.handleReportDeleted);
+    window.addEventListener('reportRestored', this.handleReportRestored);
+  },
+
+  beforeUnmount() {
+    // Clean up event listeners
+    window.removeEventListener('reportDeleted', this.handleReportDeleted);
+    window.removeEventListener('reportRestored', this.handleReportRestored);
+  },
+
   computed: {
     filteredReports() {
       let reports = [...this.reportsCollection];
@@ -260,6 +271,13 @@ export default {
       // Apply status filter
       if (this.statusFilter) {
         reports = ReportService.filterReports(reports, { status: [this.statusFilter] });
+      }
+
+      // Apply sync status filter
+      if (this.syncStatusFilter) {
+        reports = reports.filter(report => {
+          return this.getReportSyncStatus(report) === this.syncStatusFilter;
+        });
       }
 
       // Apply sorting
@@ -332,8 +350,7 @@ export default {
         this.setReportLoading(report.id, true);
 
         // Use the comprehensive DeletionService
-        const deletionService = new DeletionService();
-        const result = await deletionService.deleteReport(report.id, {
+        const result = await this.deletionService.deleteReport(report.id, {
           confirm: false, // We already confirmed above
           showFeedback: false // We'll handle feedback ourselves
         });
@@ -349,8 +366,8 @@ export default {
           localStorage.removeItem('uploaded-report-' + report.id);
 
           // Show success message
-          this.showSuccessMessage(result.deletionType === 'soft' 
-            ? 'Report hidden from collection' 
+          this.showSuccessMessage(result.deletionType === 'soft'
+            ? 'Report hidden from collection'
             : 'Report deleted successfully'
           );
 
@@ -375,11 +392,11 @@ export default {
     async showDeleteConfirmation(report) {
       return new Promise((resolve) => {
         const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-        
+
         this.confirmationDialog = {
           show: true,
           title: isLocalhost ? 'Delete Report' : 'Hide Report',
-          message: isLocalhost 
+          message: isLocalhost
             ? 'This will permanently delete the report file from the server.'
             : 'This will hide the report from the collection. The file will remain until next deployment.',
           details: `Report: ${report.name || report.id}`,
@@ -428,6 +445,99 @@ export default {
         color: 'error',
         timeout: 5000
       };
+    },
+
+    // Event handlers for deletion events
+    handleReportDeleted(event) {
+      const { reportId, result } = event.detail;
+
+      // Remove from local collection if it exists
+      this.reportsCollection = this.reportsCollection.filter(r => r.id !== reportId);
+
+      // Show success message
+      this.showSuccessMessage(result.deletionType === 'soft'
+        ? 'Report hidden from collection'
+        : 'Report deleted successfully'
+      );
+
+      console.log(`📢 Received deletion event for report: ${reportId}`);
+    },
+
+    handleReportRestored(event) {
+      const { reportId } = event.detail;
+
+      // Refresh the reports list to show restored report
+      this.refreshReports();
+
+      // Show success message
+      this.showSuccessMessage('Report restored successfully');
+
+      console.log(`📢 Received restoration event for report: ${reportId}`);
+    },
+
+    // Sync Status Methods for UI Indicators
+    getReportSyncStatus(report) {
+      // Check if report exists in different storage locations
+      const isInLocalStorage = localStorage.getItem('uploaded-report-' + report.id) !== null;
+      const isPublished = this.isPublished(report);
+      const isDeleted = this.isReportDeleted(report);
+
+      if (isDeleted) {
+        return 'deleted';
+      } else if (isInLocalStorage && isPublished) {
+        return 'synced';
+      } else if (isInLocalStorage && !isPublished) {
+        return 'local-only';
+      } else if (!isInLocalStorage && isPublished) {
+        return 'published-only';
+      } else {
+        return 'unknown';
+      }
+    },
+
+    getSyncStatusColor(report) {
+      const status = this.getReportSyncStatus(report);
+      switch (status) {
+        case 'synced': return 'success';
+        case 'local-only': return 'info';
+        case 'published-only': return 'warning';
+        case 'deleted': return 'error';
+        case 'unknown': return 'grey';
+        default: return 'grey';
+      }
+    },
+
+    getSyncStatusIcon(report) {
+      const status = this.getReportSyncStatus(report);
+      switch (status) {
+        case 'synced': return 'mdi-check-circle';
+        case 'local-only': return 'mdi-laptop';
+        case 'published-only': return 'mdi-cloud';
+        case 'deleted': return 'mdi-delete';
+        case 'unknown': return 'mdi-help-circle';
+        default: return 'mdi-help-circle';
+      }
+    },
+
+    getSyncStatusLabel(report) {
+      const status = this.getReportSyncStatus(report);
+      switch (status) {
+        case 'synced': return 'Synced';
+        case 'local-only': return 'Local Only';
+        case 'published-only': return 'Published';
+        case 'deleted': return 'Deleted';
+        case 'unknown': return 'Unknown';
+        default: return 'Unknown';
+      }
+    },
+
+    isReportDeleted(report) {
+      try {
+        const deletedReports = JSON.parse(localStorage.getItem('deleted-reports') || '[]');
+        return deletedReports.some(deleted => deleted.reportId === report.id);
+      } catch (e) {
+        return false;
+      }
     },
 
     getStatusIcon(report) {
@@ -636,11 +746,11 @@ export default {
           // Unpublish: Remove from published reports
           const updatedPublished = publishedReports.filter(pub => pub.id !== report.id);
           localStorage.setItem('published-reports-index', JSON.stringify(updatedPublished));
-          
+
           // Show confirmation
           this.$emit('report-unpublished', report);
           console.log(`Report ${report.id} unpublished from GitHub Pages`);
-          
+
         } else {
           // Publish: Add to published reports
           const publishedReport = {
@@ -648,10 +758,10 @@ export default {
             publishedAt: new Date().toISOString(),
             publishStatus: 'published'
           };
-          
+
           publishedReports.unshift(publishedReport);
           localStorage.setItem('published-reports-index', JSON.stringify(publishedReports));
-          
+
           // Show confirmation
           this.$emit('report-published', report);
           console.log(`Report ${report.id} published to GitHub Pages`);
@@ -660,10 +770,10 @@ export default {
         // Update GitHub Pages index and save file for GitHub Pages
         await this.updateGitHubPagesIndex();
         await this.saveReportForGitHubPages(report);
-        
+
         // Force reactivity update
         this.$forceUpdate();
-        
+
       } catch (error) {
         console.error('Error toggling publish status:', error);
         alert('Failed to update publish status. Please try again.');
@@ -673,7 +783,7 @@ export default {
     async updateGitHubPagesIndex() {
       try {
         const publishedReports = JSON.parse(localStorage.getItem('published-reports-index') || '[]');
-        
+
         // Create GitHub Pages compatible index
         const githubPagesIndex = {
           reports: publishedReports.map(report => ({
@@ -698,9 +808,9 @@ export default {
 
         // Store GitHub Pages index
         localStorage.setItem('github-pages-index', JSON.stringify(githubPagesIndex));
-        
+
         console.log('GitHub Pages index updated with', publishedReports.length, 'published reports');
-        
+
       } catch (error) {
         console.error('Error updating GitHub Pages index:', error);
       }
@@ -724,7 +834,7 @@ export default {
       try {
         // Since we can't directly write files from browser, we'll use a different approach
         // Create a form to submit the data to a backend endpoint or use the File System Access API
-        
+
         if ('showDirectoryPicker' in window) {
           // Use File System Access API (modern browsers)
           await this.saveWithFileSystemAPI(reportId, reportData);
@@ -743,21 +853,21 @@ export default {
       try {
         // Request directory access
         const dirHandle = await window.showDirectoryPicker();
-        
+
         // Create the file
         const fileHandle = await dirHandle.getFileHandle(`${reportId}.json`, { create: true });
         const writable = await fileHandle.createWritable();
-        
+
         // Write the data
         await writable.write(reportData);
         await writable.close();
-        
+
         console.log(`✅ Report ${reportId} saved to uploads folder`);
         alert(`Report published successfully! The file has been saved and will be included in the next GitHub Pages update.`);
-        
+
         // Trigger index generation
         await this.triggerIndexGeneration();
-        
+
       } catch (error) {
         if (error.name === 'AbortError') {
           console.log('User cancelled directory selection');
@@ -778,9 +888,9 @@ export default {
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-      
+
       console.log(`📁 Report ${reportId} downloaded for manual upload`);
-      
+
       // Show detailed instructions
       const instructions = `
 📋 To complete GitHub Pages publishing:
@@ -799,7 +909,7 @@ export default {
 
 The GitHub workflow will automatically update your GitHub Pages site!
       `;
-      
+
       alert(instructions);
     },
 
@@ -808,7 +918,7 @@ The GitHub workflow will automatically update your GitHub Pages site!
         // This would ideally call the generate-index-enhanced.js script
         // Since we can't run Node.js from browser, we'll show instructions
         console.log('🔄 Index generation needed - run generate-index-enhanced.js');
-        
+
         // You could implement a backend endpoint here to trigger the script
         // For now, we'll just log the instruction
       } catch (error) {
@@ -872,7 +982,7 @@ The GitHub workflow will automatically update your GitHub Pages site!
 
   async mounted() {
     await this.fetchReports();
-    
+
     // Listen for deletion events to refresh the reports list
     window.addEventListener('reportDeleted', this.handleReportDeleted);
     window.addEventListener('reportRestored', this.handleReportRestored);
@@ -1624,6 +1734,7 @@ The GitHub workflow will automatically update your GitHub Pages site!
     transform: translateY(20px);
     background: var(--theme-surface-variant);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -1641,11 +1752,11 @@ The GitHub workflow will automatically update your GitHub Pages site!
     background: var(--theme-surface);
     border-bottom: 1px solid var(--theme-border);
   }
-  
+
   [data-theme="dark"] .filters-section {
     background: var(--theme-surface-variant);
   }
-  
+
   [data-theme="dark"] .reports-content {
     background: var(--theme-background);
   }
@@ -1656,5 +1767,103 @@ The GitHub workflow will automatically update your GitHub Pages site!
     background: var(--theme-surface);
     border: 1px solid var(--theme-border);
   }
+}
+</style>
+
+<style scoped>
+/* Sync Status Indicators Styling */
+.sync-status-indicators {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.sync-status-chip {
+  font-size: 0.7rem !important;
+  height: 20px !important;
+  border-radius: 10px !important;
+}
+
+.sync-status-chip .v-icon {
+  margin-right: 2px !important;
+}
+
+/* Dark theme sync status indicators */
+[data-theme="dark"] .sync-status-chip {
+  background: var(--theme-surface-variant) !important;
+  border: 1px solid var(--theme-border) !important;
+}
+
+[data-theme="dark"] .sync-status-chip.v-chip--variant-outlined {
+  background: transparent !important;
+  border: 1px solid currentColor !important;
+}
+
+/* Report header layout improvements */
+.report-header-single-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.report-header-single-line .status-icon {
+  flex-shrink: 0;
+}
+
+.report-header-single-line .date-info {
+  flex-shrink: 0;
+  font-size: 0.85rem;
+  color: var(--theme-text-secondary);
+}
+
+.report-header-single-line .test-counts-info {
+  flex-shrink: 0;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.report-header-single-line .sync-status-indicators {
+  flex-grow: 1;
+  justify-content: flex-start;
+}
+
+.report-header-single-line .report-actions {
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+/* Responsive adjustments for sync indicators */
+@media (max-width: 768px) {
+  .sync-status-indicators {
+    order: 3;
+    width: 100%;
+    margin-top: 4px;
+  }
+
+  .report-header-single-line {
+    flex-wrap: wrap;
+  }
+}
+
+/* Dark theme compatibility */
+[data-theme="dark"] .date-info {
+  color: var(--theme-text-secondary) !important;
+}
+
+[data-theme="dark"] .test-counts-info {
+  color: var(--theme-text-primary) !important;
+}
+
+[data-theme="dark"] .passed-count {
+  color: var(--theme-success) !important;
+}
+
+[data-theme="dark"] .failed-count {
+  color: var(--theme-error) !important;
+}
+
+[data-theme="dark"] .skipped-count {
+  color: var(--theme-warning) !important;
 }
 </style>

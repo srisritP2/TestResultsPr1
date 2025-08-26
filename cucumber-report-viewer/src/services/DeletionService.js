@@ -5,30 +5,36 @@
 
 class DeletionService {
   constructor() {
-    this.baseURL = process.env.NODE_ENV === 'production' ? '' : 'http://localhost:3001';
-    this.isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    this.baseURL =
+      process.env.NODE_ENV === "production" ? "" : "http://localhost:3001";
+    this.isLocalhost =
+      window.location.hostname === "localhost" ||
+      window.location.hostname === "127.0.0.1";
   }
 
   /**
    * Delete a report with confirmation and proper error handling
    */
   async deleteReport(reportId, options = {}) {
-    const { 
-      confirm = true, 
+    const {
+      confirm = true,
       soft = null, // null = auto-detect based on environment
-      showFeedback = true 
+      showFeedback = true,
     } = options;
 
     try {
       // Auto-detect deletion type if not specified
       const shouldSoftDelete = soft !== null ? soft : !this.isLocalhost;
-      
+
       // Show confirmation dialog if requested
-      if (confirm && !await this.confirmDeletion(reportId, shouldSoftDelete)) {
-        return { 
-          success: false, 
+      if (
+        confirm &&
+        !(await this.confirmDeletion(reportId, shouldSoftDelete))
+      ) {
+        return {
+          success: false,
           cancelled: true,
-          message: 'Deletion cancelled by user'
+          message: "Deletion cancelled by user",
         };
       }
 
@@ -39,19 +45,22 @@ class DeletionService {
 
       // Perform deletion
       const filename = this.getFilenameFromId(reportId);
-      const response = await fetch(`${this.baseURL}/api/reports/${filename}?soft=${shouldSoftDelete}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json'
+      const response = await fetch(
+        `${this.baseURL}/api/reports/${filename}?soft=${shouldSoftDelete}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
         }
-      });
+      );
 
       const result = await response.json();
 
       if (result.success) {
         // Update local state
         await this.updateLocalState(reportId, result.deletionType);
-        
+
         // Show success feedback
         if (showFeedback) {
           this.showSuccessMessage(reportId, result.deletionType);
@@ -60,18 +69,17 @@ class DeletionService {
         // Emit deletion event for UI updates
         this.emitDeletionEvent(reportId, result);
       } else {
-        throw new Error(result.error || 'Deletion failed');
+        throw new Error(result.error || "Deletion failed");
       }
 
       return result;
-
     } catch (error) {
-      console.error('Deletion error:', error);
-      
+      console.error("Deletion error:", error);
+
       if (showFeedback) {
         this.showErrorMessage(reportId, error.message);
       }
-      
+
       throw error;
     } finally {
       if (showFeedback) {
@@ -85,21 +93,21 @@ class DeletionService {
    */
   async confirmDeletion(reportId, isSoftDelete) {
     return new Promise((resolve) => {
-      const message = isSoftDelete 
-        ? 'This will hide the report from the collection. The file will remain until next deployment.'
-        : 'This will permanently delete the report file from the server.';
+      const message = isSoftDelete
+        ? "This will hide the report from the collection. The file will remain until next deployment."
+        : "This will permanently delete the report file from the server.";
 
-      const title = isSoftDelete ? 'Hide Report' : 'Delete Report';
-      
+      const title = isSoftDelete ? "Hide Report" : "Delete Report";
+
       // Create confirmation dialog
       const dialog = this.createConfirmationDialog({
         title,
         message,
         reportId,
-        confirmText: isSoftDelete ? 'Hide' : 'Delete',
-        confirmColor: 'error',
+        confirmText: isSoftDelete ? "Hide" : "Delete",
+        confirmColor: "error",
         onConfirm: () => resolve(true),
-        onCancel: () => resolve(false)
+        onCancel: () => resolve(false),
       });
 
       document.body.appendChild(dialog);
@@ -109,9 +117,17 @@ class DeletionService {
   /**
    * Create confirmation dialog element
    */
-  createConfirmationDialog({ title, message, reportId, confirmText, confirmColor, onConfirm, onCancel }) {
-    const overlay = document.createElement('div');
-    overlay.className = 'deletion-confirmation-overlay';
+  createConfirmationDialog({
+    title,
+    message,
+    reportId,
+    confirmText,
+    confirmColor,
+    onConfirm,
+    onCancel,
+  }) {
+    const overlay = document.createElement("div");
+    overlay.className = "deletion-confirmation-overlay";
     overlay.style.cssText = `
       position: fixed;
       top: 0;
@@ -125,8 +141,8 @@ class DeletionService {
       z-index: 9999;
     `;
 
-    const dialog = document.createElement('div');
-    dialog.className = 'deletion-confirmation-dialog';
+    const dialog = document.createElement("div");
+    dialog.className = "deletion-confirmation-dialog";
     dialog.style.cssText = `
       background: white;
       border-radius: 8px;
@@ -159,25 +175,25 @@ class DeletionService {
     `;
 
     // Add event listeners
-    const cancelBtn = dialog.querySelector('.cancel-btn');
-    const confirmBtn = dialog.querySelector('.confirm-btn');
+    const cancelBtn = dialog.querySelector(".cancel-btn");
+    const confirmBtn = dialog.querySelector(".confirm-btn");
 
     const cleanup = () => {
       document.body.removeChild(overlay);
     };
 
-    cancelBtn.addEventListener('click', () => {
+    cancelBtn.addEventListener("click", () => {
       cleanup();
       onCancel();
     });
 
-    confirmBtn.addEventListener('click', () => {
+    confirmBtn.addEventListener("click", () => {
       cleanup();
       onConfirm();
     });
 
     // Close on overlay click
-    overlay.addEventListener('click', (e) => {
+    overlay.addEventListener("click", (e) => {
       if (e.target === overlay) {
         cleanup();
         onCancel();
@@ -186,13 +202,13 @@ class DeletionService {
 
     // Close on Escape key
     const handleKeydown = (e) => {
-      if (e.key === 'Escape') {
+      if (e.key === "Escape") {
         cleanup();
         onCancel();
-        document.removeEventListener('keydown', handleKeydown);
+        document.removeEventListener("keydown", handleKeydown);
       }
     };
-    document.addEventListener('keydown', handleKeydown);
+    document.addEventListener("keydown", handleKeydown);
 
     overlay.appendChild(dialog);
     return overlay;
@@ -204,12 +220,12 @@ class DeletionService {
   async updateLocalState(reportId, deletionType) {
     try {
       // Update localStorage if used
-      const reportsKey = 'cucumber-reports';
+      const reportsKey = "cucumber-reports";
       const storedReports = localStorage.getItem(reportsKey);
-      
+
       if (storedReports) {
         const reports = JSON.parse(storedReports);
-        const updatedReports = reports.filter(r => r.id !== reportId);
+        const updatedReports = reports.filter((r) => r.id !== reportId);
         localStorage.setItem(reportsKey, JSON.stringify(updatedReports));
       }
 
@@ -218,17 +234,16 @@ class DeletionService {
         reportId,
         deletedAt: new Date().toISOString(),
         deletionType,
-        environment: this.isLocalhost ? 'localhost' : 'production'
+        environment: this.isLocalhost ? "localhost" : "production",
       };
 
-      const deletionsKey = 'deleted-reports';
+      const deletionsKey = "deleted-reports";
       const storedDeletions = localStorage.getItem(deletionsKey);
       const deletions = storedDeletions ? JSON.parse(storedDeletions) : [];
       deletions.push(deletionInfo);
       localStorage.setItem(deletionsKey, JSON.stringify(deletions));
-
     } catch (error) {
-      console.error('Error updating local state:', error);
+      console.error("Error updating local state:", error);
     }
   }
 
@@ -236,12 +251,14 @@ class DeletionService {
    * Show loading state for deletion operation
    */
   showLoadingState(reportId, isLoading) {
-    const deleteBtn = document.querySelector(`[data-report-id="${reportId}"] .delete-btn`);
+    const deleteBtn = document.querySelector(
+      `[data-report-id="${reportId}"] .delete-btn`
+    );
     if (deleteBtn) {
       deleteBtn.disabled = isLoading;
-      deleteBtn.innerHTML = isLoading ? 
-        '<i class="mdi mdi-loading mdi-spin"></i>' : 
-        '<i class="mdi mdi-delete"></i>';
+      deleteBtn.innerHTML = isLoading
+        ? '<i class="mdi mdi-loading mdi-spin"></i>'
+        : '<i class="mdi mdi-delete"></i>';
     }
   }
 
@@ -249,26 +266,27 @@ class DeletionService {
    * Show success message
    */
   showSuccessMessage(reportId, deletionType) {
-    const message = deletionType === 'soft' 
-      ? 'Report hidden from collection'
-      : 'Report deleted successfully';
-    
-    this.showNotification(message, 'success');
+    const message =
+      deletionType === "soft"
+        ? "Report hidden from collection"
+        : "Report deleted successfully";
+
+    this.showNotification(message, "success");
   }
 
   /**
    * Show error message
    */
   showErrorMessage(reportId, error) {
-    this.showNotification(`Failed to delete report: ${error}`, 'error');
+    this.showNotification(`Failed to delete report: ${error}`, "error");
   }
 
   /**
    * Show notification (can be enhanced with a proper notification system)
    */
-  showNotification(message, type = 'info') {
+  showNotification(message, type = "info") {
     // Simple notification - can be replaced with Vuetify snackbar or similar
-    const notification = document.createElement('div');
+    const notification = document.createElement("div");
     notification.className = `deletion-notification deletion-notification-${type}`;
     notification.style.cssText = `
       position: fixed;
@@ -279,7 +297,13 @@ class DeletionService {
       color: white;
       z-index: 10000;
       max-width: 300px;
-      background: ${type === 'success' ? '#4caf50' : type === 'error' ? '#f44336' : '#2196f3'};
+      background: ${
+        type === "success"
+          ? "#4caf50"
+          : type === "error"
+          ? "#f44336"
+          : "#2196f3"
+      };
     `;
     notification.textContent = message;
 
@@ -297,14 +321,14 @@ class DeletionService {
    * Emit deletion event for UI components to listen to
    */
   emitDeletionEvent(reportId, result) {
-    const event = new CustomEvent('reportDeleted', {
+    const event = new CustomEvent("reportDeleted", {
       detail: {
         reportId,
         result,
-        timestamp: new Date().toISOString()
-      }
+        timestamp: new Date().toISOString(),
+      },
     });
-    
+
     window.dispatchEvent(event);
   }
 
@@ -313,10 +337,10 @@ class DeletionService {
    */
   getFilenameFromId(reportId) {
     // If reportId already includes .json, use as-is
-    if (reportId.endsWith('.json')) {
+    if (reportId.endsWith(".json")) {
       return reportId;
     }
-    
+
     // Otherwise, add .json extension
     return `${reportId}.json`;
   }
@@ -333,41 +357,43 @@ class DeletionService {
       }
 
       const filename = this.getFilenameFromId(reportId);
-      const response = await fetch(`${this.baseURL}/api/reports/${filename}/restore`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
+      const response = await fetch(
+        `${this.baseURL}/api/reports/${filename}/restore`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
         }
-      });
+      );
 
       const result = await response.json();
 
       if (result.success) {
         // Remove from local deleted reports
         await this.removeFromLocalDeleted(reportId);
-        
+
         if (showFeedback) {
-          this.showNotification('Report restored successfully', 'success');
+          this.showNotification("Report restored successfully", "success");
         }
 
         // Emit restoration event
-        const event = new CustomEvent('reportRestored', {
-          detail: { reportId, result }
+        const event = new CustomEvent("reportRestored", {
+          detail: { reportId, result },
         });
         window.dispatchEvent(event);
       } else {
-        throw new Error(result.message || 'Restoration failed');
+        throw new Error(result.message || "Restoration failed");
       }
 
       return result;
-
     } catch (error) {
-      console.error('Restoration error:', error);
-      
+      console.error("Restoration error:", error);
+
       if (showFeedback) {
         this.showErrorMessage(reportId, error.message);
       }
-      
+
       throw error;
     } finally {
       if (showFeedback) {
@@ -381,16 +407,18 @@ class DeletionService {
    */
   async removeFromLocalDeleted(reportId) {
     try {
-      const deletionsKey = 'deleted-reports';
+      const deletionsKey = "deleted-reports";
       const storedDeletions = localStorage.getItem(deletionsKey);
-      
+
       if (storedDeletions) {
         const deletions = JSON.parse(storedDeletions);
-        const updatedDeletions = deletions.filter(d => d.reportId !== reportId);
+        const updatedDeletions = deletions.filter(
+          (d) => d.reportId !== reportId
+        );
         localStorage.setItem(deletionsKey, JSON.stringify(updatedDeletions));
       }
     } catch (error) {
-      console.error('Error removing from local deleted:', error);
+      console.error("Error removing from local deleted:", error);
     }
   }
 
@@ -401,14 +429,14 @@ class DeletionService {
     try {
       const response = await fetch(`${this.baseURL}/api/sync/status`);
       const result = await response.json();
-      
+
       if (result.success) {
         return result.syncStatus;
       } else {
-        throw new Error(result.error || 'Failed to get sync status');
+        throw new Error(result.error || "Failed to get sync status");
       }
     } catch (error) {
-      console.error('Error getting sync status:', error);
+      console.error("Error getting sync status:", error);
       throw error;
     }
   }
@@ -420,14 +448,14 @@ class DeletionService {
     try {
       const response = await fetch(`${this.baseURL}/api/reports/deleted`);
       const result = await response.json();
-      
+
       if (result.success) {
         return result.deletedReports;
       } else {
-        throw new Error(result.error || 'Failed to get deleted reports');
+        throw new Error(result.error || "Failed to get deleted reports");
       }
     } catch (error) {
-      console.error('Error getting deleted reports:', error);
+      console.error("Error getting deleted reports:", error);
       throw error;
     }
   }
@@ -447,12 +475,12 @@ class DeletionService {
     // Process in batches to avoid overwhelming the server
     for (let i = 0; i < reportIds.length; i += batchSize) {
       const batch = reportIds.slice(i, i + batchSize);
-      
+
       const batchPromises = batch.map(async (reportId) => {
         try {
-          const result = await this.deleteReport(reportId, { 
-            confirm: false, 
-            showFeedback: false 
+          const result = await this.deleteReport(reportId, {
+            confirm: false,
+            showFeedback: false,
           });
           results.push({ reportId, result });
           return result;
@@ -465,12 +493,15 @@ class DeletionService {
       await Promise.all(batchPromises);
 
       if (showProgress) {
-        this.showBulkProgress(Math.min(i + batchSize, reportIds.length), reportIds.length);
+        this.showBulkProgress(
+          Math.min(i + batchSize, reportIds.length),
+          reportIds.length
+        );
       }
 
       // Small delay between batches
       if (i + batchSize < reportIds.length) {
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise((resolve) => setTimeout(resolve, 100));
       }
     }
 
@@ -479,9 +510,9 @@ class DeletionService {
     }
 
     // Show summary
-    const successCount = results.filter(r => r.result.success).length;
+    const successCount = results.filter((r) => r.result.success).length;
     const message = `Bulk deletion completed: ${successCount}/${reportIds.length} successful`;
-    this.showNotification(message, errors.length > 0 ? 'warning' : 'success');
+    this.showNotification(message, errors.length > 0 ? "warning" : "success");
 
     return {
       success: true,
@@ -490,8 +521,8 @@ class DeletionService {
       summary: {
         total: reportIds.length,
         successful: successCount,
-        failed: errors.length
-      }
+        failed: errors.length,
+      },
     };
   }
 
@@ -499,11 +530,11 @@ class DeletionService {
    * Show bulk operation progress
    */
   showBulkProgress(current, total) {
-    let progressEl = document.getElementById('bulk-deletion-progress');
-    
+    let progressEl = document.getElementById("bulk-deletion-progress");
+
     if (!progressEl) {
-      progressEl = document.createElement('div');
-      progressEl.id = 'bulk-deletion-progress';
+      progressEl = document.createElement("div");
+      progressEl.id = "bulk-deletion-progress";
       progressEl.style.cssText = `
         position: fixed;
         top: 50%;
@@ -539,7 +570,7 @@ class DeletionService {
    * Hide bulk operation progress
    */
   hideBulkProgress() {
-    const progressEl = document.getElementById('bulk-deletion-progress');
+    const progressEl = document.getElementById("bulk-deletion-progress");
     if (progressEl) {
       document.body.removeChild(progressEl);
     }

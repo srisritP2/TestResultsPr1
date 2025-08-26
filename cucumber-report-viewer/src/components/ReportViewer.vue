@@ -523,6 +523,7 @@ function getScenarioList(feature) {
 }
 
 import ConfirmationDialog from '@/components/ConfirmationDialog.vue';
+import DeletionService from '@/services/DeletionService';
 
 export default {
   name: 'ReportViewer',
@@ -560,6 +561,7 @@ export default {
       },
       filtersExpanded: false,
       deleting: false,
+      deletionService: new DeletionService(),
       // Confirmation dialog state
       confirmationDialog: {
         show: false,
@@ -1165,14 +1167,10 @@ export default {
 
         this.deleting = true;
 
-        // Import DeletionService dynamically
-        const { default: DeletionService } = await import('@/services/DeletionService');
-        const deletionService = new DeletionService();
-        
         // Get report ID from route params
         const reportId = this.$route.params.id;
         
-        const result = await deletionService.deleteReport(reportId, {
+        const result = await this.deletionService.deleteReport(reportId, {
           confirm: false, // We already confirmed above
           showFeedback: false // We'll handle feedback ourselves
         });
@@ -1183,6 +1181,13 @@ export default {
             ? 'Report hidden from collection' 
             : 'Report deleted successfully'
           );
+
+          // Emit event for parent components
+          this.$emit('report-deleted', {
+            reportId,
+            result,
+            deletionType: result.deletionType
+          });
 
           // Navigate back to collection after a short delay
           setTimeout(() => {
