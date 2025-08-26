@@ -26,22 +26,22 @@
       </div>
       <ReportsCollection />
       <div class="howto-section">
-        <h2>Start publishing <span class="highlight">in seconds</span></h2>
+        <h2>Share with your <span class="highlight">development team</span></h2>
         <div class="howto-cards">
           <div class="howto-card">
-            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/ruby/ruby-original.svg" alt="Ruby" class="howto-icon" />
-            <div class="howto-title">cucumber-ruby</div>
-            <code>$ cucumber --publish</code>
+            <v-icon size="32" color="primary" class="howto-icon">mdi-upload</v-icon>
+            <div class="howto-title">1. Upload Reports</div>
+            <div class="howto-description">Upload your Cucumber JSON files using the form above</div>
           </div>
           <div class="howto-card">
-            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/java/java-original.svg" alt="JVM" class="howto-icon" />
-            <div class="howto-title">cucumber-jvm</div>
-            <code>cucumber.publish.enabled=true</code>
+            <v-icon size="32" color="success" class="howto-icon">mdi-cloud-upload</v-icon>
+            <div class="howto-title">2. Publish to Team</div>
+            <div class="howto-description">Click publish to share reports with your development team</div>
           </div>
           <div class="howto-card">
-            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg" alt="JS" class="howto-icon" />
-            <div class="howto-title">cucumber-js</div>
-            <code>$ cucumber-js --publish</code>
+            <v-icon size="32" color="info" class="howto-icon">mdi-chart-line</v-icon>
+            <div class="howto-title">3. Track Progress</div>
+            <div class="howto-description">Monitor test results and track quality trends over time</div>
           </div>
         </div>
       </div>
