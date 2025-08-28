@@ -1181,11 +1181,19 @@ export default {
         });
 
         if (result.success && !result.cancelled) {
-          // Show success message
-          this.showSuccessMessage(result.deletionType === 'soft' 
-            ? 'Report hidden from collection' 
-            : 'Report deleted successfully'
-          );
+          // Show success message with appropriate text
+          let successMessage;
+          if (result.localOnly) {
+            successMessage = result.deletionType === 'soft' 
+              ? 'Report hidden locally (server offline)' 
+              : 'Report removed from view (server offline)';
+          } else {
+            successMessage = result.deletionType === 'soft' 
+              ? 'Report hidden from collection' 
+              : 'Report deleted successfully';
+          }
+          
+          this.showSuccessMessage(successMessage);
 
           // Emit event for parent components
           this.$emit('report-deleted', {
