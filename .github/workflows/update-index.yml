@@ -167,6 +167,8 @@ jobs:
           commit_user_name: "cucumber-bot"
           commit_user_email: "cucumber-bot@github.com"
           commit_author: "Cucumber Bot <cucumber-bot@github.com>"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create deployment comment
         if: github.event_name == 'push'
