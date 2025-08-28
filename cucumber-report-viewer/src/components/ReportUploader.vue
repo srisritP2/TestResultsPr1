@@ -1,5 +1,5 @@
 <template>
-  <v-card class="mx-auto my-8 pa-6" max-width="420">
+  <v-card class="mx-auto my-8 pa-6 mobile-uploader-card" max-width="420">
     <v-card-title class="text-h6 font-weight-bold">Upload Cucumber JSON Report</v-card-title>
     <v-card-text>
       <v-file-input
@@ -642,6 +642,104 @@ export default {
   display: flex;
   align-items: center;
   gap: 4px;
+}
+
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+  .mobile-uploader-card {
+    margin: 16px 8px !important;
+    padding: 16px !important;
+    max-width: none !important;
+    width: calc(100% - 16px) !important;
+  }
+  
+  .v-card-title {
+    font-size: 1.1rem !important;
+    line-height: 1.3 !important;
+  }
+  
+  .storage-info {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+  
+  .stored-reports-list {
+    max-height: 250px;
+  }
+  
+  .stored-report-item {
+    padding: 12px !important;
+    margin-bottom: 8px !important;
+  }
+  
+  .report-actions {
+    flex-direction: column;
+    gap: 6px;
+    align-items: flex-end;
+  }
+  
+  .clickable-area {
+    padding-right: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .mobile-uploader-card {
+    margin: 12px 4px !important;
+    padding: 12px !important;
+    border-radius: 8px !important;
+  }
+  
+  .v-card-title {
+    font-size: 1rem !important;
+    padding-bottom: 12px !important;
+  }
+  
+  .v-file-input {
+    margin-bottom: 12px;
+  }
+  
+  .stored-report-item {
+    padding: 10px !important;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .report-actions {
+    width: 100%;
+    flex-direction: row;
+    justify-content: flex-end;
+    gap: 4px;
+  }
+  
+  .text-body-2 {
+    font-size: 0.9rem !important;
+  }
+  
+  .text-caption {
+    font-size: 0.75rem !important;
+  }
+}
+
+/* Touch-friendly improvements */
+@media (hover: none) and (pointer: coarse) {
+  .stored-report-item {
+    min-height: 48px;
+  }
+  
+  .clickable-area {
+    min-height: 44px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  
+  .v-btn {
+    min-height: 44px !important;
+    min-width: 44px !important;
+  }
 }
 
 /* Dark Theme Compatibility for ReportUploader */

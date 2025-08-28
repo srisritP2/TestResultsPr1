@@ -4,22 +4,35 @@
       <!-- Enhanced Header with Title and Actions -->
       <v-card-title class="reports-collection-header">
         <div class="header-left">
-          <v-icon color="primary" size="24" class="mr-3">mdi-folder-multiple</v-icon>
-          <div>
+          <v-icon color="primary" :size="$vuetify.display.mobile ? 20 : 24" class="header-icon">mdi-folder-multiple</v-icon>
+          <div class="header-text">
             <h3 class="collection-title">Test Reports</h3>
             <p class="collection-subtitle" v-if="reportsCollection.length > 0">
-              {{ reportsCollection.length }} reports available
+              {{ reportsCollection.length }} report{{ reportsCollection.length !== 1 ? 's' : '' }} available
             </p>
           </div>
         </div>
         <div class="header-actions">
-          <v-btn size="small" variant="outlined" color="primary" @click="refreshReports" :loading="loading">
-            <v-icon size="16" class="mr-1">mdi-refresh</v-icon>
-            Refresh
+          <v-btn 
+            :size="$vuetify.display.mobile ? 'x-small' : 'small'" 
+            variant="outlined" 
+            color="primary" 
+            @click="refreshReports" 
+            :loading="loading"
+            class="action-btn"
+          >
+            <v-icon :size="$vuetify.display.mobile ? 14 : 16" :class="$vuetify.display.mobile ? '' : 'mr-1'">mdi-refresh</v-icon>
+            <span v-if="!$vuetify.display.mobile">Refresh</span>
           </v-btn>
-          <v-btn size="small" variant="text" color="secondary" @click="showFilters = !showFilters">
-            <v-icon size="16" class="mr-1">mdi-filter</v-icon>
-            Filter
+          <v-btn 
+            :size="$vuetify.display.mobile ? 'x-small' : 'small'" 
+            variant="text" 
+            color="secondary" 
+            @click="showFilters = !showFilters"
+            class="action-btn"
+          >
+            <v-icon :size="$vuetify.display.mobile ? 14 : 16" :class="$vuetify.display.mobile ? '' : 'mr-1'">mdi-filter</v-icon>
+            <span v-if="!$vuetify.display.mobile">Filter</span>
           </v-btn>
         </div>
       </v-card-title>
@@ -28,14 +41,45 @@
       <v-expand-transition>
         <v-card-text v-show="showFilters" class="filters-section">
           <div class="filters-grid">
-            <v-text-field v-model="searchQuery" placeholder="Search reports..." prepend-inner-icon="mdi-magnify"
-              variant="outlined" density="compact" clearable hide-details class="search-field" />
-            <v-select v-model="statusFilter" :items="statusOptions" label="Status" variant="outlined" density="compact"
-              clearable hide-details />
-            <v-select v-model="sortBy" :items="sortOptions" label="Sort by" variant="outlined" density="compact"
-              hide-details />
-            <v-select v-model="syncStatusFilter" :items="syncStatusOptions" label="Sync Status" variant="outlined"
-              density="compact" clearable hide-details />
+            <v-text-field 
+              v-model="searchQuery" 
+              placeholder="Search reports..." 
+              prepend-inner-icon="mdi-magnify"
+              variant="outlined" 
+              density="compact" 
+              clearable 
+              hide-details 
+              class="search-field" 
+            />
+            <v-select 
+              v-model="statusFilter" 
+              :items="statusOptions" 
+              label="Status" 
+              variant="outlined" 
+              density="compact"
+              clearable 
+              hide-details 
+              class="filter-select"
+            />
+            <v-select 
+              v-model="sortBy" 
+              :items="sortOptions" 
+              label="Sort by" 
+              variant="outlined" 
+              density="compact"
+              hide-details 
+              class="filter-select"
+            />
+            <v-select 
+              v-model="syncStatusFilter" 
+              :items="syncStatusOptions" 
+              label="Sync Status" 
+              variant="outlined"
+              density="compact" 
+              clearable 
+              hide-details 
+              class="filter-select"
+            />
           </div>
         </v-card-text>
       </v-expand-transition>
@@ -72,82 +116,102 @@
           <v-card v-for="report in filteredReports" :key="report.id" class="report-card"
             :class="{ 'report-failed': report.failed > 0 }" @click="navigateToReport(report)">
             <v-card-text class="report-content">
-              <!-- Single Line Header: Status + Date + Test Counts + Sync Status + Menu -->
-              <div class="report-header-single-line">
-                <v-icon :color="getStatusColor(report)" size="20" class="status-icon">
-                  {{ getStatusIcon(report) }}
-                </v-icon>
-                <span class="date-info">{{ formatDate(report.date) }}</span>
-                <span class="test-counts-info">
-                  <span class="passed-count">{{ report.passed || 0 }}</span>:<span class="failed-count">{{ report.failed
-                    || 0
-                  }}</span>:<span class="skipped-count">{{ report.skipped || 0 }}</span>
-                </span>
-                <!-- Sync Status Indicators -->
-                <div class="sync-status-indicators">
-                  <v-chip v-if="getReportSyncStatus(report) !== 'synced'" :color="getSyncStatusColor(report)"
-                    size="x-small" variant="outlined" class="sync-status-chip">
-                    <v-icon size="12" class="mr-1">{{ getSyncStatusIcon(report) }}</v-icon>
-                    {{ getSyncStatusLabel(report) }}
-                  </v-chip>
+              <!-- Mobile-First Header Layout -->
+              <div class="report-header">
+                <!-- Top Row: Status + Date + Actions -->
+                <div class="report-header-top">
+                  <div class="status-and-date">
+                    <v-icon :color="getStatusColor(report)" size="20" class="status-icon">
+                      {{ getStatusIcon(report) }}
+                    </v-icon>
+                    <span class="date-info">{{ formatDate(report.date) }}</span>
+                  </div>
+                  <div class="report-actions">
+                    <v-btn :icon="isPublished(report) ? 'mdi-cloud-check' : 'mdi-cloud-upload'" size="small"
+                      variant="text" :color="isPublished(report) ? 'success' : 'primary'"
+                      @click.stop="togglePublishStatus(report)"
+                      :title="isPublished(report) ? 'Unpublish from GitHub Pages' : 'Publish to GitHub Pages'"></v-btn>
+                    <v-menu>
+                      <template #activator="{ props }">
+                        <v-btn icon="mdi-dots-vertical" size="small" variant="text" v-bind="props" @click.stop></v-btn>
+                      </template>
+                      <v-list>
+                        <v-list-item @click="navigateToReport(report)">
+                          <v-list-item-title>
+                            <v-icon size="16" class="mr-2">mdi-eye</v-icon>
+                            View Report
+                          </v-list-item-title>
+                        </v-list-item>
+                        <v-list-item @click="togglePublishStatus(report)">
+                          <v-list-item-title>
+                            <v-icon size="16" class="mr-2">{{ isPublished(report) ? 'mdi-cloud-off' : 'mdi-cloud-upload'
+                              }}</v-icon>
+                            {{ isPublished(report) ? 'Unpublish' : 'Publish to GitHub Pages' }}
+                          </v-list-item-title>
+                        </v-list-item>
+                        <v-list-item @click="deleteReport(report)" class="text-error" :disabled="report.deleting">
+                          <v-list-item-title>
+                            <v-icon size="16" class="mr-2">
+                              {{ report.deleting ? 'mdi-loading mdi-spin' : 'mdi-delete' }}
+                            </v-icon>
+                            {{ report.deleting ? 'Deleting...' : 'Delete' }}
+                          </v-list-item-title>
+                        </v-list-item>
+                      </v-list>
+                    </v-menu>
+                  </div>
                 </div>
-                <div class="report-actions">
-                  <v-btn :icon="isPublished(report) ? 'mdi-cloud-check' : 'mdi-cloud-upload'" size="small"
-                    variant="text" :color="isPublished(report) ? 'success' : 'primary'"
-                    @click.stop="togglePublishStatus(report)"
-                    :title="isPublished(report) ? 'Unpublish from GitHub Pages' : 'Publish to GitHub Pages'"></v-btn>
-                  <v-menu>
-                    <template #activator="{ props }">
-                      <v-btn icon="mdi-dots-vertical" size="small" variant="text" v-bind="props" @click.stop></v-btn>
-                    </template>
-                    <v-list>
-                      <v-list-item @click="navigateToReport(report)">
-                        <v-list-item-title>
-                          <v-icon size="16" class="mr-2">mdi-eye</v-icon>
-                          View Report
-                        </v-list-item-title>
-                      </v-list-item>
-                      <v-list-item @click="togglePublishStatus(report)">
-                        <v-list-item-title>
-                          <v-icon size="16" class="mr-2">{{ isPublished(report) ? 'mdi-cloud-off' : 'mdi-cloud-upload'
-                            }}</v-icon>
-                          {{ isPublished(report) ? 'Unpublish' : 'Publish to GitHub Pages' }}
-                        </v-list-item-title>
-                      </v-list-item>
-                      <v-list-item @click="deleteReport(report)" class="text-error" :disabled="report.deleting">
-                        <v-list-item-title>
-                          <v-icon size="16" class="mr-2">
-                            {{ report.deleting ? 'mdi-loading mdi-spin' : 'mdi-delete' }}
-                          </v-icon>
-                          {{ report.deleting ? 'Deleting...' : 'Delete' }}
-                        </v-list-item-title>
-                      </v-list-item>
-                    </v-list>
-                  </v-menu>
+
+                <!-- Second Row: Test Counts + Sync Status -->
+                <div class="report-header-bottom">
+                  <div class="test-counts-info">
+                    <span class="test-count-item">
+                      <span class="passed-count">{{ report.passed || 0 }}</span>
+                      <span class="count-label">passed</span>
+                    </span>
+                    <span class="test-count-separator">•</span>
+                    <span class="test-count-item">
+                      <span class="failed-count">{{ report.failed || 0 }}</span>
+                      <span class="count-label">failed</span>
+                    </span>
+                    <span class="test-count-separator">•</span>
+                    <span class="test-count-item">
+                      <span class="skipped-count">{{ report.skipped || 0 }}</span>
+                      <span class="count-label">skipped</span>
+                    </span>
+                  </div>
+                  <!-- Sync Status Indicators -->
+                  <div class="sync-status-indicators">
+                    <v-chip v-if="getReportSyncStatus(report) !== 'synced'" :color="getSyncStatusColor(report)"
+                      size="x-small" variant="outlined" class="sync-status-chip">
+                      <v-icon size="12" class="mr-1">{{ getSyncStatusIcon(report) }}</v-icon>
+                      {{ getSyncStatusLabel(report) }}
+                    </v-chip>
+                  </div>
                 </div>
               </div>
 
-              <!-- Compact Progress Bar -->
-              <div class="compact-progress-section">
-                <v-progress-linear :model-value="getPassPercentage(report)" :color="getProgressColor(report)" height="4"
-                  rounded class="mb-1"></v-progress-linear>
-                <div class="compact-stats">
+              <!-- Enhanced Progress Bar -->
+              <div class="progress-section">
+                <v-progress-linear :model-value="getPassPercentage(report)" :color="getProgressColor(report)" height="6"
+                  rounded class="mb-2"></v-progress-linear>
+                <div class="progress-stats">
                   <span class="total-tests">{{ (report.passed || 0) + (report.failed || 0) + (report.skipped || 0) }}
-                    tests</span>
+                    total tests</span>
                   <span class="pass-rate-text" :class="getPassRateClass(report)">
                     {{ getPassPercentage(report).toFixed(1) }}% passed
                   </span>
                 </div>
               </div>
 
-              <!-- Tags -->
+              <!-- Tags Section -->
               <div v-if="report.tags && report.tags.length" class="tags-section">
-                <v-chip v-for="tag in report.tags.slice(0, 3)" :key="tag" size="x-small" variant="outlined"
-                  class="mr-1 mb-1">
+                <v-chip v-for="tag in report.tags.slice(0, $vuetify.display.mobile ? 2 : 3)" :key="tag" size="x-small" variant="outlined"
+                  class="tag-chip">
                   {{ tag }}
                 </v-chip>
-                <span v-if="report.tags.length > 3" class="more-tags">
-                  +{{ report.tags.length - 3 }} more
+                <span v-if="report.tags.length > ($vuetify.display.mobile ? 2 : 3)" class="more-tags">
+                  +{{ report.tags.length - ($vuetify.display.mobile ? 2 : 3) }} more
                 </span>
               </div>
 
@@ -1799,71 +1863,391 @@ The GitHub workflow will automatically update your GitHub Pages site!
   border: 1px solid currentColor !important;
 }
 
-/* Report header layout improvements */
-.report-header-single-line {
+/* ===== MOBILE-FIRST RESPONSIVE DESIGN ===== */
+
+/* Container and Card Styles */
+.reports-collection-container {
+  padding: 8px;
+}
+
+.reports-collection-card {
+  border-radius: 12px !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Header Styles */
+.reports-collection-header {
+  padding: 16px !important;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+
+.header-icon {
+  flex-shrink: 0;
+}
+
+.header-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.collection-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.collection-subtitle {
+  font-size: 0.875rem;
+  opacity: 0.7;
+  margin: 2px 0 0 0;
+  line-height: 1.2;
+}
+
+.header-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.action-btn {
+  min-width: auto !important;
+}
+
+/* Filters Section */
+.filters-section {
+  padding: 12px 16px !important;
+  background: rgba(0, 0, 0, 0.02);
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.filters-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 1fr;
+}
+
+/* Reports Grid */
+.reports-content {
+  padding: 16px !important;
+}
+
+.reports-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 1fr;
+}
+
+.report-card {
+  border-radius: 8px !important;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.report-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+}
+
+.report-card.report-failed {
+  border-left: 4px solid #f44336;
+}
+
+.report-content {
+  padding: 16px !important;
+}
+
+/* New Mobile-First Report Header */
+.report-header {
+  margin-bottom: 12px;
+}
+
+.report-header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.status-and-date {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status-icon {
+  flex-shrink: 0;
+}
+
+.date-info {
+  font-size: 0.875rem;
+  color: var(--theme-text-secondary);
+  font-weight: 500;
+}
+
+.report-actions {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.report-header-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.test-counts-info {
   display: flex;
   align-items: center;
   gap: 8px;
   flex-wrap: wrap;
 }
 
-.report-header-single-line .status-icon {
+.test-count-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.test-count-separator {
+  color: var(--theme-text-secondary);
+  font-size: 0.75rem;
+}
+
+.count-label {
+  font-size: 0.75rem;
+  color: var(--theme-text-secondary);
+  text-transform: lowercase;
+}
+
+.passed-count {
+  color: #4caf50;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.failed-count {
+  color: #f44336;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.skipped-count {
+  color: #ff9800;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.sync-status-indicators {
+  display: flex;
+  gap: 4px;
   flex-shrink: 0;
 }
 
-.report-header-single-line .date-info {
-  flex-shrink: 0;
-  font-size: 0.85rem;
+.sync-status-chip {
+  font-size: 0.75rem !important;
+}
+
+/* Progress Section */
+.progress-section {
+  margin-bottom: 12px;
+}
+
+.progress-stats {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.875rem;
+}
+
+.total-tests {
   color: var(--theme-text-secondary);
 }
 
-.report-header-single-line .test-counts-info {
-  flex-shrink: 0;
-  font-size: 0.85rem;
-  font-weight: 500;
+.pass-rate-text {
+  font-weight: 600;
 }
 
-.report-header-single-line .sync-status-indicators {
-  flex-grow: 1;
-  justify-content: flex-start;
+.pass-rate-excellent { color: #4caf50; }
+.pass-rate-good { color: #8bc34a; }
+.pass-rate-warning { color: #ff9800; }
+.pass-rate-poor { color: #f44336; }
+
+/* Tags Section */
+.tags-section {
+  margin-bottom: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
 }
 
-.report-header-single-line .report-actions {
-  flex-shrink: 0;
-  margin-left: auto;
+.tag-chip {
+  font-size: 0.75rem !important;
 }
 
-/* Responsive adjustments for sync indicators */
-@media (max-width: 768px) {
-  .sync-status-indicators {
-    order: 3;
-    width: 100%;
-    margin-top: 4px;
+.more-tags {
+  font-size: 0.75rem;
+  color: var(--theme-text-secondary);
+  font-style: italic;
+}
+
+/* Report Identifier */
+.report-identifier {
+  text-align: right;
+}
+
+.json-filename {
+  font-size: 0.75rem;
+  color: var(--theme-text-secondary);
+  font-family: monospace;
+  background: rgba(0, 0, 0, 0.05);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+/* Empty and Loading States */
+.loading-state, .empty-state {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.loading-state p, .empty-state h4, .empty-state p {
+  margin: 8px 0;
+}
+
+/* ===== TABLET RESPONSIVE (768px+) ===== */
+@media (min-width: 768px) {
+  .reports-collection-container {
+    padding: 16px;
   }
-
-  .report-header-single-line {
-    flex-wrap: wrap;
+  
+  .filters-grid {
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 16px;
+  }
+  
+  .reports-grid {
+    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+    gap: 16px;
+  }
+  
+  .report-header-bottom {
+    flex-wrap: nowrap;
+  }
+  
+  .test-counts-info {
+    flex-wrap: nowrap;
   }
 }
 
-/* Dark theme compatibility */
+/* ===== DESKTOP RESPONSIVE (1024px+) ===== */
+@media (min-width: 1024px) {
+  .reports-collection-container {
+    padding: 24px;
+  }
+  
+  .reports-grid {
+    grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
+    gap: 20px;
+  }
+  
+  .report-content {
+    padding: 20px !important;
+  }
+  
+  .collection-title {
+    font-size: 1.5rem;
+  }
+}
+
+/* ===== LARGE DESKTOP (1440px+) ===== */
+@media (min-width: 1440px) {
+  .reports-grid {
+    grid-template-columns: repeat(auto-fill, minmax(500px, 1fr));
+    gap: 24px;
+  }
+}
+
+/* ===== DARK THEME SUPPORT ===== */
+[data-theme="dark"] .reports-collection-card {
+  background: var(--theme-surface) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+[data-theme="dark"] .filters-section {
+  background: rgba(255, 255, 255, 0.02) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+[data-theme="dark"] .report-card {
+  background: var(--theme-surface-variant) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+[data-theme="dark"] .report-card:hover {
+  border-color: rgba(255, 255, 255, 0.15) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+}
+
 [data-theme="dark"] .date-info {
   color: var(--theme-text-secondary) !important;
 }
 
-[data-theme="dark"] .test-counts-info {
-  color: var(--theme-text-primary) !important;
+[data-theme="dark"] .count-label {
+  color: var(--theme-text-secondary) !important;
+}
+
+[data-theme="dark"] .test-count-separator {
+  color: var(--theme-text-secondary) !important;
 }
 
 [data-theme="dark"] .passed-count {
-  color: var(--theme-success) !important;
+  color: #66bb6a !important;
 }
 
 [data-theme="dark"] .failed-count {
-  color: var(--theme-error) !important;
+  color: #ef5350 !important;
 }
 
 [data-theme="dark"] .skipped-count {
-  color: var(--theme-warning) !important;
+  color: #ffb74d !important;
+}
+
+[data-theme="dark"] .total-tests {
+  color: var(--theme-text-secondary) !important;
+}
+
+[data-theme="dark"] .more-tags {
+  color: var(--theme-text-secondary) !important;
+}
+
+[data-theme="dark"] .json-filename {
+  background: rgba(255, 255, 255, 0.05) !important;
+  color: var(--theme-text-secondary) !important;
+}
+
+[data-theme="dark"] .collection-title {
+  color: var(--theme-text-primary) !important;
+}
+
+[data-theme="dark"] .collection-subtitle {
+  color: var(--theme-text-secondary) !important;
 }
 </style>

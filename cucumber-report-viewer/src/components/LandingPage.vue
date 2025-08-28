@@ -471,4 +471,212 @@ code {
   text-decoration: underline;
   margin-left: 0.5rem;
 }
+
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+  .navbar-content {
+    padding: 0 1rem;
+  }
+  
+  .brand-title {
+    font-size: 1rem;
+    display: none; /* Hide on mobile to save space */
+  }
+  
+  .navbar-actions {
+    gap: 0.5rem;
+  }
+  
+  .main-content {
+    padding: 1.5rem 0.75rem 0 0.75rem;
+  }
+  
+  .upload-card {
+    padding: 1.5rem 1rem;
+    margin-bottom: 2rem;
+    border-radius: 1rem;
+  }
+  
+  .main-title {
+    font-size: 1.4rem;
+    margin-bottom: 0.75rem;
+    line-height: 1.3;
+  }
+  
+  .subtitle {
+    font-size: 1rem;
+    margin-bottom: 1.5rem;
+    line-height: 1.4;
+  }
+  
+  .upload-area {
+    padding: 1.5rem 0.75rem 1rem 0.75rem;
+    border-radius: 0.6rem;
+  }
+  
+  .howto-section {
+    margin-top: 2rem;
+    padding: 0 0.5rem;
+  }
+  
+  .howto-section h2 {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+    line-height: 1.3;
+  }
+  
+  .howto-cards {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .howto-card {
+    padding: 1.5rem 1rem;
+    border-radius: 0.8rem;
+  }
+  
+  .howto-icon {
+    width: 28px;
+    height: 28px;
+  }
+  
+  .howto-title {
+    font-size: 1rem;
+  }
+  
+  .howto-description {
+    font-size: 0.9rem;
+    line-height: 1.4;
+  }
+  
+  .footer {
+    padding: 1rem 0.5rem;
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .navbar-content {
+    padding: 0 0.75rem;
+  }
+  
+  .logo {
+    height: 28px;
+    width: 28px;
+  }
+  
+  .main-content {
+    padding: 1rem 0.5rem 0 0.5rem;
+  }
+  
+  .upload-card {
+    padding: 1.25rem 0.75rem;
+    margin-bottom: 1.5rem;
+    border-radius: 0.8rem;
+  }
+  
+  .main-title {
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .subtitle {
+    font-size: 0.9rem;
+    margin-bottom: 1.25rem;
+  }
+  
+  .upload-area {
+    padding: 1.25rem 0.5rem 0.75rem 0.5rem;
+    border-radius: 0.5rem;
+  }
+  
+  .howto-section {
+    margin-top: 1.5rem;
+    padding: 0 0.25rem;
+  }
+  
+  .howto-section h2 {
+    font-size: 1.3rem;
+    margin-bottom: 1.25rem;
+  }
+  
+  .howto-cards {
+    gap: 0.75rem;
+  }
+  
+  .howto-card {
+    padding: 1.25rem 0.75rem;
+    border-radius: 0.6rem;
+  }
+  
+  .howto-icon {
+    width: 24px;
+    height: 24px;
+  }
+  
+  .howto-title {
+    font-size: 0.95rem;
+    margin-bottom: 0.4rem;
+  }
+  
+  .howto-description {
+    font-size: 0.85rem;
+  }
+  
+  .footer {
+    padding: 0.75rem 0.5rem;
+    font-size: 0.8rem;
+  }
+}
+
+/* Very small screens */
+@media (max-width: 360px) {
+  .main-title {
+    font-size: 1.1rem;
+  }
+  
+  .subtitle {
+    font-size: 0.85rem;
+  }
+  
+  .upload-card {
+    padding: 1rem 0.5rem;
+  }
+  
+  .upload-area {
+    padding: 1rem 0.4rem 0.6rem 0.4rem;
+  }
+  
+  .howto-section h2 {
+    font-size: 1.2rem;
+  }
+  
+  .howto-card {
+    padding: 1rem 0.5rem;
+  }
+}
+
+/* Touch-friendly improvements */
+@media (hover: none) and (pointer: coarse) {
+  .howto-card {
+    min-height: 120px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+  }
+  
+  .navbar-link {
+    padding: 0.5rem;
+    border-radius: 0.25rem;
+  }
+  
+  .upload-area {
+    min-height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
 </style>
