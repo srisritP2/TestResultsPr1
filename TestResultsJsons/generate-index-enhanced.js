@@ -151,6 +151,18 @@ class CucumberIndexGenerator {
       // Convert tags Set to Array
       metadata.tags = Array.from(metadata.tags).sort();
 
+      // Try to extract timestamp from report ID first (prioritize filename timestamp)
+      if (filename.startsWith('report-')) {
+        const timestampMatch = filename.match(/report-(\d+)\.json$/);
+        if (timestampMatch) {
+          const timestamp = parseInt(timestampMatch[1]);
+          if (timestamp && timestamp > 1000000000000) { // Valid timestamp
+            metadata.date = new Date(timestamp).toISOString();
+            this.log(`Extracted timestamp from filename: ${filename} -> ${metadata.date}`);
+          }
+        }
+      }
+
       // Fallback to file modification time if no timestamp found
       if (!metadata.date) {
         const stats = fs.statSync(path.join(this.reportsDir, filename));
