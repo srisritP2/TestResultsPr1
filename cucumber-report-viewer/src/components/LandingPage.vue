@@ -26,7 +26,7 @@
       </div>
       <ReportsCollection />
       <div class="howto-section">
-        <h2>Share with your <span class="highlight">development team</span></h2>
+        <h2>Share with your <span class="highlight">team</span></h2>
         <div class="howto-cards">
           <div class="howto-card">
             <v-icon size="32" color="primary" class="howto-icon">mdi-upload</v-icon>
@@ -36,7 +36,7 @@
           <div class="howto-card">
             <v-icon size="32" color="success" class="howto-icon">mdi-cloud-upload</v-icon>
             <div class="howto-title">2. Publish to Team</div>
-            <div class="howto-description">Click publish to share reports with your development team</div>
+            <div class="howto-description">Click publish to share reports with your team</div>
           </div>
           <div class="howto-card">
             <v-icon size="32" color="info" class="howto-icon">mdi-chart-line</v-icon>
