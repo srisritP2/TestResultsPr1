@@ -180,7 +180,7 @@ body, .report-view {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  max-width: 1200px;
+  max-width: 1800px;
   margin: 0 auto;
   padding: 0 2rem;
 }
@@ -246,7 +246,7 @@ body, .report-view {
   display: flex;
   flex-direction: row;
   gap: 2.5rem;
-  max-width: 1200px;
+  max-width: 1800px;
   width: 100%;
 }
 .left-col {

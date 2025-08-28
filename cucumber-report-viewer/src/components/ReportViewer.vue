@@ -1367,7 +1367,7 @@ export default {
   grid-template-columns: 1fr auto 1fr auto;
   gap: 32px;
   align-items: center;
-  max-width: 1400px;
+  max-width: 1800px;
   margin: 0 auto;
 }
 
@@ -1654,7 +1654,7 @@ export default {
 }
 
 .controls-container {
-  max-width: 1200px;
+  max-width: 1600px;
   margin: 0 auto;
 }
 
@@ -1735,7 +1735,7 @@ export default {
 }
 
 .search-container {
-  max-width: 1200px;
+  max-width: 1600px;
   margin: 0 auto;
 }
 
@@ -1801,7 +1801,7 @@ export default {
 }
 
 .filters-container {
-  max-width: 1200px;
+  max-width: 1600px;
   margin: 0 auto;
 }
 
@@ -2207,7 +2207,7 @@ export default {
 }
 
 .cucumber-report-content {
-  max-width: 900px;
+  max-width: 1600px;
   margin: 0 auto;
   padding: 0 1.5rem 2rem 1.5rem;
 }
