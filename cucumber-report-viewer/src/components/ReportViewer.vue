@@ -98,46 +98,51 @@
           </div>
         </div>
 
-        <!-- Action Buttons Section -->
-        <div class="actions-section">
-          <v-menu>
+        <!-- Left Action - Back to Collection -->
+        <div class="left-actions">
+          <v-tooltip text="Back to Collection" location="bottom">
             <template #activator="{ props }">
               <v-btn
                 v-bind="props"
-                icon="mdi-dots-vertical"
+                @click="goBackToCollection"
+                icon="mdi-arrow-left"
                 variant="text"
-                size="small"
-                class="action-menu-btn"
+                size="large"
+                class="back-btn"
               />
             </template>
-            <v-list>
-              <v-list-item @click="goBackToCollection">
-                <v-list-item-title>
-                  <v-icon size="16" class="mr-2">mdi-arrow-left</v-icon>
-                  Back to Collection
-                </v-list-item-title>
-              </v-list-item>
-              <v-list-item @click="refreshReport">
-                <v-list-item-title>
-                  <v-icon size="16" class="mr-2">mdi-refresh</v-icon>
-                  Refresh Report
-                </v-list-item-title>
-              </v-list-item>
-              <v-divider />
-              <v-list-item 
-                @click="deleteCurrentReport" 
-                class="text-error"
+          </v-tooltip>
+        </div>
+
+        <!-- Right Actions - Refresh & Delete -->
+        <div class="right-actions">
+          <v-tooltip text="Refresh Report Data" location="bottom">
+            <template #activator="{ props }">
+              <v-btn
+                v-bind="props"
+                @click="refreshReport"
+                icon="mdi-refresh"
+                variant="text"
+                size="large"
+                class="refresh-btn"
+              />
+            </template>
+          </v-tooltip>
+          
+          <v-tooltip :text="deleting ? 'Deleting Report...' : 'Delete Report'" location="bottom">
+            <template #activator="{ props }">
+              <v-btn
+                v-bind="props"
+                @click="deleteCurrentReport"
+                :icon="deleting ? 'mdi-loading mdi-spin' : 'mdi-delete'"
+                variant="text"
+                size="large"
+                class="delete-btn"
                 :disabled="deleting"
-              >
-                <v-list-item-title>
-                  <v-icon size="16" class="mr-2">
-                    {{ deleting ? 'mdi-loading mdi-spin' : 'mdi-delete' }}
-                  </v-icon>
-                  {{ deleting ? 'Deleting...' : 'Delete Report' }}
-                </v-list-item-title>
-              </v-list-item>
-            </v-list>
-          </v-menu>
+                :loading="deleting"
+              />
+            </template>
+          </v-tooltip>
         </div>
       </div>
     </div>
@@ -1364,11 +1369,79 @@ export default {
 
 .header-container {
   display: grid;
-  grid-template-columns: 1fr auto 1fr auto;
+  grid-template-columns: auto 1fr auto 1fr auto auto;
   gap: 32px;
   align-items: center;
   max-width: 1800px;
   margin: 0 auto;
+}
+
+/* Left Actions */
+.left-actions {
+  display: flex;
+  align-items: center;
+  justify-self: start;
+}
+
+.back-btn {
+  color: #6366F1 !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 12px;
+}
+
+.back-btn:hover {
+  background: rgba(99, 102, 241, 0.1) !important;
+  transform: translateX(-4px);
+  color: #4F46E5 !important;
+}
+
+.back-btn:active {
+  transform: translateX(-2px) scale(0.95);
+}
+
+/* Right Actions */
+.right-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-self: end;
+}
+
+.refresh-btn {
+  color: #10B981 !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 12px;
+}
+
+.refresh-btn:hover {
+  background: rgba(16, 185, 129, 0.1) !important;
+  transform: rotate(180deg);
+  color: #059669 !important;
+}
+
+.refresh-btn:active {
+  transform: rotate(180deg) scale(0.95);
+}
+
+.delete-btn {
+  color: #EF4444 !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 12px;
+}
+
+.delete-btn:hover {
+  background: rgba(239, 68, 68, 0.1) !important;
+  transform: scale(1.1);
+  color: #DC2626 !important;
+}
+
+.delete-btn:active {
+  transform: scale(1.05);
+}
+
+.delete-btn:disabled {
+  opacity: 0.6;
+  transform: none !important;
 }
 
 /* Brand Section */
