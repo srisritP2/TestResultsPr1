@@ -389,20 +389,114 @@ export default {
       try {
         const reportSize = JSON.stringify(reportData).length;
         
-        // Update index with storage strategy info
+        // Calculate statistics from the report data
+        const stats = this.calculateReportStatistics(reportData);
+        
+        // Update index with storage strategy info and statistics
         let index = JSON.parse(localStorage.getItem('uploaded-reports-index') || '[]');
-        index.unshift({ 
+        const reportEntry = { 
           id, 
           name, 
           date, 
           size: reportSize,
           storageStrategy,
-          persistent: storageStrategy !== 'session'
-        });
+          persistent: storageStrategy !== 'session',
+          // Add calculated statistics
+          features: stats.features,
+          scenarios: stats.scenarios,
+          steps: stats.steps,
+          passed: stats.passed,
+          failed: stats.failed,
+          skipped: stats.skipped,
+          duration: stats.duration,
+          tags: stats.tags
+        };
+        
+        index.unshift(reportEntry);
         localStorage.setItem('uploaded-reports-index', JSON.stringify(index));
+        
+        console.log(`✅ Saved report ${id} to localStorage with stats:`, stats);
       } catch (error) {
         console.warn('Failed to update localStorage index:', error);
       }
+    },
+
+    calculateReportStatistics(reportData) {
+      let features = 0;
+      let scenarios = 0;
+      let steps = 0;
+      let passed = 0;
+      let failed = 0;
+      let skipped = 0;
+      let duration = 0;
+      const tags = new Set();
+
+      // Handle both array format and object format
+      const featuresArray = Array.isArray(reportData) ? reportData : reportData.features || [];
+      
+      featuresArray.forEach(feature => {
+        features++;
+        
+        // Collect feature tags
+        if (feature.tags) {
+          feature.tags.forEach(tag => tags.add(tag.name || tag));
+        }
+        
+        // Process scenarios/elements
+        const elements = feature.elements || feature.scenarios || [];
+        elements.forEach(element => {
+          if (element.type === 'scenario' || !element.type) {
+            scenarios++;
+            
+            // Collect scenario tags
+            if (element.tags) {
+              element.tags.forEach(tag => tags.add(tag.name || tag));
+            }
+            
+            // Process steps
+            if (element.steps) {
+              element.steps.forEach(step => {
+                steps++;
+                
+                if (step.result) {
+                  switch (step.result.status) {
+                    case 'passed':
+                      passed++;
+                      break;
+                    case 'failed':
+                      failed++;
+                      break;
+                    case 'skipped':
+                    case 'pending':
+                    case 'undefined':
+                      skipped++;
+                      break;
+                  }
+                  
+                  // Add duration (convert from nanoseconds to milliseconds if needed)
+                  if (step.result.duration) {
+                    const stepDuration = step.result.duration > 1000000 
+                      ? step.result.duration / 1000000 // Convert nanoseconds to milliseconds
+                      : step.result.duration;
+                    duration += stepDuration;
+                  }
+                }
+              });
+            }
+          }
+        });
+      });
+
+      return {
+        features,
+        scenarios,
+        steps,
+        passed,
+        failed,
+        skipped,
+        duration: Math.round(duration),
+        tags: Array.from(tags)
+      };
     },
     dismissStorageInfo() {
       this.showStorageInfo = false;

@@ -22,41 +22,32 @@ class ReportService {
       return cached.data;
     }
 
-    // First try localStorage for uploaded reports
+    // Load both localStorage and server reports, then merge them
+    let localReports = [];
+    let serverReports = [];
+    
+    // First, load localStorage reports
     try {
       const localIndex = JSON.parse(localStorage.getItem('uploaded-reports-index') || '[]');
-      if (localIndex.length > 0) {
-        const fallbackData = {
-          reports: localIndex.map(report => ({
-            ...report,
-            features: report.features || 0,
-            scenarios: report.scenarios || 0,
-            steps: report.steps || 0,
-            passed: report.passed || 0,
-            failed: report.failed || 0,
-            skipped: report.skipped || 0,
-            duration: report.duration || 0,
-            tags: report.tags || [],
-            size: report.size || 0
-          })),
-          statistics: null,
-          version: '1.0.0-localStorage'
-        };
-        
-        // Cache the result
-        this.cache.set(cacheKey, {
-          data: fallbackData,
-          timestamp: Date.now()
-        });
-        
-        console.log('Successfully loaded from localStorage');
-        return fallbackData;
-      }
+      localReports = localIndex.map(report => ({
+        ...report,
+        features: report.features || 0,
+        scenarios: report.scenarios || 0,
+        steps: report.steps || 0,
+        passed: report.passed || 0,
+        failed: report.failed || 0,
+        skipped: report.skipped || 0,
+        duration: report.duration || 0,
+        tags: report.tags || [],
+        size: report.size || 0,
+        source: 'localStorage'
+      }));
+      console.log(`Loaded ${localReports.length} reports from localStorage`);
     } catch (localError) {
       console.warn('Failed to load from localStorage:', localError);
     }
 
-    // Try multiple possible paths for the index file
+    // Second, try to load server reports
     const possiblePaths = [
       `${process.env.BASE_URL || '/'}TestResultsJsons/index.json`,
       '/TestResultsJsons/index.json',
@@ -66,7 +57,7 @@ class ReportService {
     
     for (const indexPath of possiblePaths) {
       try {
-        console.log(`Trying to load index from: ${indexPath}`);
+        console.log(`Trying to load server index from: ${indexPath}`);
         const response = await fetch(`${indexPath}?t=${Date.now()}`, { cache: 'reload' });
         
         if (!response.ok) {
@@ -76,40 +67,31 @@ class ReportService {
         const data = await response.json();
         
         // Handle both enhanced and legacy formats
-        let normalizedData;
         if (Array.isArray(data)) {
           // Legacy format: array of reports
-          normalizedData = {
-            reports: data.map(report => ({
-              ...report,
-              features: report.features || 0,
-              scenarios: report.scenarios || 0,
-              steps: report.steps || 0,
-              passed: report.passed || 0,
-              failed: report.failed || 0,
-              skipped: report.skipped || 0,
-              duration: report.duration || 0,
-              tags: report.tags || [],
-              size: report.size || 0
-            })),
-            statistics: null,
-            version: '1.0.0'
-          };
+          serverReports = data.map(report => ({
+            ...report,
+            features: report.features || 0,
+            scenarios: report.scenarios || 0,
+            steps: report.steps || 0,
+            passed: report.passed || 0,
+            failed: report.failed || 0,
+            skipped: report.skipped || 0,
+            duration: report.duration || 0,
+            tags: report.tags || [],
+            size: report.size || 0,
+            source: 'server'
+          }));
         } else if (data && data.reports) {
           // Enhanced format: object with reports and statistics
-          normalizedData = data;
-        } else {
-          throw new Error('Invalid index format');
+          serverReports = data.reports.map(report => ({
+            ...report,
+            source: 'server'
+          }));
         }
         
-        // Cache the result
-        this.cache.set(cacheKey, {
-          data: normalizedData,
-          timestamp: Date.now()
-        });
-        
-        console.log(`Successfully loaded index from: ${indexPath}`);
-        return normalizedData;
+        console.log(`Successfully loaded ${serverReports.length} reports from server: ${indexPath}`);
+        break; // Successfully loaded, exit loop
         
       } catch (error) {
         console.warn(`Failed to load from ${indexPath}:`, error.message);
@@ -117,31 +99,28 @@ class ReportService {
       }
     }
     
-    // If all paths failed, return empty structure
-    console.error('All index loading attempts failed');
-    const emptyData = {
-      reports: [],
-      statistics: {
-        totalReports: 0,
-        totalScenarios: 0,
-        totalSteps: 0,
-        totalPassed: 0,
-        totalFailed: 0,
-        totalSkipped: 0,
-        passRate: '0.00',
-        failRate: '0.00',
-        skipRate: '0.00'
-      },
-      version: '1.0.0-fallback'
+    // Merge localStorage and server reports
+    const mergedReports = this.mergeReports(localReports, serverReports);
+    
+    const mergedData = {
+      reports: mergedReports,
+      statistics: this.calculateStatistics(mergedReports),
+      version: '1.0.0-merged',
+      sources: {
+        localStorage: localReports.length,
+        server: serverReports.length,
+        total: mergedReports.length
+      }
     };
     
-    // Cache the empty result to avoid repeated failures
+    // Cache the merged result
     this.cache.set(cacheKey, {
-      data: emptyData,
+      data: mergedData,
       timestamp: Date.now()
     });
     
-    return emptyData;
+    console.log(`✅ Successfully merged reports: ${localReports.length} local + ${serverReports.length} server = ${mergedReports.length} total`);
+    return mergedData;
   }
 
   /**
@@ -342,6 +321,67 @@ class ReportService {
     return Object.values(trendData).sort((a, b) => 
       new Date(a.date) - new Date(b.date)
     );
+  }
+
+  /**
+   * Merge localStorage and server reports, avoiding duplicates
+   */
+  mergeReports(localReports, serverReports) {
+    const merged = [...localReports];
+    const localIds = new Set(localReports.map(r => r.id));
+    
+    // Add server reports that don't exist in localStorage
+    serverReports.forEach(serverReport => {
+      if (!localIds.has(serverReport.id)) {
+        merged.push(serverReport);
+      }
+    });
+    
+    // Sort by date (newest first)
+    return merged.sort((a, b) => new Date(b.date) - new Date(a.date));
+  }
+
+  /**
+   * Calculate statistics from merged reports
+   */
+  calculateStatistics(reports) {
+    if (!reports || reports.length === 0) {
+      return {
+        totalReports: 0,
+        totalScenarios: 0,
+        totalSteps: 0,
+        totalPassed: 0,
+        totalFailed: 0,
+        totalSkipped: 0,
+        passRate: '0.00',
+        failRate: '0.00',
+        skipRate: '0.00'
+      };
+    }
+
+    const totals = reports.reduce((acc, report) => ({
+      scenarios: acc.scenarios + (report.scenarios || 0),
+      steps: acc.steps + (report.steps || 0),
+      passed: acc.passed + (report.passed || 0),
+      failed: acc.failed + (report.failed || 0),
+      skipped: acc.skipped + (report.skipped || 0)
+    }), { scenarios: 0, steps: 0, passed: 0, failed: 0, skipped: 0 });
+
+    const passRate = totals.steps > 0 ? (totals.passed / totals.steps * 100).toFixed(2) : '0.00';
+    const failRate = totals.steps > 0 ? (totals.failed / totals.steps * 100).toFixed(2) : '0.00';
+    const skipRate = totals.steps > 0 ? (totals.skipped / totals.steps * 100).toFixed(2) : '0.00';
+
+    return {
+      totalReports: reports.length,
+      totalScenarios: totals.scenarios,
+      totalSteps: totals.steps,
+      totalPassed: totals.passed,
+      totalFailed: totals.failed,
+      totalSkipped: totals.skipped,
+      passRate,
+      failRate,
+      skipRate
+    };
   }
 
   /**

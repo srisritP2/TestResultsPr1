@@ -24,7 +24,7 @@
           <ReportUploader @report-uploaded="handleFileUpload" />
         </div>
       </div>
-      <ReportsCollection />
+      <ReportsCollection ref="reportsCollection" />
       <div class="howto-section">
         <h2>Share with your <span class="highlight">team</span></h2>
         <div class="howto-cards">
@@ -70,24 +70,32 @@ export default {
   setup() {
     const router = useRouter();
     const store = useStore();
-    const handleFileUpload = (reportData) => {
+    return { router, store };
+  },
+  methods: {
+    async handleFileUpload(reportData) {
       // Use the id from the upload event if available
       const id = reportData && reportData._uploadedId;
       if (reportData) {
-        store.commit('setReportData', reportData);
+        this.store.commit('setReportData', reportData);
       }
+      
+      // Refresh the reports collection to show the new report
+      if (this.$refs.reportsCollection) {
+        await this.$refs.reportsCollection.refreshReports();
+      }
+      
       if (id) {
-        router.push({ name: 'Report', params: { id }, query: { t: Date.now() } });
+        this.router.push({ name: 'Report', params: { id }, query: { t: Date.now() } });
       } else {
         // fallback: use latest from index
         let index = JSON.parse(localStorage.getItem('uploaded-reports-index') || '[]');
         const latest = index && index.length ? index[0] : null;
         if (latest && latest.id) {
-          router.push({ name: 'Report', params: { id: latest.id }, query: { t: Date.now() } });
+          this.router.push({ name: 'Report', params: { id: latest.id }, query: { t: Date.now() } });
         }
       }
-    };
-    return { handleFileUpload };
+    }
   }
 }
 </script>

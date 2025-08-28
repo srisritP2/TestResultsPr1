@@ -863,21 +863,65 @@ export default {
             duration: report.duration || 0,
             tags: report.tags || [],
             size: report.size || 0,
-            publishedAt: report.publishedAt
+            publishedAt: report.publishedAt,
+            source: 'published'
           })),
           statistics: this.calculatePublishedStatistics(publishedReports),
           version: '1.0.0-published',
           lastUpdated: new Date().toISOString()
         };
 
-        // Store GitHub Pages index
+        // Store GitHub Pages index locally
         localStorage.setItem('github-pages-index', JSON.stringify(githubPagesIndex));
+
+        // Create downloadable files for GitHub Pages deployment
+        this.downloadGitHubPagesFiles(githubPagesIndex, publishedReports);
 
         console.log('GitHub Pages index updated with', publishedReports.length, 'published reports');
 
       } catch (error) {
         console.error('Error updating GitHub Pages index:', error);
       }
+    },
+
+    downloadGitHubPagesFiles(githubPagesIndex, publishedReports) {
+      try {
+        // Download the index.json file
+        const indexBlob = new Blob([JSON.stringify(githubPagesIndex, null, 2)], { 
+          type: 'application/json' 
+        });
+        this.downloadFile(indexBlob, 'index.json');
+
+        // Show instructions to user
+        this.showSuccessMessage(
+          `📁 Downloaded index.json with ${publishedReports.length} reports. ` +
+          `Upload this file to your GitHub Pages TestResultsJsons/ folder to publish the reports.`
+        );
+
+        // Also download individual report files if they exist in localStorage
+        publishedReports.forEach(report => {
+          const reportData = localStorage.getItem('uploaded-report-' + report.id);
+          if (reportData) {
+            const reportBlob = new Blob([reportData], { type: 'application/json' });
+            this.downloadFile(reportBlob, `${report.id}.json`);
+          }
+        });
+
+      } catch (error) {
+        console.error('Error creating GitHub Pages files:', error);
+      }
+    },
+
+    downloadFile(blob, filename) {
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      link.style.display = 'none';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
     },
 
     async saveReportForGitHubPages(report) {
