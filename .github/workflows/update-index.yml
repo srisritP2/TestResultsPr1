@@ -1,5 +1,11 @@
 name: Update Cucumber Reports Index
 
+permissions:
+  contents: write
+  actions: read
+  pages: write
+  id-token: write
+
 on:
   push:
     paths:
@@ -33,6 +39,7 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
+          persist-credentials: true
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -156,17 +163,37 @@ jobs:
           fi
 
       - name: Commit and push changes
-        uses: stefanzweifel/git-auto-commit-action@v5
-        with:
-          commit_message: "🤖 Auto-update Cucumber reports index and statistics"
-          file_pattern: |
-            cucumber-report-viewer/public/TestResultsJsons/index.json
-            cucumber-report-viewer/public/TestResultsJsons/stats.json
-            cucumber-report-viewer/public/TestResultsJsons/.deleted-reports.json
-            cucumber-report-viewer/public/TestResultsJsons/*.json
-          commit_user_name: "cucumber-bot"
-          commit_user_email: "cucumber-bot@github.com"
-          commit_author: "Cucumber Bot <cucumber-bot@github.com>"
+        run: |
+          cd cucumber-report-viewer/public/TestResultsJsons
+          
+          # Configure git
+          git config --local user.email "cucumber-bot@github.com"
+          git config --local user.name "Cucumber Bot"
+          
+          # Check if there are changes to commit
+          if git diff --quiet && git diff --staged --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          
+          # Add all relevant files
+          git add index.json stats.json .deleted-reports.json *.json
+          
+          # Show what we're committing
+          echo "Files to commit:"
+          git diff --staged --name-only
+          
+          # Commit changes
+          git commit -m "🤖 Auto-update Cucumber reports index and statistics
+          
+          - Updated index.json with latest reports
+          - Refreshed statistics
+          - Processed report cleanup
+          
+          [skip ci]"
+          
+          # Push changes
+          git push
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
