@@ -832,7 +832,9 @@ export default {
         }
 
         // Update GitHub Pages index and save file for GitHub Pages
-        await this.updateGitHubPagesIndex();
+        // Only download files when user explicitly publishes (not on automatic updates)
+        const shouldDownload = !isCurrentlyPublished; // Download only when publishing, not unpublishing
+        await this.updateGitHubPagesIndex(shouldDownload);
         await this.saveReportForGitHubPages(report);
 
         // Force reactivity update
@@ -844,7 +846,7 @@ export default {
       }
     },
 
-    async updateGitHubPagesIndex() {
+    async updateGitHubPagesIndex(shouldDownload = false) {
       try {
         const publishedReports = JSON.parse(localStorage.getItem('published-reports-index') || '[]');
 
@@ -874,8 +876,13 @@ export default {
         // Store GitHub Pages index locally
         localStorage.setItem('github-pages-index', JSON.stringify(githubPagesIndex));
 
-        // Create downloadable files for GitHub Pages deployment
-        this.downloadGitHubPagesFiles(githubPagesIndex, publishedReports);
+        // Only download files when explicitly requested (when user clicks publish button)
+        if (shouldDownload && publishedReports.length > 0) {
+          console.log('🔽 Triggering GitHub Pages files download:', publishedReports.length, 'reports');
+          this.downloadGitHubPagesFiles(githubPagesIndex, publishedReports);
+        } else {
+          console.log('📋 GitHub Pages index updated without download. shouldDownload:', shouldDownload, 'publishedCount:', publishedReports.length);
+        }
 
         console.log('GitHub Pages index updated with', publishedReports.length, 'published reports');
 
@@ -886,6 +893,12 @@ export default {
 
     downloadGitHubPagesFiles(githubPagesIndex, publishedReports) {
       try {
+        // Only download if there are actually published reports
+        if (publishedReports.length === 0) {
+          console.log('No published reports to download');
+          return;
+        }
+
         // Download the index.json file
         const indexBlob = new Blob([JSON.stringify(githubPagesIndex, null, 2)], { 
           type: 'application/json' 
