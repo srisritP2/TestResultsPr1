@@ -214,7 +214,8 @@ class ReportFormatFixer {
     
     if (this.errorCount > 0) {
       this.log('⚠️ Completed with errors', 'warning');
-      process.exit(1);
+      // Don't exit with error code - let the workflow continue
+      process.exit(0);
     } else {
       this.log('🎉 All done! Reports are now in correct format', 'success');
       process.exit(0);

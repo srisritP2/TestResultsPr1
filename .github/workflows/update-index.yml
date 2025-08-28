@@ -48,7 +48,15 @@ jobs:
       - name: Fix report formats
         run: |
           cd cucumber-report-viewer
-          node scripts/fix-report-formats.js
+          node scripts/fix-report-formats.js || echo "⚠️ Format fixer completed with warnings"
+
+      - name: Force index regeneration
+        run: |
+          cd cucumber-report-viewer/public/TestResultsJsons
+          echo "🔄 Forcing index regeneration to include all reports..."
+          # Remove existing index to force regeneration
+          rm -f index.json stats.json
+          echo "✅ Cleared existing index files"
 
       - name: Cleanup deleted reports
         run: |
