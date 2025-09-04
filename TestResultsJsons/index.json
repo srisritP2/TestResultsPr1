@@ -1,9 +1,99 @@
 {
-  "generated": "2025-08-28T09:28:37.598Z",
+  "generated": "2025-09-04T13:50:01.758Z",
   "version": "2.1.0",
   "reports": [
     {
+      "id": "Admin-Client-Settings-Page-Test-Scenarios-2025-09-04T13-45-59-697Z",
+      "name": "Admin Client Settings Page || Test Scenarios",
+      "date": "2025-09-04T13:45:59.697Z",
+      "features": 16,
+      "scenarios": 53,
+      "steps": 641,
+      "passed": 632,
+      "failed": 3,
+      "skipped": 6,
+      "duration": 951.7368158,
+      "size": 754960,
+      "tags": [
+        "AddResponse",
+        "AddResponseFlowValidation",
+        "AuthDashBoard",
+        "AuthTicket",
+        "CreateTicket",
+        "EndToEndSuite",
+        "Excavators",
+        "ExistingUserData",
+        "HomeOwnerTicket",
+        "MyCompanyTickets",
+        "OpenTicketInResponses",
+        "PrintTicket",
+        "QuickTestSuite",
+        "RegressionSuite",
+        "RememberMe",
+        "ResetPassword",
+        "Responses",
+        "RunNow",
+        "SignIn",
+        "SignUp",
+        "TicketDrafts",
+        "TicketSearch",
+        "UnAuthDashBoard",
+        "ViewTicketDetails",
+        "WorkAreaWithPolygon"
+      ],
+      "environment": null,
+      "tool": null,
+      "hash": "80c02ce51b4c333e0b8df10e380571fd",
+      "status": "active",
+      "isDeleted": false
+    },
+    {
       "id": "Admin-Client-Settings-Page-Test-Scenarios-2025-08-28T08-55-28-848Z",
+      "name": "Admin Client Settings Page || Test Scenarios",
+      "date": "2025-08-28T08:55:28.848Z",
+      "features": 16,
+      "scenarios": 53,
+      "steps": 641,
+      "passed": 640,
+      "failed": 1,
+      "skipped": 0,
+      "duration": 965.8552958,
+      "size": 196595,
+      "tags": [
+        "AddResponse",
+        "AddResponseFlowValidation",
+        "AuthDashBoard",
+        "AuthTicket",
+        "CreateTicket",
+        "EndToEndSuite",
+        "Excavators",
+        "ExistingUserData",
+        "HomeOwnerTicket",
+        "MyCompanyTickets",
+        "OpenTicketInResponses",
+        "PrintTicket",
+        "QuickTestSuite",
+        "RegressionSuite",
+        "RememberMe",
+        "ResetPassword",
+        "Responses",
+        "RunNow",
+        "SignIn",
+        "SignUp",
+        "TicketDrafts",
+        "TicketSearch",
+        "UnAuthDashBoard",
+        "ViewTicketDetails",
+        "WorkAreaWithPolygon"
+      ],
+      "environment": null,
+      "tool": null,
+      "hash": "28f39e9c01080419f7758bb9729f7b9e",
+      "status": "active",
+      "isDeleted": false
+    },
+    {
+      "id": "Admin-Client-Settings-Page-Test-Scenarios-2025-08-28T09-23-32-017Z",
       "name": "Admin Client Settings Page || Test Scenarios",
       "date": "2025-08-28T08:55:28.848Z",
       "features": 16,
@@ -414,19 +504,19 @@
     "lastDeletionAt": null
   },
   "statistics": {
-    "totalReports": 9,
-    "totalFeatures": 142,
-    "totalScenarios": 475,
-    "totalSteps": 5805,
-    "totalPassed": 5798,
-    "totalFailed": 7,
-    "totalSkipped": 0,
-    "totalDuration": 8419.4101252,
-    "totalSize": 1778512,
-    "averageDuration": "935.49",
-    "passRate": "99.88",
-    "failRate": "0.12",
-    "skipRate": "0.00",
+    "totalReports": 11,
+    "totalFeatures": 174,
+    "totalScenarios": 581,
+    "totalSteps": 7087,
+    "totalPassed": 7070,
+    "totalFailed": 11,
+    "totalSkipped": 6,
+    "totalDuration": 10337.0022368,
+    "totalSize": 2730067,
+    "averageDuration": "939.73",
+    "passRate": "99.76",
+    "failRate": "0.16",
+    "skipRate": "0.08",
     "oldestReport": {
       "id": "Admin-Client-Settings-Page-Test-Scenarios-2025-07-17T11-06-24-735Z",
       "name": "Admin Client Settings Page || Test Scenarios",
@@ -475,17 +565,17 @@
       "isDeleted": false
     },
     "newestReport": {
-      "id": "Admin-Client-Settings-Page-Test-Scenarios-2025-08-28T08-55-28-848Z",
+      "id": "Admin-Client-Settings-Page-Test-Scenarios-2025-09-04T13-45-59-697Z",
       "name": "Admin Client Settings Page || Test Scenarios",
-      "date": "2025-08-28T08:55:28.848Z",
-      "size": 196595,
+      "date": "2025-09-04T13:45:59.697Z",
+      "size": 754960,
       "features": 16,
       "scenarios": 53,
       "steps": 641,
-      "passed": 640,
-      "failed": 1,
-      "skipped": 0,
-      "duration": 965.8552958,
+      "passed": 632,
+      "failed": 3,
+      "skipped": 6,
+      "duration": 951.7368158,
       "tags": [
         "AddResponse",
         "AddResponseFlowValidation",
@@ -516,8 +606,8 @@
       "environment": null,
       "tool": null,
       "version": null,
-      "hash": "28f39e9c01080419f7758bb9729f7b9e",
-      "suggestedFilename": "Admin-Client-Settings-Page-Test-Scenarios-2025-08-28T08-55-28-848Z.json",
+      "hash": "80c02ce51b4c333e0b8df10e380571fd",
+      "suggestedFilename": "Admin-Client-Settings-Page-Test-Scenarios-2025-09-04T13-45-59-697Z.json",
       "status": "active",
       "isDeleted": false
     },
@@ -615,6 +705,14 @@
       ]
     },
     {
+      "file": "Admin-Client-Settings-Page-Test-Scenarios-2025-08-28T08-55-28-848Z.json",
+      "errors": [
+        "Feature 2, Scenario 0: Missing name",
+        "Feature 2, Scenario 2: Missing name",
+        "Feature 9, Scenario 0: Missing name"
+      ]
+    },
+    {
       "file": "Admin-Client-Settings-Page-Test-Scenarios-2025-08-28T09-23-32-017Z.json",
       "errors": [
         "Feature 2, Scenario 0: Missing name",
@@ -633,12 +731,20 @@
       "errors": [
         "Invalid Cucumber JSON format: root should be an array"
       ]
+    },
+    {
+      "file": "report-1756993559697.json",
+      "errors": [
+        "Feature 2, Scenario 0: Missing name",
+        "Feature 2, Scenario 2: Missing name",
+        "Feature 9, Scenario 0: Missing name"
+      ]
     }
   ],
   "renames": [
     {
-      "from": "Admin-Client-Settings-Page-Test-Scenarios-2025-08-28T09-23-32-017Z.json",
-      "to": "Admin-Client-Settings-Page-Test-Scenarios-2025-08-28T08-55-28-848Z.json"
+      "from": "report-1756993559697.json",
+      "to": "Admin-Client-Settings-Page-Test-Scenarios-2025-09-04T13-45-59-697Z.json"
     }
   ]
 }
