@@ -1,0 +1,120 @@
+name: Deploy Application to GitHub Pages
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+on:
+  push:
+    branches: [main]
+    paths-ignore: 
+      - 'cucumber-report-viewer/public/TestResultsJsons/*.json'
+      - '!cucumber-report-viewer/public/TestResultsJsons/index.json'
+      - '!cucumber-report-viewer/public/TestResultsJsons/stats.json'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: false
+        default: 'production'
+        type: choice
+        options:
+          - production
+          - staging
+
+# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: 'cucumber-report-viewer/package-lock.json'
+
+      - name: Install dependencies
+        run: |
+          cd cucumber-report-viewer
+          npm ci
+
+      - name: Build application
+        run: |
+          cd cucumber-report-viewer
+          npm run build
+        env:
+          NODE_ENV: production
+
+      - name: Validate build output
+        run: |
+          cd cucumber-report-viewer
+          npm run validate-build
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: 'cucumber-report-viewer/dist'
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+      - name: Create deployment summary
+        run: |
+          echo "## 🚀 Deployment Successful" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Application URL:** ${{ steps.deployment.outputs.page_url }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Deployment Time:** $(date -u)" >> $GITHUB_STEP_SUMMARY
+          echo "**Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### ✅ Deployment Features" >> $GITHUB_STEP_SUMMARY
+          echo "- PWA manifest and service worker" >> $GITHUB_STEP_SUMMARY
+          echo "- Optimized assets and caching" >> $GITHUB_STEP_SUMMARY
+          echo "- Responsive design with dark/light themes" >> $GITHUB_STEP_SUMMARY
+          echo "- Cucumber report viewing and management" >> $GITHUB_STEP_SUMMARY
+
+      - name: Post deployment validation
+        run: |
+          echo "🔍 Validating deployed application..."
+          
+          # Wait a moment for deployment to propagate
+          sleep 30
+          
+          # Check if the main page loads
+          if curl -f -s "${{ steps.deployment.outputs.page_url }}" > /dev/null; then
+            echo "✅ Main page is accessible"
+          else
+            echo "❌ Main page is not accessible"
+            exit 1
+          fi
+          
+          # Check if manifest.json is accessible
+          if curl -f -s "${{ steps.deployment.outputs.page_url }}manifest.json" > /dev/null; then
+            echo "✅ Manifest.json is accessible"
+          else
+            echo "❌ Manifest.json is not accessible"
+            exit 1
+          fi
+          
+          echo "🎉 Post-deployment validation passed!"

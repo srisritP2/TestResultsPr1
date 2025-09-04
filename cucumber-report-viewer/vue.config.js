@@ -2,7 +2,7 @@
 const path = require('path');
 
 module.exports = {
-  publicPath: '/TestResultsPr1/',
+  publicPath: '/TestResults/',
   lintOnSave: false,
   devServer: {
     port: 8080,
@@ -54,6 +54,37 @@ module.exports = {
         webp: { quality: 85 }
       });
 
+    // Ensure proper asset copying
+    config.plugin('copy').tap(([options]) => {
+      if (!options.patterns) {
+        options.patterns = [];
+      }
+      
+      // Copy favicon files
+      options.patterns.push({
+        from: path.resolve(__dirname, 'public/img'),
+        to: path.resolve(__dirname, 'dist/img'),
+        globOptions: {
+          ignore: ['**/.*']
+        }
+      });
+      
+      // Copy TestResultsJsons directory
+      options.patterns.push({
+        from: path.resolve(__dirname, 'public/TestResultsJsons'),
+        to: path.resolve(__dirname, 'dist/TestResultsJsons'),
+        globOptions: {
+          ignore: ['**/.*']
+        }
+      });
+      
+      return [options];
+    });
+
+    // Configure proper chunk naming for consistent asset paths
+    config.output.filename('[name].[contenthash:8].js');
+    config.output.chunkFilename('[name].[contenthash:8].js');
+
     // Tree shaking for Vuetify (only if plugin exists)
     if (config.plugins.has('VuetifyLoaderPlugin')) {
       config.plugin('VuetifyLoaderPlugin').tap(args => {
@@ -76,10 +107,46 @@ module.exports = {
   // PWA for caching
   pwa: {
     name: 'Cucumber Report Viewer',
+    short_name: 'Cucumber Reports',
+    description: 'View and analyze Cucumber test reports with an interactive web interface',
     themeColor: '#3B82F6',
     msTileColor: '#000000',
     appleMobileWebAppCapable: 'yes',
     appleMobileWebAppStatusBarStyle: 'black',
+    manifestOptions: {
+      name: 'Cucumber Report Viewer',
+      short_name: 'Cucumber Reports',
+      description: 'View and analyze Cucumber test reports with an interactive web interface',
+      start_url: '/TestResults/',
+      scope: '/TestResults/',
+      display: 'standalone',
+      background_color: '#ffffff',
+      theme_color: '#3B82F6',
+      icons: [
+        {
+          src: '/TestResults/img/icons/favicon-16x16.png',
+          sizes: '16x16',
+          type: 'image/png'
+        },
+        {
+          src: '/TestResults/img/icons/favicon-32x32.png',
+          sizes: '32x32',
+          type: 'image/png'
+        },
+        {
+          src: '/TestResults/img/icons/apple-touch-icon.png',
+          sizes: '180x180',
+          type: 'image/png'
+        }
+      ]
+    },
+    iconPaths: {
+      favicon32: 'img/icons/favicon-32x32.png',
+      favicon16: 'img/icons/favicon-16x16.png',
+      appleTouchIcon: 'img/icons/apple-touch-icon.png',
+      maskIcon: 'img/icons/favicon.svg',
+      msTileImage: 'img/icons/favicon-32x32.png'
+    },
     workboxOptions: {
       skipWaiting: true,
       clientsClaim: true,
@@ -101,6 +168,16 @@ module.exports = {
             },
             expiration: {
               maxAgeSeconds: 60 * 60 * 24 * 365, // 1 year
+            },
+          },
+        },
+        {
+          urlPattern: /\/TestResults\/TestResultsJsons\/.*/,
+          handler: 'CacheFirst',
+          options: {
+            cacheName: 'cucumber-reports',
+            expiration: {
+              maxAgeSeconds: 60 * 60 * 24 * 7, // 1 week
             },
           },
         }

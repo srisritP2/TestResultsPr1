@@ -3,8 +3,6 @@ name: Update Cucumber Reports Index
 permissions:
   contents: write
   actions: read
-  pages: write
-  id-token: write
 
 on:
   push:
@@ -12,6 +10,7 @@ on:
       - "cucumber-report-viewer/public/TestResultsJsons/*.json"
       - "!cucumber-report-viewer/public/TestResultsJsons/index.json"
       - "!cucumber-report-viewer/public/TestResultsJsons/stats.json"
+    branches: [main]
   workflow_dispatch:
     inputs:
       validate_reports:
